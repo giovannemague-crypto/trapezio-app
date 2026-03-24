@@ -289,32 +289,45 @@ async function lerFotoComIA(file) {
     i.src = imgUrl;
   });
 
-  // Redimensiona e aplica filtro de contraste alto
   const canvas = document.createElement('canvas');
-  const escala = Math.min(1200 / img.width, 900 / img.height, 1);
+  const escala = Math.min(1400 / img.width, 1000 / img.height, 2);
   canvas.width  = img.width  * escala;
   canvas.height = img.height * escala;
   const ctx = canvas.getContext('2d');
 
-  // Fundo branco
   ctx.fillStyle = '#fff';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // Desenha a imagem redimensionada
   ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-  // Aplica alto contraste em escala de cinza
+  // Detecta se imagem é predominantemente escura
+  const sample = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  let totalBrilho = 0;
+  for (let i = 0; i < sample.data.length; i += 16) {
+    totalBrilho += 0.299*sample.data[i] + 0.587*sample.data[i+1] + 0.114*sample.data[i+2];
+  }
+  const brilhoMedio = totalBrilho / (sample.data.length / 16);
+  const imagemEscura = brilhoMedio < 100;
+
+  // Aplica filtro: aumenta contraste sem binarizar
   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
   const data = imageData.data;
   for (let i = 0; i < data.length; i += 4) {
-    const avg = 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
-    const val = avg > 128 ? 255 : 0; // binarização
+    let r = data[i], g = data[i+1], b = data[i+2];
+    // Converte para escala de cinza
+    let gray = 0.299*r + 0.587*g + 0.114*b;
+    // Se imagem escura, inverte para texto claro virar escuro
+    if (imagemEscura) gray = 255 - gray;
+    // Aumenta contraste
+    gray = Math.min(255, Math.max(0, (gray - 128) * 1.8 + 128));
+    // Binariza
+    const val = gray > 140 ? 255 : 0;
     data[i] = data[i+1] = data[i+2] = val;
   }
   ctx.putImageData(imageData, 0, 0);
 
   const processedUrl = canvas.toDataURL('image/png');
   URL.revokeObjectURL(imgUrl);
+  console.log('Imagem escura:', imagemEscura, '| Brilho médio:', Math.round(brilhoMedio));
 
   const result = await Tesseract.recognize(processedUrl, 'por+eng', {
     tessedit_char_whitelist: '0123456789,.ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzÀ-ú ',
