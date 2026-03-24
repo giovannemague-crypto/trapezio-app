@@ -413,7 +413,7 @@ const views = {
   coleta() {
     const f = state.form;
     const posto = state.posto;
-    const podeSalvar = f.nome && (f.gc || f.ga || f.et || f.ds);
+  const podeSalvar = f.nome.trim().length > 0;
 
     const campos = COMBUSTIVEIS.map(({ key, label }) => {
       const val = f[key];
@@ -452,7 +452,7 @@ const views = {
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;">
         <button class="btn-back" onclick="irLista()">←</button>
         <div>
-          <div class="label">${p.cidade} · ${p.estado}</div>
+          <div class="label">${posto.cidade} · ${posto.estado}</div>
           <div class="title">Registrar concorrente</div>
         </div>
       </div>
@@ -462,7 +462,7 @@ const views = {
       <div class="card">
         <div class="label" style="margin-bottom:6px;">Nome do posto concorrente</div>
         <div class="input-wrap">
-          <input type="text" placeholder="Ex: Ipiranga Av. Brasil" value="${f.nome}"
+          <input type="text" id="inputNome" placeholder="Ex: Ipiranga Av. Brasil" value="${f.nome}"
             oninput="setNome(this.value)"
             onfocus="setDrop(true)"
             onblur="setTimeout(()=>setDrop(false),200)" />
