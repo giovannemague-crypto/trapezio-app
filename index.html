@@ -71,7 +71,7 @@
     /* Foto preview */
     .foto-btn { width: 100%; padding: 20px; font-size: 13px; border-radius: 8px; border: 0.5px dashed rgba(0,0,0,0.2); background: #f5f5f3; color: #73726c; cursor: pointer; text-align: center; line-height: 1.6; }
     .foto-preview { position: relative; }
-    .foto-preview img { width: 100%; border-radius: 8px; max-height: 180px; object-fit: cover; }
+    .foto-preview img { width: 100%; border-radius: 8px; max-height: 320px; object-fit: contain; background: #000; }
     .foto-overlay { position: absolute; bottom: 6px; left: 6px; }
     .foto-change  { position: absolute; top: 6px; right: 6px; }
 
@@ -280,72 +280,61 @@ function render() {
 // ============================================================
 async function lerFotoComIA(file) {
   const url = URL.createObjectURL(file);
-  
-  // Atualiza mensagem de loading
-  const spinnerMsg = document.querySelector('.spinner-wrap div:last-child');
-  if (spinnerMsg) spinnerMsg.textContent = 'Lendo preços da imagem... (pode levar alguns segundos)';
 
   const result = await Tesseract.recognize(url, 'por+eng', {
     logger: m => {
       if (m.status === 'recognizing text') {
         const pct = Math.round(m.progress * 100);
-        const msg = document.querySelector('.spinner-wrap div:last-child');
-        if (msg) msg.textContent = `Lendo preços... ${pct}%`;
+        const msg = document.querySelector('.spinner-msg');
+        if (msg) msg.textContent = `Lendo imagem... ${pct}%`;
       }
     }
   });
 
   const texto = result.data.text;
-  console.log('OCR texto bruto:', texto);
+  console.log('OCR resultado bruto:\n', texto);
 
-  // Extrai números no formato de preço (ex: 6,29 ou 6.29 ou 5,17)
-  const numeros = texto.match(/\b\d[.,]\d{2}\b|\b\d{1,2}[.,]\d{2}\b/g) || [];
-  const precos = numeros
-    .map(n => parseFloat(n.replace(',', '.')))
-    .filter(n => n >= 3.0 && n <= 12.0)
-    .map(n => n.toFixed(2));
-
-  console.log('Preços encontrados:', precos);
-
-  // Tenta mapear os preços encontrados aos combustíveis
-  // Busca por palavras-chave no texto para identificar qual preço é qual
-  const textoLower = texto.toLowerCase();
-  
-  let gc = '', ga = '', et = '', ds = '';
-
-  // Estratégia: detecta por palavras-chave próximas aos números
-  const linhas = texto.split('\n').map(l => l.trim()).filter(l => l);
-  
-  for (const linha of linhas) {
-    const linhaLow = linha.toLowerCase();
-    const num = (linha.match(/\d[\d.,]{2,4}\d/g) || [])
+  // Extrai todos os valores que parecem preço de combustível
+  const matches = texto.match(/\d{1,2}[.,]\d{2}/g) || [];
+  const precos = [...new Set(
+    matches
       .map(n => parseFloat(n.replace(',', '.')))
       .filter(n => n >= 3.0 && n <= 12.0)
-      .map(n => n.toFixed(2))[0];
-    
-    if (!num) continue;
-    
-    if ((linhaLow.includes('etanol') || linhaLow.includes('alcool') || linhaLow.match(/\be\b/)) && !et) {
-      et = num;
-    } else if ((linhaLow.includes('aditi') || linhaLow.includes('podium') || linhaLow.includes('v-power') || linhaLow.includes('select')) && !ga) {
-      ga = num;
-    } else if ((linhaLow.includes('gasolina') || linhaLow.includes('comum') || linhaLow.includes('gas')) && !gc) {
-      gc = num;
-    } else if ((linhaLow.includes('diesel') || linhaLow.includes('s10') || linhaLow.includes('s-10')) && !ds) {
-      ds = num;
-    }
+      .map(n => n.toFixed(2))
+  )];
+
+  console.log('Preços extraídos:', precos);
+
+  const textoLow = texto.toLowerCase();
+  let gc = '', ga = '', et = '', ds = '';
+
+  // Detecta por palavras-chave linha a linha
+  const linhas = texto.split('\n');
+  for (const linha of linhas) {
+    const l = linha.toLowerCase();
+    const nums = (linha.match(/\d{1,2}[.,]\d{2}/g) || [])
+      .map(n => parseFloat(n.replace(',', '.')))
+      .filter(n => n >= 3.0 && n <= 12.0)
+      .map(n => n.toFixed(2));
+    if (!nums.length) continue;
+    const v = nums[0];
+    if (!et && (l.includes('etanol') || l.includes('álcool') || l.includes('alcool') || l.match(/\be\b/) || l.includes('e '))) et = v;
+    else if (!ds && (l.includes('diesel') || l.includes('s10') || l.includes('s-10'))) ds = v;
+    else if (!ga && (l.includes('aditi') || l.includes('podium') || l.includes('v-power') || l.includes('select') || l.includes('premium'))) ga = v;
+    else if (!gc && (l.includes('gasolina') || l.includes('comum') || l.includes('regular'))) gc = v;
   }
 
-  // Se não achou por palavra-chave, distribui pelos preços encontrados por ordem
+  // Fallback: se não achou por palavra-chave, distribui por ordem de preço
   if (!gc && !ga && !et && !ds && precos.length > 0) {
     const sorted = [...precos].sort((a, b) => parseFloat(a) - parseFloat(b));
-    if (sorted[0]) et = sorted[0];   // etanol geralmente é o mais barato
-    if (sorted[1]) gc = sorted[1];   // gasolina comum
-    if (sorted[2]) ga = sorted[2];   // gasolina aditivada
-    if (sorted[3]) ds = sorted[3];   // diesel
+    et = sorted[0] || '';
+    gc = sorted[1] || '';
+    ga = sorted[2] || '';
+    ds = sorted[3] || '';
   }
 
   URL.revokeObjectURL(url);
+  console.log('Resultado final:', { gc, ga, et, ds });
   return { gc, ga, et, ds };
 }
 
@@ -529,7 +518,7 @@ const views = {
       <div class="card">
         <div class="label" style="margin-bottom:8px;">Foto do painel de preços</div>
         ${fotoSection}
-        ${f.loading ? `<div class="spinner-wrap"><div class="spinner"></div><div style="font-size:13px;color:#73726c;">Lendo preços com IA...</div></div>` : ''}
+        ${f.loading ? `<div class="spinner-wrap"><div class="spinner"></div><div class="spinner-msg" style="font-size:13px;color:#73726c;">Iniciando leitura...</div></div>` : ''}
         ${f.erroIA ? `<div class="alert-amber" style="margin-top:10px;">Não foi possível ler automaticamente. Preencha os preços abaixo.</div>` : ''}
       </div>
 
