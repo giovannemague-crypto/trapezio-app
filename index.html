@@ -313,27 +313,28 @@ async function lerFotoComIA(file) {
   console.log('Imagem processada — tamanho:', canvas.width, 'x', canvas.height);
 
   const result = await Tesseract.recognize(processedUrl, 'por', {
-    tessedit_char_whitelist: '0123456789,.',
     logger: m => {
       if (m.status === 'recognizing text') {
         const pct = Math.round(m.progress * 100);
         const msg = document.querySelector('.spinner-msg');
         if (msg) msg.textContent = `Lendo imagem... ${pct}%`;
       }
-    }
+    },
+    errorHandler: e => console.error('Tesseract erro:', e),
   });
 
+  // Filtra apenas números no formato de preço — ignora todo o resto
   const texto = result.data.text;
   console.log('OCR texto bruto:\n', texto);
 
-  const matches = texto.match(/\d{1,2}[.,]\d{2}/g) || [];
+  // Pega apenas padrões que claramente são preços: X,XX ou XX,XX
+  const matches = [...texto.matchAll(/\b(\d{1,2})[,.](\d{2})\b/g)];
   const precos = [...new Set(
     matches
-      .map(n => parseFloat(n.replace(',', '.')))
+      .map(m => parseFloat(`${m[1]}.${m[2]}`))
       .filter(n => n >= 3.0 && n <= 12.0)
       .map(n => n.toFixed(2))
   )];
-
   console.log('Preços extraídos:', precos);
 
   let gc = '', ga = '', et = '', ds = '';
