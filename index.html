@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>Trapézio — Pesquisa de Preços</title>
+  <link rel="manifest" href="manifest.json" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f3; color: #1a1a18; min-height: 100vh; }
+    .container { max-width: 560px; margin: 0 auto; padding: 1.25rem 1rem; }
+
+    /* Tipografia */
+    .label  { font-size: 11px; color: #73726c; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .title  { font-size: 18px; font-weight: 500; }
+    .sub    { font-size: 12px; color: #73726c; margin-top: 2px; }
+    .hint   { font-size: 11px; color: #9c9a92; margin-top: 6px; }
+
+    /* Cards */
+    .card   { background: #fff; border: 0.5px solid rgba(0,0,0,0.12); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+    .card-gray { background: #f5f5f3; border-radius: 8px; padding: 12px 14px; }
+
+    /* Botões */
+    .btn-primary { width: 100%; padding: 12px; font-size: 14px; font-weight: 500; border-radius: 8px; border: 0.5px solid rgba(0,0,0,0.2); background: #1a1a18; color: #fff; cursor: pointer; margin-bottom: 8px; }
+    .btn-primary:disabled { background: #e8e8e4; color: #9c9a92; cursor: not-allowed; border-color: transparent; }
+    .btn-secondary { width: 100%; padding: 12px; font-size: 14px; border-radius: 8px; border: 0.5px solid rgba(0,0,0,0.2); background: transparent; color: #1a1a18; cursor: pointer; }
+    .btn-small { padding: 5px 12px; font-size: 12px; border-radius: 6px; border: 0.5px solid rgba(0,0,0,0.2); background: transparent; color: #73726c; cursor: pointer; }
+    .btn-back { background: transparent; border: none; font-size: 22px; cursor: pointer; color: #73726c; padding: 0; line-height: 1; }
+
+    /* Badges */
+    .badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 6px; }
+    .badge-green  { background: #eaf3de; color: #3b6d11; border: 0.5px solid #639922; }
+    .badge-amber  { background: #faeeda; color: #854f0b; border: 0.5px solid #ba7517; }
+    .badge-red    { background: #fcebeb; color: #a32d2d; border: 0.5px solid #e24b4a; }
+    .badge-blue   { background: #e6f1fb; color: #185fa5; border: 0.5px solid #b5d4f4; }
+    .badge-gray   { background: #f1efe8; color: #444441; border: 0.5px solid #b4b2a9; }
+
+    /* Inputs */
+    input[type=text], input[type=number], textarea, select {
+      width: 100%; padding: 9px 12px; font-size: 14px; border-radius: 8px;
+      border: 0.5px solid rgba(0,0,0,0.2); background: #f5f5f3;
+      color: #1a1a18; font-family: inherit; outline: none;
+    }
+    input:focus, textarea:focus, select:focus { border-color: rgba(0,0,0,0.4); }
+    textarea { resize: vertical; }
+
+    /* Grid de preços */
+    .price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .price-field label { font-size: 11px; color: #73726c; display: block; margin-bottom: 4px; }
+    .price-row { display: flex; align-items: center; gap: 6px; }
+    .price-row span { font-size: 13px; color: #73726c; }
+    .price-row input { flex: 1; }
+    .price-status { font-size: 10px; margin-top: 3px; }
+
+    /* Status bar */
+    .status-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.25rem; }
+
+    /* Header */
+    .header { margin-bottom: 1.25rem; }
+    .header-row { display: flex; justify-content: space-between; align-items: flex-start; }
+
+    /* Registro card */
+    .reg-card { background: #fff; border: 0.5px solid rgba(0,0,0,0.1); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; }
+    .reg-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .reg-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    /* Foto preview */
+    .foto-btn { width: 100%; padding: 20px; font-size: 13px; border-radius: 8px; border: 0.5px dashed rgba(0,0,0,0.2); background: #f5f5f3; color: #73726c; cursor: pointer; text-align: center; line-height: 1.6; }
+    .foto-preview { position: relative; }
+    .foto-preview img { width: 100%; border-radius: 8px; max-height: 180px; object-fit: cover; }
+    .foto-overlay { position: absolute; bottom: 6px; left: 6px; }
+    .foto-change  { position: absolute; top: 6px; right: 6px; }
+
+    /* Dropdown sugestões */
+    .dropdown { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 0.5px solid rgba(0,0,0,0.2); border-radius: 8px; z-index: 20; margin-top: 2px; overflow: hidden; }
+    .dropdown-item { padding: 9px 12px; font-size: 13px; cursor: pointer; border-bottom: 0.5px solid rgba(0,0,0,0.06); }
+    .dropdown-item:hover { background: #f5f5f3; }
+    .dropdown-item:last-child { border-bottom: none; }
+    .input-wrap { position: relative; }
+
+    /* Spinner */
+    .spinner-wrap { text-align: center; padding: 1.5rem 0; }
+    .spinner { width: 28px; height: 28px; border: 2px solid #e8e8e4; border-top-color: #1a1a18; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 8px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Tabs */
+    .tabs { display: flex; border-bottom: 0.5px solid rgba(0,0,0,0.1); margin-bottom: 1.25rem; }
+    .tab { padding: 8px 16px; font-size: 13px; border: none; border-bottom: 2px solid transparent; background: transparent; color: #73726c; cursor: pointer; }
+    .tab.active { border-bottom-color: #1a1a18; color: #1a1a18; font-weight: 500; }
+
+    /* Aviso */
+    .alert-amber { background: #faeeda; border: 0.5px solid #ba7517; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #854f0b; margin-bottom: 12px; }
+    .alert-blue  { background: #e6f1fb; border: 0.5px solid #b5d4f4; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #185fa5; margin-bottom: 12px; }
+
+    /* Tabela resumo */
+    .resumo-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .resumo-table th { text-align: left; padding: 8px 10px; font-weight: 500; color: #73726c; border-bottom: 0.5px solid rgba(0,0,0,0.1); }
+    .resumo-table td { padding: 10px 10px; border-bottom: 0.5px solid rgba(0,0,0,0.06); }
+
+    /* Vazio */
+    .empty { border: 0.5px dashed rgba(0,0,0,0.15); border-radius: 12px; padding: 2rem; text-align: center; color: #73726c; margin-bottom: 12px; font-size: 13px; line-height: 1.7; }
+
+    @media (prefers-color-scheme: dark) {
+      body { background: #1a1a18; color: #e8e8e4; }
+      .card, .reg-card { background: #2c2c2a; border-color: rgba(255,255,255,0.1); }
+      .card-gray { background: #232321; }
+      input[type=text], input[type=number], textarea, select { background: #232321; color: #e8e8e4; border-color: rgba(255,255,255,0.15); }
+      .foto-btn { background: #232321; border-color: rgba(255,255,255,0.15); color: #9c9a92; }
+      .dropdown { background: #2c2c2a; border-color: rgba(255,255,255,0.15); }
+      .dropdown-item:hover { background: #232321; }
+      .btn-primary { background: #e8e8e4; color: #1a1a18; }
+      .btn-primary:disabled { background: #333331; color: #666663; }
+      .btn-secondary, .btn-small { color: #e8e8e4; border-color: rgba(255,255,255,0.2); }
+      .tabs { border-color: rgba(255,255,255,0.1); }
+      .tab { color: #9c9a92; }
+      .tab.active { color: #e8e8e4; border-bottom-color: #e8e8e4; }
+      .resumo-table th { color: #9c9a92; border-color: rgba(255,255,255,0.1); }
+      .resumo-table td { border-color: rgba(255,255,255,0.06); }
+      .empty { border-color: rgba(255,255,255,0.1); color: #9c9a92; }
+      .status-bar .card-gray { background: #232321; }
+    }
+  </style>
+</head>
+<body>
+<div class="container" id="app"></div>
+
+<script>
+// ============================================================
+// CONFIGURAÇÃO — substitua com suas credenciais reais
+// ============================================================
+const CONFIG = {
+  SUPABASE_URL:  'https://SEU_PROJETO.supabase.co',
+  SUPABASE_KEY:  'SUA_CHAVE_ANON_SUPABASE',
+  ANTHROPIC_KEY: 'SUA_CHAVE_ANTHROPIC',
+  N8N_WEBHOOK:   'https://SEU_N8N/webhook/trapezio',
+};
+
+// ============================================================
+// DADOS DOS POSTOS — carregue do Supabase em produção
+// ============================================================
+const POSTOS = [
+  { id:'001', nome:'Posto Alfa',                          endereco:'Est Da Graciosa, 3253, Alphaville Graciosa', cidade:'Colombo',              estado:'PR', cnpj:'20.244.903/0001-25', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'002', nome:'Posto Almirante Filial 02',           endereco:'R Antonio Kaesemodel, 2339, Colonial',       cidade:'São Bento Do Sul',     estado:'SC', cnpj:'11.393.320/0002-56', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'003', nome:'Posto Almirante Filial 03',           endereco:'Av. Getúlio Vargas, 2130, Cristo Rei',       cidade:'São Leopoldo',         estado:'RS', cnpj:'11.393.320/0003-37', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'004', nome:'Posto Almirante Filial 04',           endereco:'Av. Borges De Medeiros, 2205, Praia De Belas',cidade:'Porto Alegre',        estado:'RS', cnpj:'11.393.320/0004-18', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'005', nome:'Posto Almirante Filial 05',           endereco:'Av. Primeiro De Marco, 4600, Santo Afonso',  cidade:'Novo Hamburgo',        estado:'RS', cnpj:'11.393.320/0005-07', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'006', nome:'Posto Almirante Filial 06',           endereco:'Av. Santos Ferreira, 2700, Estancia Velha',  cidade:'Canoas',               estado:'RS', cnpj:'11.393.320/0006-80', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'007', nome:'Posto Almirante Filial 07',           endereco:'Av. Do Nazario, 1024, Olaria',               cidade:'Canoas',               estado:'RS', cnpj:'11.393.320/0007-60', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'008', nome:'Posto Almirante Filial 08',           endereco:'Av. Dorival Candido, 1460, Cohab C',         cidade:'Gravataí',             estado:'RS', cnpj:'11.393.320/0008-41', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'009', nome:'Posto Almirante Filial 09',           endereco:'Av. Luiz Pasteur, 4799, Walderez',           cidade:'Sapucaia Do Sul',      estado:'RS', cnpj:'11.393.320/0009-22', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'011', nome:'Posto Almirante Filial 11',           endereco:'Av. Rui Barbosa, 4791, Ipe',                 cidade:'São José Dos Pinhais', estado:'PR', cnpj:'11.393.320/0011-47', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'012', nome:'Posto Almirante Filial 12',           endereco:'Rod RS 240, 5280, Ri',                       cidade:'Portão',               estado:'RS', cnpj:'11.393.320/0012-28', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'013', nome:'Posto Almirante Filial 13 (SÃO DIMAS)',endereco:'Rua Presidente Faria, 116, Colonia Faria',  cidade:'Colombo',              estado:'PR', cnpj:'11.393.320/0013-09', bandeira:'BR',             precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'014', nome:'Posto Almirante Filial 14 (ROSAS)',   endereco:'Avenida Ely Correa, 5600, Jd Do Cedro',      cidade:'Gravataí',             estado:'RS', cnpj:'11.393.320/0014-90', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'015', nome:'Posto Almirante Filial 15 (GRAVO)',   endereco:'Rua Porto Palmeira, 2509, Campo Da Brazina', cidade:'Araricá',              estado:'RS', cnpj:'11.393.320/0015-70', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'017', nome:'Posto Almirante Filial 17 (GRAVI)',   endereco:'R Jose Appelonio Da Costa, 2160, Estação',   cidade:'Araricá',              estado:'RS', cnpj:'11.393.320/0017-32', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'018', nome:'Posto Almirante Filial 18 (SAPUCAIA)',endereco:'Av. Coronel Theodomiro, 885, Nova Sapucaia', cidade:'Sapucaia Do Sul',      estado:'RS', cnpj:'11.393.320/0018-13', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'019', nome:'Posto Almirante Filial 19 (SAN MICHAEL)',endereco:'R. João Bettega, 3015, Cidade Industrial',cidade:'Curitiba',             estado:'PR', cnpj:'11.393.320/0019-02', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'024a',nome:'Posto Almirante Filial 24 (OCEANO)',  endereco:'R Carlos Dietzsch, 1115, Portão',            cidade:'Curitiba',             estado:'PR', cnpj:'11.393.320/0024-61', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'020', nome:'Posto Almirante Matriz',              endereco:'Almirante Alexandrino, 1526, Afonso Pena',   cidade:'São José Dos Pinhais', estado:'PR', cnpj:'11.393.320/0001-75', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'021', nome:'Posto América',                       endereco:'Av. Marginal Jose de Anchieta, 956, Guarani',cidade:'Colombo',              estado:'PR', cnpj:'04.488.277/0001-66', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'022', nome:'Posto Beira Rio',                     endereco:'Av. Armando de Sales Oliveira, 1101',        cidade:'Porto Feliz',          estado:'SP', cnpj:'74.222.167/0001-33', bandeira:'BR',             precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'023', nome:'Posto Brasil',                        endereco:'AV. Brasil, 846, Eucaliptos',                cidade:'Fazenda Rio Grande',   estado:'PR', cnpj:'30.275.160/0001-04', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'025', nome:'Posto Cisne',                         endereco:'Avenida Portugal, 3205, Nações',             cidade:'Fazenda Rio Grande',   estado:'PR', cnpj:'31.307.182/0001-71', bandeira:'BR',             precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'026', nome:'Posto Dom Afonso',                    endereco:'R. Dom Afonso, 680, Vila Real',              cidade:'Balneário Camboriú',   estado:'SC', cnpj:'44.212.848/0001-50', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'027', nome:'Posto Duque De Caxias',               endereco:'Rodovia Duque De Caxias, SC301 Km10',        cidade:'São Francisco Do Sul', estado:'SC', cnpj:'26.236.970/0001-84', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'028', nome:'Posto Estaiada',                      endereco:'Av. Cristovao Colombo, 2935, Jd Algodoal',   cidade:'Piracicaba',           estado:'SP', cnpj:'29.127.813/0001-29', bandeira:'Shell',          precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'029', nome:'Posto Izaac',                         endereco:'Rua Izaac Ferreira Da Cruz, 1497, Pinheirinho',cidade:'Curitiba',           estado:'PR', cnpj:'02.682.740/0001-80', bandeira:'Trapézio',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'030', nome:'Posto Linha Verde Filial 02',         endereco:'Av. Marechal Floriano Peixoto, 7825, Boqueirão',cidade:'Curitiba',          estado:'PR', cnpj:'38.824.625/0002-21', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'031', nome:'Posto Linha Verde Filial 03 (PALMARES)',endereco:'Av. Dos Palmares, 20, Jardim Liberdade',   cidade:'Maringá',              estado:'PR', cnpj:'38.824.625/0003-02', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'032', nome:'Posto Linha Verde Filial 04',         endereco:'Av. Dos Estados, 2435, Centro',              cidade:'Campo Bom',            estado:'RS', cnpj:'38.824.625/0004-93', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'033', nome:'Posto Linha Verde Filial 05',         endereco:'Av. Sen. Salgado Filho, 7277, Viamópolis',   cidade:'Viamão',               estado:'RS', cnpj:'38.824.625/0005-74', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'034', nome:'Posto Linha Verde Filial 06 (MAKIOLKA)',endereco:'Rua Theodoro Makiolka, 3115, Barreirinha', cidade:'Curitiba',             estado:'PR', cnpj:'38.824.625/0006-55', bandeira:'BR',             precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'035', nome:'Posto Linha Verde Filial 07 (BORDA)', endereco:'Rua Estela Mari Rezende, 10789, Borda Do Campo',cidade:'São José Dos Pinhais',estado:'PR',cnpj:'38.824.625/0007-36', bandeira:'Ipiranga',      precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'036', nome:'Posto Linha Verde Filial 10 (PETRUS)',endereco:'Rua Das Carmelitas, 2963, Boqueirão',        cidade:'Curitiba',             estado:'PR', cnpj:'38.824.625/0010-31', bandeira:'Shell',          precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'037', nome:'Posto Linha Verde Filial 11',         endereco:'Av. Dorival Cândido, 2029, Jansen',          cidade:'Gravataí',             estado:'RS', cnpj:'38.824.625/0011-12', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'038', nome:'Posto Linha Verde Filial 13 (GONÇALES)',endereco:'Rua Uirapuru, 1901, Centro',               cidade:'Arapongas',            estado:'PR', cnpj:'38.824.625/0013-84', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'039', nome:'Posto Linha Verde Filial 14 (MARQUES)',endereco:'Rua Marques De Olinda, 2385, Costa E Silva', cidade:'Joinville',           estado:'SC', cnpj:'38.824.625/0014-65', bandeira:'Shell',          precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'040', nome:'Posto Linha Verde Filial 15 (LUSTOSA)',endereco:'Rua Duque De Caxias, 399, São Francisco',   cidade:'Curitiba',             estado:'PR', cnpj:'38.824.625/0015-46', bandeira:'Trapézio',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'041', nome:'Posto Linha Verde Filial 16 (BAIRRO NOVO)',endereco:'R. Tijucas Do Sul, 1963, Sítio Cercado',cidade:'Curitiba',             estado:'PR', cnpj:'38.824.625/0016-27', bandeira:'Trapézio',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'042', nome:'Posto Linha Verde Filial 18 (4Z)',    endereco:'Av. Farrapos, 858, Floresta',                 cidade:'Porto Alegre',         estado:'RS', cnpj:'38.824.625/0018-99', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'043', nome:'Posto Linha Verde Filial 20 (3Z)',    endereco:'Av. Saturnino De Brito, 1018, Vila Jardim',   cidade:'Porto Alegre',         estado:'RS', cnpj:'38.824.625/0020-03', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'044', nome:'Posto Linha Verde Filial 21 (BV)',    endereco:'Est. João Oliveira Remião, 7810, São Tome',   cidade:'Viamão',               estado:'RS', cnpj:'38.824.625/0021-94', bandeira:'Shell',          precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'045', nome:'Posto Linha Verde Filial 22 (Trapézio)',endereco:'Rua Raul Pompeia, 1350, Cidade Industrial', cidade:'Curitiba',             estado:'PR', cnpj:'38.824.625/0022-75', bandeira:'BR',             precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'046', nome:'Posto Linha Verde Filial 23 (ANGRA BATEL)',endereco:'Av. Sete De Setembro, 4814, Batel',     cidade:'Curitiba',             estado:'PR', cnpj:'38.824.625/0023-56', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'047', nome:'Posto Linha Verde Filial 24 (BRANQUINHA)',endereco:'Est. Bérico José Bernardes, 142, São Tomé',cidade:'Viamão',             estado:'RS', cnpj:'38.824.625/0024-37', bandeira:'Trapézio',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'048', nome:'Posto Linha Verde Filial 25',         endereco:'Av. São Borja, 2035, Fazenda São Borja',      cidade:'São Leopoldo',         estado:'RS', cnpj:'38.824.625/0025-18', bandeira:'BR',             precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'049', nome:'Posto Linha Verde Filial 26',         endereco:'RS-240, 8092, Rincão do Cascalho',            cidade:'Portão',               estado:'RS', cnpj:'38.824.625/0026-07', bandeira:'Shell',          precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'050', nome:'Posto Linha Verde Filial 27',         endereco:'R Visconde De São Leopoldo, 620, Vicentina',  cidade:'São Leopoldo',         estado:'RS', cnpj:'38.824.625/0027-80', bandeira:'Trapézio',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'051', nome:'Posto Linha Verde Filial 28 (RDP)',   endereco:'Rua das Neves, 2112, Serra Alta',             cidade:'São Bento do Sul',     estado:'SC', cnpj:'38.824.625/0028-60', bandeira:'RDP',            precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'052', nome:'Posto Linha Verde Matriz',            endereco:'Km 79, 005 - BR-116, Jardim Menino Deus',     cidade:'Curitiba',             estado:'PR', cnpj:'38.824.625/0001-40', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'053', nome:'Posto Marechal',                      endereco:'Av. Manoel Ribas, 8051, Butiatuvinha',        cidade:'Curitiba',             estado:'PR', cnpj:'34.331.407/0001-13', bandeira:'Shell',          precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'054', nome:'Posto Mirante Piracicaba',            endereco:'Av. Barão De Serra Negra, 101, Vila Rezende', cidade:'Piracicaba',           estado:'SP', cnpj:'33.453.598/0165-31', bandeira:'Shell',          precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'055', nome:'Posto Neninha',                       endereco:'Av. das Amoreiras, 2062, Jardim do Lago',     cidade:'Campinas',             estado:'SP', cnpj:'08.712.167/0001-97', bandeira:'Trapézio',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'056', nome:'Posto NSA',                           endereco:'Rua Sao Romualdo, 778, Santa Terezinha',      cidade:'Fazenda Rio Grande',   estado:'PR', cnpj:'26.335.150/0001-40', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'057', nome:'Posto Premiere',                      endereco:'Rua Prof. Pedro Viriato P Souza, 1846, Mossungue',cidade:'Curitiba',         estado:'PR', cnpj:'07.879.799/0001-87', bandeira:'Shell',          precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'058', nome:'Posto Rio Verde',                     endereco:'Avenida Argentina, 324, Rio Verde',           cidade:'Colombo',              estado:'PR', cnpj:'25.390.970/0001-71', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'059', nome:'Posto Tijucas',                       endereco:'Rua Izaac Ferreira Da Cruz, 2920, Sitio Cercado',cidade:'Curitiba',          estado:'PR', cnpj:'23.975.331/0001-42', bandeira:'BR',             precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'060', nome:'Posto TOF',                           endereco:'Av. dos Esportes, 1092, Jardim Primavera',    cidade:'Valinhos',             estado:'SP', cnpj:'48.632.285/0001-00', bandeira:'TOF',            precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'061', nome:'Posto Triangulo',                     endereco:'Rua Sao Salvador, 360, Pilarzinho',           cidade:'Curitiba',             estado:'PR', cnpj:'06.272.541/0001-55', bandeira:'BR',             precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'062', nome:'Posto TS',                            endereco:'Av. Anita Garibaldi, 1305, Ahú',              cidade:'Curitiba',             estado:'PR', cnpj:'78.289.055/0001-50', bandeira:'Shell',          precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'063', nome:'Posto Via Torres',                    endereco:'Comendador Franco, 3133, Jardim Das Américas', cidade:'Curitiba',             estado:'PR', cnpj:'14.958.580/0001-39', bandeira:'BR',             precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'064', nome:'Posto Vila Resende',                  endereco:'Av. Dona Francisca, 549, Vila Rezende',       cidade:'Piracicaba',           estado:'SP', cnpj:'22.890.433/0001-00', bandeira:'Shell',          precos:{ gc:0, ga:0, et:0, ds:0 } },
+  { id:'065', nome:'Posto WC',                            endereco:'Rod BR-101, 8600, Quarta Linha',              cidade:'Criciúma',             estado:'SC', cnpj:'24.613.173/0001-43', bandeira:'Ipiranga',       precos:{ gc:0, ga:0, et:0, ds:0 } },
+];
+
+const COMBUSTIVEIS = [
+  { key:'gc', label:'Gasolina Comum' },
+  { key:'ga', label:'Gasolina Aditivada' },
+  { key:'et', label:'Etanol' },
+  { key:'ds', label:'Diesel S10' },
+];
+
+const BANDEIRAS = ['Ipiranga','Shell','BR','Petrobras','Raízen','Bandeira Branca','Outros'];
+
+const BANDEIRA_BADGE = {
+  'Ipiranga':        'badge-amber',
+  'Shell':           'badge-red',
+  'BR':              'badge-blue',
+  'Petrobras':       'badge-blue',
+  'Raízen':          'badge-green',
+  'Bandeira Branca': 'badge-gray',
+  'Outros':          'badge-gray',
+};
+
+// ============================================================
+// ESTADO GLOBAL
+// ============================================================
+let state = {
+  tela: 'selector',   // selector | lista | coleta | resumo
+  posto: null,
+  registros: [],
+  form: {
+    nome: '', bandeira: 'Bandeira Branca',
+    gc:'', ga:'', et:'', ds:'',
+    obs:'', imgPreview: null, imgFile: null,
+    iaUsada: false, erroIA: false, loading: false,
+    dropOpen: false,
+  },
+};
+
+// ============================================================
+// LEITURA DE POSTO PELA URL (?posto=001)
+// ============================================================
+function getPostoFromURL() {
+  const id = new URLSearchParams(location.search).get('posto');
+  return id ? POSTOS.find(p => p.id === id) : null;
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function calcStatus(nosso, deles) {
+  const d = nosso - deles;
+  if (d > 0.05)  return { label:`+R$ ${d.toFixed(2)} acima`, cls:'badge-red',   cor:'#a32d2d' };
+  if (d < -0.05) return { label:`R$ ${Math.abs(d).toFixed(2)} abaixo`, cls:'badge-green', cor:'#3b6d11' };
+  return { label:'Na média', cls:'badge-amber', cor:'#854f0b' };
+}
+
+function hoje() {
+  return new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'2-digit', month:'2-digit', year:'numeric' });
+}
+
+function hora() {
+  return new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+}
+
+function render() {
+  const app = document.getElementById('app');
+  app.innerHTML = views[state.tela]();
+  bindEvents();
+}
+
+// ============================================================
+// API — Ler preços da foto via Anthropic
+// ============================================================
+async function lerFotoComIA(file) {
+  const b64 = await new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 500,
+      messages: [{ role:'user', content: [
+        { type:'image', source:{ type:'base64', media_type: file.type || 'image/jpeg', data: b64 } },
+        { type:'text', text:`Analise a imagem de um painel de preços de posto de gasolina. Retorne SOMENTE JSON sem texto extra: {"gc":"0.00","ga":"0.00","et":"0.00","ds":"0.00"}. gc=gasolina comum, ga=gasolina aditivada, et=etanol, ds=diesel s10. Use ponto decimal. Use "" se não encontrar.` }
+      ]}]
+    })
+  });
+
+  const data = await resp.json();
+  const txt = (data.content || []).map(b => b.text || '').join('').trim();
+  return JSON.parse(txt.replace(/```json|```/g,'').trim());
+}
+
+// ============================================================
+// API — Enviar registro ao N8N
+// ============================================================
+async function enviarN8N(registro) {
+  try {
+    await fetch(CONFIG.N8N_WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ posto_id: state.posto.id, ...registro }),
+    });
+  } catch (e) {
+    console.warn('N8N offline — dados salvos localmente');
+  }
+}
+
+// ============================================================
+// VIEWS
+// ============================================================
+const views = {
+
+  // --- Seletor de posto ---
+  selector() {
+    const lista = POSTOS.map(p => `
+      <button class="reg-card" style="width:100%;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;" onclick="selecionarPosto('${p.id}')">
+        <div>
+          <div style="font-weight:500;font-size:14px;margin-bottom:2px;">${p.nome}</div>
+          <div class="sub">${p.cidade}, ${p.estado}</div>
+          <div class="sub" style="margin-top:2px;font-size:11px;">${p.endereco}</div>
+        </div>
+        <span class="badge ${BANDEIRA_BADGE[p.bandeira] || 'badge-gray'}">${p.bandeira}</span>
+      </button>
+    `).join('');
+
+    return `
+      <div class="header">
+        <div class="label">Grupo Trapézio</div>
+        <div class="title">Selecione seu posto</div>
+        <div class="sub">Na versão final, seu link já abre direto aqui</div>
+      </div>
+      <div class="alert-blue">Use o link do WhatsApp para acessar direto no seu posto, sem precisar selecionar.</div>
+      ${lista}
+    `;
+  },
+
+  // --- Tela principal (lista de registros do dia) ---
+  lista() {
+    const p = state.posto;
+    const regs = state.registros;
+    const meta = regs.length >= 7;
+    const bcls = BANDEIRA_BADGE[p.bandeira] || 'badge-gray';
+
+    const cards = regs.length === 0
+      ? `<div class="empty">Nenhum concorrente registrado ainda hoje.<br><span style="font-size:12px;color:#9c9a92;">Toque no botão abaixo para começar.</span></div>`
+      : regs.map((r, i) => `
+          <div class="reg-card">
+            <div class="reg-header">
+              <div>
+                <div style="font-weight:500;font-size:14px;">${r.nome}</div>
+                <div class="sub">${r.hora} · <span class="badge ${BANDEIRA_BADGE[r.bandeira] || 'badge-gray'}" style="font-size:10px;">${r.bandeira}</span></div>
+              </div>
+              ${r.imgPreview ? `<img src="${r.imgPreview}" style="width:40px;height:40px;object-fit:cover;border-radius:6px;border:0.5px solid rgba(0,0,0,0.1);">` : ''}
+            </div>
+            <div class="reg-tags">
+              ${COMBUSTIVEIS.filter(c => r[c.key]).map(c => `
+                <span class="badge badge-gray" style="font-size:10px;">${c.label.replace('Gasolina ','Gás.')}: R$ ${parseFloat(r[c.key]).toFixed(2)}</span>
+              `).join('')}
+            </div>
+            ${r.obs ? `<div style="margin-top:6px;font-size:12px;color:#73726c;font-style:italic;">"${r.obs}"</div>` : ''}
+          </div>
+        `).join('');
+
+    return `
+      <div class="header">
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div class="header-row">
+            <div>
+              <div class="label">${p.estado} · ${p.cidade}</div>
+              <div class="title">${p.nome}</div>
+              <div class="sub">${p.bairro} · ${hoje()}</div>
+            </div>
+            <div style="text-align:right;">
+              <span class="badge ${bcls}">${p.bandeira}</span>
+              <br><button class="btn-small" style="margin-top:6px;" onclick="trocarPosto()">trocar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="status-bar">
+        <div class="card-gray">
+          <div class="label">Registrados</div>
+          <div style="font-size:22px;font-weight:500;">${regs.length} <span style="font-size:13px;font-weight:400;color:${meta ? '#3b6d11' : '#9c9a92'};">/ 7+</span></div>
+        </div>
+        <div class="card-gray" style="${meta ? 'background:#eaf3de;border:0.5px solid #639922;' : ''}">
+          <div class="label" style="${meta ? 'color:#3b6d11;' : ''}">Status</div>
+          <div style="font-size:15px;font-weight:500;color:${meta ? '#3b6d11' : '#1a1a18'};">${regs.length === 0 ? 'Aguardando' : meta ? 'Meta atingida' : 'Em andamento'}</div>
+        </div>
+      </div>
+
+      ${cards}
+
+      <button class="btn-primary" onclick="irColeta()">+ Registrar concorrente</button>
+      ${regs.length > 0 ? `<button class="btn-secondary" onclick="irResumo()">Ver relatório do dia →</button>` : ''}
+    `;
+  },
+
+  // --- Formulário de coleta ---
+  coleta() {
+    const f = state.form;
+    const posto = state.posto;
+    const podeSalvar = f.nome && (f.gc || f.ga || f.et || f.ds);
+
+    const campos = COMBUSTIVEIS.map(({ key, label }) => {
+      const val = f[key];
+      const nosso = posto.precos[key];
+      const st = val && !isNaN(parseFloat(val)) ? calcStatus(nosso, parseFloat(val)) : null;
+      return `
+        <div class="price-field">
+          <label>${label}</label>
+          <div class="price-row">
+            <span>R$</span>
+            <input type="number" step="0.01" placeholder="0,00" value="${val}"
+              style="${st ? `border-color:${st.cls === 'badge-red' ? '#e24b4a' : st.cls === 'badge-green' ? '#639922' : '#ba7517'};` : ''}"
+              oninput="setPreco('${key}', this.value)" />
+          </div>
+          ${st ? `<div class="price-status" style="color:${st.cor};">${st.label} do nosso</div>` : ''}
+        </div>
+      `;
+    }).join('');
+
+    const sugestoes = BANDEIRAS
+      .filter(b => f.nome && b.toLowerCase().includes(f.nome.toLowerCase()))
+      .slice(0, 5);
+
+    const fotoSection = f.imgPreview
+      ? `<div class="foto-preview">
+           <img src="${f.imgPreview}" alt="foto">
+           <div class="foto-overlay">${f.iaUsada ? '<span class="badge badge-blue" style="font-size:10px;">Lido pela IA</span>' : ''}</div>
+           <div class="foto-change"><button class="btn-small" onclick="trocarFoto()">Trocar</button></div>
+         </div>`
+      : `<button class="foto-btn" onclick="document.getElementById('fileInput').click()">
+           Tirar foto ou selecionar da galeria<br>
+           <span style="font-size:11px;color:#9c9a92;">A IA lê os preços automaticamente (opcional)</span>
+         </button>`;
+
+    return `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;">
+        <button class="btn-back" onclick="irLista()">←</button>
+        <div>
+          <div class="label">${p.cidade} · ${p.estado}</div>
+          <div class="title">Registrar concorrente</div>
+        </div>
+      </div>
+
+      <input type="file" id="fileInput" accept="image/*" capture="environment" style="display:none;" onchange="handleFoto(this)">
+
+      <div class="card">
+        <div class="label" style="margin-bottom:6px;">Nome do posto concorrente</div>
+        <div class="input-wrap">
+          <input type="text" placeholder="Ex: Ipiranga Av. Brasil" value="${f.nome}"
+            oninput="setNome(this.value)"
+            onfocus="setDrop(true)"
+            onblur="setTimeout(()=>setDrop(false),200)" />
+          ${f.dropOpen && sugestoes.length > 0 ? `
+            <div class="dropdown">
+              ${sugestoes.map(b => `<div class="dropdown-item" onmousedown="escolherBandeira('${b}')">${b}</div>`).join('')}
+            </div>` : ''}
+        </div>
+
+        <div style="margin-top:12px;">
+          <div class="label" style="margin-bottom:6px;">Bandeira</div>
+          <select onchange="setBandeira(this.value)">
+            ${BANDEIRAS.map(b => `<option value="${b}" ${f.bandeira === b ? 'selected' : ''}>${b}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="label" style="margin-bottom:8px;">Foto do painel de preços</div>
+        ${fotoSection}
+        ${f.loading ? `<div class="spinner-wrap"><div class="spinner"></div><div style="font-size:13px;color:#73726c;">Lendo preços com IA...</div></div>` : ''}
+        ${f.erroIA ? `<div class="alert-amber" style="margin-top:10px;">Não foi possível ler automaticamente. Preencha os preços abaixo.</div>` : ''}
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div class="label">Preços observados</div>
+          ${f.iaUsada ? '<span style="font-size:11px;color:#185fa5;">Preenchido pela IA — confira</span>' : ''}
+        </div>
+        <div class="price-grid">${campos}</div>
+        <div class="hint">Deixe em branco os combustíveis que o posto não vende.</div>
+      </div>
+
+      <div class="card">
+        <div class="label" style="margin-bottom:6px;">Observações (opcional)</div>
+        <textarea rows="3" placeholder="Ex: Promoção no etanol até sexta, fila grande..." oninput="setObs(this.value)">${f.obs}</textarea>
+      </div>
+
+      <button class="btn-primary" onclick="salvar()" ${!podeSalvar ? 'disabled' : ''}>Salvar registro</button>
+    `;
+  },
+
+  // --- Resumo do dia ---
+  resumo() {
+    const p = state.posto;
+    const regs = state.registros;
+
+    const tabelas = COMBUSTIVEIS.map(({ key, label }) => {
+      const vals = regs.filter(r => r[key]).map(r => parseFloat(r[key]));
+      if (!vals.length) return '';
+      const media = (vals.reduce((a,b) => a+b, 0) / vals.length).toFixed(2);
+      const menor = Math.min(...vals).toFixed(2);
+      const nosso = p.precos[key];
+      const st = calcStatus(nosso, parseFloat(media));
+
+      const linhas = regs.filter(r => r[key]).map(r => `
+        <tr>
+          <td>${r.nome}</td>
+          <td><span class="badge ${BANDEIRA_BADGE[r.bandeira] || 'badge-gray'}" style="font-size:10px;">${r.bandeira}</span></td>
+          <td style="text-align:right;">R$ ${parseFloat(r[key]).toFixed(2)}</td>
+        </tr>
+      `).join('');
+
+      return `
+        <div class="card" style="margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <div style="font-weight:500;">${label}</div>
+            <span class="badge ${st.cls}">${st.label}</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;">
+            <div class="card-gray"><div class="label">Nosso</div><div style="font-size:14px;font-weight:500;color:#185fa5;">R$ ${nosso.toFixed(2)}</div></div>
+            <div class="card-gray"><div class="label">Média</div><div style="font-size:14px;font-weight:500;">R$ ${media}</div></div>
+            <div class="card-gray"><div class="label">Menor</div><div style="font-size:14px;font-weight:500;">R$ ${menor}</div></div>
+          </div>
+          <table class="resumo-table">
+            <thead><tr><th>Posto</th><th>Bandeira</th><th style="text-align:right;">Preço</th></tr></thead>
+            <tbody>${linhas}</tbody>
+          </table>
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;">
+        <button class="btn-back" onclick="irLista()">←</button>
+        <div>
+          <div class="label">Relatório · ${p.nome}</div>
+          <div class="title">Comparativo do dia</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.25rem;">
+        <div class="card-gray"><div class="label">Posto</div><div style="font-size:13px;font-weight:500;">${p.nome}</div></div>
+        <div class="card-gray"><div class="label">Bairro</div><div style="font-size:13px;font-weight:500;">${p.bairro}</div></div>
+        <div class="card-gray"><div class="label">Concorrentes</div><div style="font-size:13px;font-weight:500;">${regs.length}</div></div>
+      </div>
+
+      ${tabelas}
+
+      <button class="btn-primary" onclick="enviarRelatorio()">Enviar para supervisor</button>
+      <button class="btn-secondary" onclick="irLista()">Voltar e adicionar mais</button>
+    `;
+  },
+};
+
+// ============================================================
+// AÇÕES
+// ============================================================
+function selecionarPosto(id) {
+  state.posto = POSTOS.find(p => p.id === id);
+  state.tela = 'lista';
+  render();
+}
+
+function trocarPosto() { state.tela = 'selector'; render(); }
+function irLista()    { state.tela = 'lista';    render(); }
+function irColeta()   { state.form = { nome:'', bandeira:'Bandeira Branca', gc:'', ga:'', et:'', ds:'', obs:'', imgPreview:null, imgFile:null, iaUsada:false, erroIA:false, loading:false, dropOpen:false }; state.tela = 'coleta'; render(); }
+function irResumo()   { state.tela = 'resumo';   render(); }
+
+function setNome(v)     { state.form.nome = v; render(); }
+function setBandeira(v) { state.form.bandeira = v; render(); }
+function setPreco(k, v) { state.form[k] = v; render(); }
+function setObs(v)      { state.form.obs = v; render(); }
+function setDrop(v)     { state.form.dropOpen = v; render(); }
+
+function escolherBandeira(b) {
+  state.form.nome = b;
+  state.form.bandeira = BANDEIRAS.includes(b) ? b : 'Outros';
+  state.form.dropOpen = false;
+  render();
+}
+
+function trocarFoto() {
+  state.form.imgPreview = null;
+  state.form.imgFile = null;
+  state.form.iaUsada = false;
+  state.form.erroIA = false;
+  state.form.gc = state.form.ga = state.form.et = state.form.ds = '';
+  render();
+}
+
+async function handleFoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  state.form.imgPreview = URL.createObjectURL(file);
+  state.form.imgFile = file;
+  state.form.loading = true;
+  state.form.iaUsada = false;
+  state.form.erroIA = false;
+  render();
+
+  try {
+    const precos = await lerFotoComIA(file);
+    state.form.gc = precos.gc || '';
+    state.form.ga = precos.ga || '';
+    state.form.et = precos.et || '';
+    state.form.ds = precos.ds || '';
+    state.form.iaUsada = true;
+  } catch(e) {
+    state.form.erroIA = true;
+  }
+  state.form.loading = false;
+  render();
+}
+
+function salvar() {
+  const f = state.form;
+  const reg = {
+    nome: f.nome, bandeira: f.bandeira,
+    gc: f.gc, ga: f.ga, et: f.et, ds: f.ds,
+    obs: f.obs, imgPreview: f.imgPreview,
+    iaUsada: f.iaUsada, hora: hora(),
+  };
+  state.registros.push(reg);
+  enviarN8N(reg);
+  irLista();
+}
+
+async function enviarRelatorio() {
+  try {
+    await enviarN8N({ tipo: 'relatorio_dia', registros: state.registros });
+    alert('Relatório enviado para o supervisor!');
+  } catch(e) {
+    alert('Erro ao enviar. Tente novamente.');
+  }
+}
+
+// ============================================================
+// BIND DE EVENTOS (chamado após cada render)
+// ============================================================
+function bindEvents() {
+  // eventos já estão inline nos elementos via onclick/oninput
+}
+
+// ============================================================
+// INICIALIZAÇÃO
+// ============================================================
+function init() {
+  const postoURL = getPostoFromURL();
+  if (postoURL) {
+    state.posto = postoURL;
+    state.tela = 'lista';
+  } else {
+    state.tela = 'selector';
+  }
+  render();
+}
+
+init();
+</script>
+</body>
+</html>
