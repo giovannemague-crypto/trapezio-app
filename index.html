@@ -9,6 +9,7 @@
   <title>Trapézio — Pesquisa de Preços</title>
   <link rel="manifest" href="manifest.json" />
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f3; color: #1a1a18; min-height: 100vh; }
@@ -279,9 +280,44 @@ function render() {
 // OCR — Ler preços da foto via Tesseract.js (gratuito, no navegador)
 // ============================================================
 async function lerFotoComIA(file) {
-  const url = URL.createObjectURL(file);
+  // Pré-processa a imagem com Canvas para melhorar o OCR
+  const imgUrl = URL.createObjectURL(file);
+  const img = await new Promise((res, rej) => {
+    const i = new Image();
+    i.onload = () => res(i);
+    i.onerror = rej;
+    i.src = imgUrl;
+  });
 
-  const result = await Tesseract.recognize(url, 'por+eng', {
+  // Redimensiona e aplica filtro de contraste alto
+  const canvas = document.createElement('canvas');
+  const escala = Math.min(1200 / img.width, 900 / img.height, 1);
+  canvas.width  = img.width  * escala;
+  canvas.height = img.height * escala;
+  const ctx = canvas.getContext('2d');
+
+  // Fundo branco
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Desenha a imagem redimensionada
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+  // Aplica alto contraste em escala de cinza
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const data = imageData.data;
+  for (let i = 0; i < data.length; i += 4) {
+    const avg = 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
+    const val = avg > 128 ? 255 : 0; // binarização
+    data[i] = data[i+1] = data[i+2] = val;
+  }
+  ctx.putImageData(imageData, 0, 0);
+
+  const processedUrl = canvas.toDataURL('image/png');
+  URL.revokeObjectURL(imgUrl);
+
+  const result = await Tesseract.recognize(processedUrl, 'por+eng', {
+    tessedit_char_whitelist: '0123456789,.ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzÀ-ú ',
     logger: m => {
       if (m.status === 'recognizing text') {
         const pct = Math.round(m.progress * 100);
@@ -292,9 +328,8 @@ async function lerFotoComIA(file) {
   });
 
   const texto = result.data.text;
-  console.log('OCR resultado bruto:\n', texto);
+  console.log('OCR texto bruto:\n', texto);
 
-  // Extrai todos os valores que parecem preço de combustível
   const matches = texto.match(/\d{1,2}[.,]\d{2}/g) || [];
   const precos = [...new Set(
     matches
@@ -305,10 +340,7 @@ async function lerFotoComIA(file) {
 
   console.log('Preços extraídos:', precos);
 
-  const textoLow = texto.toLowerCase();
   let gc = '', ga = '', et = '', ds = '';
-
-  // Detecta por palavras-chave linha a linha
   const linhas = texto.split('\n');
   for (const linha of linhas) {
     const l = linha.toLowerCase();
@@ -318,13 +350,12 @@ async function lerFotoComIA(file) {
       .map(n => n.toFixed(2));
     if (!nums.length) continue;
     const v = nums[0];
-    if (!et && (l.includes('etanol') || l.includes('álcool') || l.includes('alcool') || l.match(/\be\b/) || l.includes('e '))) et = v;
+    if (!et && (l.includes('etanol') || l.includes('alcool') || l.includes('álcool'))) et = v;
     else if (!ds && (l.includes('diesel') || l.includes('s10') || l.includes('s-10'))) ds = v;
-    else if (!ga && (l.includes('aditi') || l.includes('podium') || l.includes('v-power') || l.includes('select') || l.includes('premium'))) ga = v;
+    else if (!ga && (l.includes('aditi') || l.includes('podium') || l.includes('premium') || l.includes('v-power'))) ga = v;
     else if (!gc && (l.includes('gasolina') || l.includes('comum') || l.includes('regular'))) gc = v;
   }
 
-  // Fallback: se não achou por palavra-chave, distribui por ordem de preço
   if (!gc && !ga && !et && !ds && precos.length > 0) {
     const sorted = [...precos].sort((a, b) => parseFloat(a) - parseFloat(b));
     et = sorted[0] || '';
@@ -333,7 +364,6 @@ async function lerFotoComIA(file) {
     ds = sorted[3] || '';
   }
 
-  URL.revokeObjectURL(url);
   console.log('Resultado final:', { gc, ga, et, ds });
   return { gc, ga, et, ds };
 }
@@ -486,13 +516,16 @@ const views = {
     return `
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;">
         <button class="btn-back" onclick="irLista()">←</button>
-        <div>
+        <div style="flex:1;">
           <div class="label">${posto.cidade} · ${posto.estado}</div>
           <div class="title">Registrar concorrente</div>
         </div>
+        <div id="loc-status">
+          <span class="badge badge-amber" style="font-size:10px;">Buscando GPS...</span>
+        </div>
       </div>
 
-      <input type="file" id="fileInput" accept="image/*" capture="environment" style="display:none;" onchange="handleFoto(this)">
+      <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="handleFoto(this)">
 
       <div class="card">
         <div class="label" style="margin-bottom:6px;">Nome do posto concorrente</div>
@@ -614,7 +647,37 @@ function selecionarPosto(id) {
 
 function trocarPosto() { state.tela = 'selector'; render(); }
 function irLista()    { state.tela = 'lista';    render(); }
-function irColeta()   { state.form = { nome:'', bandeira:'Bandeira Branca', gc:'', ga:'', et:'', ds:'', obs:'', imgPreview:null, imgFile:null, iaUsada:false, erroIA:false, loading:false, dropOpen:false }; state.tela = 'coleta'; render(); }
+function irColeta() {
+  state.form = {
+    nome:'', bandeira:'Bandeira Branca',
+    gc:'', ga:'', et:'', ds:'',
+    obs:'', imgPreview:null, imgFile:null,
+    iaUsada:false, erroIA:false, loading:false,
+    dropOpen:false, lat:'', lng:'', locStatus:'buscando'
+  };
+  state.tela = 'coleta';
+  render();
+
+  // Busca localização GPS automaticamente
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        state.form.lat = pos.coords.latitude.toFixed(6);
+        state.form.lng = pos.coords.longitude.toFixed(6);
+        state.form.locStatus = 'ok';
+        // Atualiza só o indicador de GPS sem recriar o form
+        const locEl = document.getElementById('loc-status');
+        if (locEl) locEl.innerHTML = `<span class="badge badge-green" style="font-size:10px;">GPS: ${state.form.lat}, ${state.form.lng}</span>`;
+      },
+      err => {
+        state.form.locStatus = 'erro';
+        const locEl = document.getElementById('loc-status');
+        if (locEl) locEl.innerHTML = `<span class="badge badge-gray" style="font-size:10px;">Localização não disponível</span>`;
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }
+}
 function irResumo()   { state.tela = 'resumo';   render(); }
 
 function setNome(v)     { state.form.nome = v; atualizarBotao(); }
@@ -649,11 +712,44 @@ async function handleFoto(input) {
   state.form.erroIA = false;
   render();
 
+  // Lê GPS do EXIF da foto
+  try {
+    const exif = await exifr.parse(file, { gps: true });
+    if (exif && exif.latitude && exif.longitude) {
+      state.form.lat = exif.latitude.toFixed(6);
+      state.form.lng = exif.longitude.toFixed(6);
+      state.form.locStatus = 'ok';
+      console.log('GPS do EXIF:', state.form.lat, state.form.lng);
+    } else {
+      // Foto sem EXIF GPS (ex: galeria, screenshot) — usa GPS atual como fallback
+      console.warn('Foto sem GPS no EXIF — usando localização atual como fallback');
+      state.form.locStatus = 'fallback';
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          pos => {
+            state.form.lat = pos.coords.latitude.toFixed(6);
+            state.form.lng = pos.coords.longitude.toFixed(6);
+            const locEl = document.getElementById('loc-status');
+            if (locEl) locEl.innerHTML = `<span class="badge badge-amber" style="font-size:10px;">GPS atual (sem EXIF)</span>`;
+          },
+          () => { state.form.locStatus = 'erro'; }
+        );
+      }
+    }
+  } catch(e) {
+    console.warn('Erro ao ler EXIF:', e);
+  }
+
+  // Atualiza indicador de GPS
+  const locEl = document.getElementById('loc-status');
+  if (locEl && state.form.locStatus === 'ok') {
+    locEl.innerHTML = `<span class="badge badge-green" style="font-size:10px;">GPS da foto: ${state.form.lat}, ${state.form.lng}</span>`;
+  }
+
+  // Roda OCR
   try {
     const precos = await lerFotoComIA(file);
     console.log('Preços retornados:', precos);
-
-    // Atualiza estado
     state.form.gc = precos.gc || '';
     state.form.ga = precos.ga || '';
     state.form.et = precos.et || '';
@@ -663,13 +759,11 @@ async function handleFoto(input) {
     state.form.loading = false;
     render();
 
-    // Atualiza os campos de input diretamente no DOM após render
     setTimeout(() => {
       const campos = { gc: precos.gc, ga: precos.ga, et: precos.et, ds: precos.ds };
       Object.entries(campos).forEach(([key, val]) => {
         if (!val) return;
-        const inputs = document.querySelectorAll(`input[type=number]`);
-        inputs.forEach(inp => {
+        document.querySelectorAll('input[type=number]').forEach(inp => {
           if (inp.getAttribute('oninput') && inp.getAttribute('oninput').includes(`'${key}'`)) {
             inp.value = val;
           }
@@ -701,6 +795,7 @@ function salvar() {
     gc: f.gc, ga: f.ga, et: f.et, ds: f.ds,
     obs: f.obs, imgPreview: f.imgPreview,
     iaUsada: f.iaUsada, hora: hora(),
+    lat: f.lat, lng: f.lng,
   };
   state.registros.push(reg);
   enviarN8N(reg);
