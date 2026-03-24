@@ -8,6 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <title>Trapézio — Pesquisa de Preços</title>
   <link rel="manifest" href="manifest.json" />
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f3; color: #1a1a18; min-height: 100vh; }
@@ -275,32 +276,77 @@ function render() {
 }
 
 // ============================================================
-// API — Ler preços da foto via Anthropic
+// OCR — Ler preços da foto via Tesseract.js (gratuito, no navegador)
 // ============================================================
 async function lerFotoComIA(file) {
-  const b64 = await new Promise((res, rej) => {
-    const r = new FileReader();
-    r.onload = () => res(r.result.split(',')[1]);
-    r.onerror = rej;
-    r.readAsDataURL(file);
+  const url = URL.createObjectURL(file);
+  
+  // Atualiza mensagem de loading
+  const spinnerMsg = document.querySelector('.spinner-wrap div:last-child');
+  if (spinnerMsg) spinnerMsg.textContent = 'Lendo preços da imagem... (pode levar alguns segundos)';
+
+  const result = await Tesseract.recognize(url, 'por+eng', {
+    logger: m => {
+      if (m.status === 'recognizing text') {
+        const pct = Math.round(m.progress * 100);
+        const msg = document.querySelector('.spinner-wrap div:last-child');
+        if (msg) msg.textContent = `Lendo preços... ${pct}%`;
+      }
+    }
   });
 
-  const resp = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 500,
-      messages: [{ role:'user', content: [
-        { type:'image', source:{ type:'base64', media_type: file.type || 'image/jpeg', data: b64 } },
-        { type:'text', text:`Analise a imagem de um painel de preços de posto de gasolina. Retorne SOMENTE JSON sem texto extra: {"gc":"0.00","ga":"0.00","et":"0.00","ds":"0.00"}. gc=gasolina comum, ga=gasolina aditivada, et=etanol, ds=diesel s10. Use ponto decimal. Use "" se não encontrar.` }
-      ]}]
-    })
-  });
+  const texto = result.data.text;
+  console.log('OCR texto bruto:', texto);
 
-  const data = await resp.json();
-  const txt = (data.content || []).map(b => b.text || '').join('').trim();
-  return JSON.parse(txt.replace(/```json|```/g,'').trim());
+  // Extrai números no formato de preço (ex: 6,29 ou 6.29)
+  const numeros = texto.match(/\d[\d.,]{2,4}\d/g) || [];
+  const precos = numeros
+    .map(n => parseFloat(n.replace(',', '.')))
+    .filter(n => n >= 3.0 && n <= 12.0) // faixa válida de preço de combustível
+    .map(n => n.toFixed(2));
+
+  console.log('Preços encontrados:', precos);
+
+  // Tenta mapear os preços encontrados aos combustíveis
+  // Busca por palavras-chave no texto para identificar qual preço é qual
+  const textoLower = texto.toLowerCase();
+  
+  let gc = '', ga = '', et = '', ds = '';
+
+  // Estratégia: detecta por palavras-chave próximas aos números
+  const linhas = texto.split('\n').map(l => l.trim()).filter(l => l);
+  
+  for (const linha of linhas) {
+    const linhaLow = linha.toLowerCase();
+    const num = (linha.match(/\d[\d.,]{2,4}\d/g) || [])
+      .map(n => parseFloat(n.replace(',', '.')))
+      .filter(n => n >= 3.0 && n <= 12.0)
+      .map(n => n.toFixed(2))[0];
+    
+    if (!num) continue;
+    
+    if ((linhaLow.includes('etanol') || linhaLow.includes('alcool') || linhaLow.match(/\be\b/)) && !et) {
+      et = num;
+    } else if ((linhaLow.includes('aditi') || linhaLow.includes('podium') || linhaLow.includes('v-power') || linhaLow.includes('select')) && !ga) {
+      ga = num;
+    } else if ((linhaLow.includes('gasolina') || linhaLow.includes('comum') || linhaLow.includes('gas')) && !gc) {
+      gc = num;
+    } else if ((linhaLow.includes('diesel') || linhaLow.includes('s10') || linhaLow.includes('s-10')) && !ds) {
+      ds = num;
+    }
+  }
+
+  // Se não achou por palavra-chave, distribui pelos preços encontrados por ordem
+  if (!gc && !ga && !et && !ds && precos.length > 0) {
+    const sorted = [...precos].sort((a, b) => parseFloat(a) - parseFloat(b));
+    if (sorted[0]) et = sorted[0];   // etanol geralmente é o mais barato
+    if (sorted[1]) gc = sorted[1];   // gasolina comum
+    if (sorted[2]) ga = sorted[2];   // gasolina aditivada
+    if (sorted[3]) ds = sorted[3];   // diesel
+  }
+
+  URL.revokeObjectURL(url);
+  return { gc, ga, et, ds };
 }
 
 // ============================================================
