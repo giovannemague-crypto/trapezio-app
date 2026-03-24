@@ -1,4 +1,4 @@
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -30,8 +30,6 @@ module.exports = async function handler(req, res) {
     });
 
     const text = await resp.text();
-    console.log('Anthropic resposta:', text.slice(0, 300));
-
     let data;
     try { data = JSON.parse(text); }
     catch(e) { return res.status(500).json({ error: 'Resposta invalida', raw: text.slice(0, 200) }); }
@@ -43,9 +41,8 @@ module.exports = async function handler(req, res) {
     return res.status(200).json(precos);
 
   } catch (e) {
-    console.error('Erro:', e.message);
     return res.status(500).json({ error: e.message });
   }
-};
+}
 
-module.exports.config = { api: { bodyParser: { sizeLimit: '10mb' } } };
+export const config = { api: { bodyParser: { sizeLimit: '10mb' } } };
