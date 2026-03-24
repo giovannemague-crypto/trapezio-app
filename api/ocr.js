@@ -24,7 +24,7 @@ export default async function handler(req, res) {
         max_tokens: 256,
         messages: [{ role: 'user', content: [
           { type: 'image', source: { type: 'base64', media_type: mediaType || 'image/jpeg', data: image } },
-          { type: 'text', text: 'Analise esta imagem de um painel de precos de posto de gasolina. Retorne SOMENTE um JSON valido, sem texto extra, sem markdown: {"gc":"0.00","ga":"0.00","et":"0.00","ds":"0.00"}. gc=gasolina comum, ga=gasolina aditivada, et=etanol, ds=diesel s10. Use ponto decimal. Use "" se nao encontrar.' }
+          { type: 'text', text: 'Analise esta imagem de um painel de precos de posto de gasolina. Retorne SOMENTE um JSON valido, sem texto extra, sem markdown: {"gc":"0.00","ga":"0.00","et":"0.00","eta":"0.00","ds":"0.00","ds500":"0.00","dsa":"0.00"}. gc=gasolina comum, ga=gasolina aditivada, et=etanol, eta=etanol aditivado, ds=diesel s10, ds500=diesel s500, dsa=diesel s10 aditivado. Use ponto decimal. Use "" se nao encontrar.' }
         ]}]
       })
     });
