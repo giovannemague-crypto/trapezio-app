@@ -298,11 +298,11 @@ async function lerFotoComIA(file) {
   const texto = result.data.text;
   console.log('OCR texto bruto:', texto);
 
-  // Extrai números no formato de preço (ex: 6,29 ou 6.29)
-  const numeros = texto.match(/\d[\d.,]{2,4}\d/g) || [];
+  // Extrai números no formato de preço (ex: 6,29 ou 6.29 ou 5,17)
+  const numeros = texto.match(/\b\d[.,]\d{2}\b|\b\d{1,2}[.,]\d{2}\b/g) || [];
   const precos = numeros
     .map(n => parseFloat(n.replace(',', '.')))
-    .filter(n => n >= 3.0 && n <= 12.0) // faixa válida de preço de combustível
+    .filter(n => n >= 3.0 && n <= 12.0)
     .map(n => n.toFixed(2));
 
   console.log('Preços encontrados:', precos);
@@ -662,16 +662,38 @@ async function handleFoto(input) {
 
   try {
     const precos = await lerFotoComIA(file);
+    console.log('Preços retornados:', precos);
+
+    // Atualiza estado
     state.form.gc = precos.gc || '';
     state.form.ga = precos.ga || '';
     state.form.et = precos.et || '';
     state.form.ds = precos.ds || '';
-    state.form.iaUsada = true;
+    state.form.iaUsada = !!(precos.gc || precos.ga || precos.et || precos.ds);
+    state.form.erroIA = !state.form.iaUsada;
+    state.form.loading = false;
+    render();
+
+    // Atualiza os campos de input diretamente no DOM após render
+    setTimeout(() => {
+      const campos = { gc: precos.gc, ga: precos.ga, et: precos.et, ds: precos.ds };
+      Object.entries(campos).forEach(([key, val]) => {
+        if (!val) return;
+        const inputs = document.querySelectorAll(`input[type=number]`);
+        inputs.forEach(inp => {
+          if (inp.getAttribute('oninput') && inp.getAttribute('oninput').includes(`'${key}'`)) {
+            inp.value = val;
+          }
+        });
+      });
+    }, 100);
+
   } catch(e) {
+    console.error('Erro OCR:', e);
     state.form.erroIA = true;
+    state.form.loading = false;
+    render();
   }
-  state.form.loading = false;
-  render();
 }
 
 function atualizarBotao() {
