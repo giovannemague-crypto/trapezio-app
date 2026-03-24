@@ -4,8 +4,10 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
   const { image, mediaType } = req.body;
   if (!image) return res.status(400).json({ error: 'Imagem não enviada' });
+
   try {
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -23,7 +25,51 @@ export default async function handler(req, res) {
         ]}]
       })
     });
+
     const data = await resp.json();
     if (data.error) return res.status(500).json({ error: data.error.message });
+
     const txt = (data.content || []).map(b => b.text || '').join('').trim();
-    const precos = JSON.parse(txt.replace(/
+    const precos = JSON.parse(txt.replace(/```json|```/g, '').trim());
+    return res.status(200).json(precos);
+
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+}
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const { image, mediaType } = req.body;
+  if (!image) return res.status(400).json({ error: 'Imagem não enviada' });
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 256,
+        messages: [{ role: 'user', content: [
+          { type: 'image', source: { type: 'base64', media_type: mediaType || 'image/jpeg', data: image } },
+          { type: 'text', text: 'Analise esta imagem de um painel de preços de posto de gasolina. Retorne SOMENTE um JSON válido, sem texto extra, sem markdown: {"gc":"0.00","ga":"0.00","et":"0.00","ds":"0.00"}. gc=gasolina comum, ga=gasolina aditivada, et=etanol, ds=diesel s10. Use ponto decimal. Use "" se não encontrar.' }
+        ]}]
+      })
+    });
+
+    const data = await resp.json();
+    if (data.error) return res.status(500).json({ error: data.error.message });
+
+    const txt = (data.content || []).map(b => b.text || '').join('').trim();
+    const precos = JSON.parse(txt.replace(/```json|```/g, '').trim());
+    return res.status(200).json(precos);
+
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+}
