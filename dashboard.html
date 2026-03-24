@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Trapézio — Dashboard Supervisor</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f1520;color:#e0e8f0;min-height:100vh}
+
+.topbar{background:#111927;border-bottom:1px solid #1e2d42;padding:0 20px;display:flex;justify-content:space-between;align-items:center;height:56px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{position:relative;width:38px;height:28px}
+.logo-bg{width:38px;height:28px;background:#1a3a6b;border-radius:4px;display:flex;align-items:center;justify-content:center}
+.logo-tri-w{width:0;height:0;border-left:9px solid transparent;border-right:9px solid transparent;border-bottom:16px solid #fff}
+.logo-tri-b{width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:11px solid #2e7dd1;position:absolute;top:10px;left:50%;transform:translateX(-50%)}
+.logo-texts{display:flex;flex-direction:column;line-height:1}
+.logo-postos{font-size:9px;color:#6a8aaa;letter-spacing:0.18em;text-transform:uppercase;font-weight:500}
+.logo-name{font-size:18px;font-weight:800;color:#fff;letter-spacing:0.06em;text-transform:uppercase;font-style:italic;margin-top:1px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.pill{font-size:11px;padding:3px 10px;border-radius:4px}
+.pill-live{background:rgba(46,209,100,0.15);color:#4dd87a;border:1px solid rgba(46,209,100,0.25)}
+.pill-date{background:rgba(255,255,255,0.06);color:#7a9abа;border:1px solid rgba(255,255,255,0.1);color:#8aaac0}
+.btn-ref{font-size:12px;padding:5px 14px;border-radius:4px;border:1px solid #2a4060;background:transparent;color:#8aaac0;cursor:pointer}
+.btn-ref:hover{background:#1a2a3a;color:#fff}
+
+.nav-tabs{background:#111927;border-bottom:1px solid #1e2d42;padding:0 20px;display:flex;gap:4px}
+.nav-tab{padding:10px 20px;font-size:13px;font-weight:500;border:none;background:transparent;color:#6a8aaa;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.nav-tab.on{color:#fff;border-bottom-color:#2e7dd1}
+.nav-tab:hover:not(.on){color:#aac0d8}
+
+.content{padding:16px 20px}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.kpi{background:#131e2e;border:1px solid #1e2d42;border-radius:6px;padding:14px 16px}
+.kpi-label{font-size:10px;color:#4a6a8a;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px}
+.kpi-val{font-size:28px;font-weight:700;line-height:1}
+.kpi-sub{font-size:11px;color:#4a6a8a;margin-top:5px}
+
+.estado-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.estado-card{background:#131e2e;border:1px solid #1e2d42;border-radius:6px;padding:12px 14px}
+.estado-nome{font-size:16px;font-weight:700;color:#e0e8f0}
+.prog-wrap{height:4px;background:#1e2d42;border-radius:2px;overflow:hidden;margin:8px 0 4px}
+.prog-bar{height:100%;border-radius:2px;transition:width 0.6s}
+
+.toolbar{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+.input-s{flex:1;min-width:200px;padding:8px 14px;font-size:13px;border-radius:5px;border:1px solid #1e2d42;background:#131e2e;color:#e0e8f0;outline:none}
+.input-s:focus{border-color:#2e7dd1}
+.input-s::placeholder{color:#3a5a7a}
+.btn-est{padding:6px 14px;font-size:12px;border-radius:5px;border:1px solid #1e2d42;background:#131e2e;color:#6a8aaa;cursor:pointer;font-weight:500}
+.btn-est.on{background:#2e7dd1;color:#fff;border-color:#2e7dd1}
+.btn-est:hover:not(.on){background:#1a2a3a;color:#aac0d8}
+
+.posto-row{background:#131e2e;border:1px solid #1e2d42;border-radius:6px;padding:12px 16px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer;transition:all 0.12s}
+.posto-row:hover{border-color:#2e7dd1;background:#172030}
+.posto-row.tem-alerta{border-left:3px solid #e24b4a}
+.row-left{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dot-g{background:#4dd87a}.dot-r{background:#e24b4a}
+.row-info{min-width:0}
+.row-nome{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#e0e8f0}
+.row-sub{font-size:11px;color:#4a6a8a;margin-top:2px}
+.row-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.buscar-btn{font-size:12px;color:#2e7dd1;border:none;background:transparent;cursor:pointer;font-weight:500;white-space:nowrap}
+.buscar-btn:hover{color:#5aaeff}
+
+.badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:3px;white-space:nowrap;font-weight:600;border:1px solid}
+.b-ipa{background:rgba(250,174,50,0.12);color:#faa932;border-color:rgba(250,174,50,0.3)}
+.b-she{background:rgba(226,75,74,0.12);color:#e24b4a;border-color:rgba(226,75,74,0.3)}
+.b-br{background:rgba(46,125,209,0.12);color:#5aaeff;border-color:rgba(46,125,209,0.3)}
+.b-tra{background:rgba(100,100,220,0.12);color:#9090ff;border-color:rgba(100,100,220,0.3)}
+.b-rdp{background:rgba(29,158,117,0.12);color:#2ec496;border-color:rgba(29,158,117,0.3)}
+.b-oth{background:rgba(255,255,255,0.06);color:#8aaac0;border-color:rgba(255,255,255,0.12)}
+.b-red{background:rgba(226,75,74,0.15);color:#e24b4a;border-color:rgba(226,75,74,0.3)}
+.b-amb{background:rgba(186,117,23,0.15);color:#f0a030;border-color:rgba(186,117,23,0.3)}
+.b-grn{background:rgba(77,216,122,0.12);color:#4dd87a;border-color:rgba(77,216,122,0.3)}
+.b-hrs{background:rgba(255,255,255,0.06);color:#6a8aaa;border-color:rgba(255,255,255,0.1);font-weight:400}
+
+.alerta-row{background:#1e0f0f;border:1px solid #3a1a1a;border-left:3px solid #e24b4a;border-radius:6px;padding:12px 16px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.alerta-row:hover{background:#251515}
+.pend-row{background:#1e1a0f;border:1px solid #3a2a0a;border-left:3px solid #f0a030;border-radius:6px;padding:12px 16px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center}
+.empty{text-align:center;padding:3rem;color:#4a6a8a;font-size:14px}
+
+.det-back{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.btn-back{background:transparent;border:none;font-size:20px;cursor:pointer;color:#6a8aaa;padding:0;line-height:1}
+.btn-back:hover{color:#fff}
+.comp-card{background:#131e2e;border:1px solid #1e2d42;border-radius:6px;padding:14px 16px}
+.comp-table{width:100%;border-collapse:collapse;font-size:13px}
+.comp-table th{text-align:left;padding:8px 10px;font-size:10px;font-weight:600;color:#4a6a8a;text-transform:uppercase;letter-spacing:0.08em;border-bottom:1px solid #1e2d42}
+.comp-table td{padding:10px 10px;border-bottom:1px solid #1a2535}
+.comp-table tr:last-child td{border-bottom:none}
+
+.sec-label{font-size:10px;font-weight:600;color:#4a6a8a;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;margin-top:4px}
+
+@media(max-width:600px){.kpi-grid,.estado-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <svg width="180" height="36" viewBox="0 0 180 36" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="tg1" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#1a3a8f"/>
+          <stop offset="100%" stop-color="#2e5fd4"/>
+        </linearGradient>
+        <linearGradient id="tg2" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#0f2060"/>
+          <stop offset="100%" stop-color="#1a3a8f"/>
+        </linearGradient>
+      </defs>
+      <!-- Forma trapézio/seta esquerda -->
+      <polygon points="4,18 18,4 38,4 38,32 18,32" fill="url(#tg1)"/>
+      <polygon points="4,18 18,4 18,32" fill="url(#tg2)" opacity="0.7"/>
+      <!-- Triângulo seta apontando esquerda -->
+      <polygon points="4,18 16,10 16,26" fill="#1a3aff" opacity="0.35"/>
+      <!-- Linha divisória interna -->
+      <line x1="18" y1="4" x2="18" y2="32" stroke="#1a3a8f" stroke-width="0.8" opacity="0.5"/>
+      <!-- POSTOS pequeno -->
+      <text x="46" y="14" font-family="Arial,sans-serif" font-size="9" font-weight="700" fill="#7aaaee" letter-spacing="2">POSTOS</text>
+      <!-- TRAPÉZIO grande bold italic -->
+      <text x="44" y="31" font-family="Arial Black,Arial,sans-serif" font-size="20" font-weight="900" font-style="italic" fill="#ffffff" letter-spacing="1">TRAPÉZIO</text>
+    </svg>
+  </div>
+  <div class="topbar-right">
+    <span class="pill pill-date" id="topdate"></span>
+    <span class="pill pill-live">● Ao vivo</span>
+    <button class="btn-ref" onclick="atualizar()">Atualizar</button>
+  </div>
+</div>
+
+<div class="nav-tabs">
+  <button class="nav-tab on" onclick="setAba('geral',this)">Meus Postos (<span id="cnt-total">0</span>)</button>
+  <button class="nav-tab" onclick="setAba('alertas',this)">Alertas (<span id="cnt-alrt">0</span>)</button>
+  <button class="nav-tab" onclick="setAba('pendentes',this)">Pendentes (<span id="cnt-pend">0</span>)</button>
+</div>
+
+<div class="content">
+  <div class="kpi-grid" id="kpis"></div>
+  <div class="estado-grid" id="estados"></div>
+  <div class="toolbar">
+    <input class="input-s" type="text" placeholder="Buscar posto ou bairro..." oninput="setBusca(this.value)" id="busca-input">
+    <div id="est-btns" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+  </div>
+  <div id="lista"></div>
+</div>
+
+<script>
+const POSTOS=[
+  {id:"001",nome:"Posto Alfa",end:"Est Da Graciosa, 3253",bairro:"Alphaville Graciosa",cidade:"Colombo",estado:"PR",bandeira:"Ipiranga",hrs:"24h"},
+  {id:"002",nome:"Almirante 02",end:"R Antonio Kaesemodel, 2339",bairro:"Colonial",cidade:"São Bento Do Sul",estado:"SC",bandeira:"Ipiranga",hrs:"6h-22h"},
+  {id:"003",nome:"Almirante 03",end:"Av. Getúlio Vargas, 2130",bairro:"Cristo Rei",cidade:"São Leopoldo",estado:"RS",bandeira:"Ipiranga",hrs:"24h"},
+  {id:"004",nome:"Almirante 04",end:"Av. Borges De Medeiros, 2205",bairro:"Praia De Belas",cidade:"Porto Alegre",estado:"RS",bandeira:"Ipiranga",hrs:"24h"},
+  {id:"005",nome:"Almirante 05",end:"Av. Primeiro De Marco, 4600",bairro:"Santo Afonso",cidade:"Novo Hamburgo",estado:"RS",bandeira:"Ipiranga",hrs:"6h-22h"},
+  {id:"006",nome:"Almirante 06",end:"Av. Santos Ferreira, 2700",bairro:"Estancia Velha",cidade:"Canoas",estado:"RS",bandeira:"Ipiranga",hrs:"24h"},
+  {id:"007",nome:"Almirante 07",end:"Av. Do Nazario, 1024",bairro:"Olaria",cidade:"Canoas",estado:"RS",bandeira:"Ipiranga",hrs:"24h"},
+  {id:"008",nome:"Almirante 08",end:"Av. Dorival Candido, 1460",bairro:"Cohab C",cidade:"Gravataí",estado:"RS",bandeira:"Ipiranga",hrs:"6h-22h"},
+  {id:"009",nome:"Almirante 09",end:"Av. Luiz Pasteur, 4799",bairro:"Walderez",cidade:"Sapucaia Do Sul",estado:"RS",bandeira:"Ipiranga",hrs:"24h"},
+  {id:"011",nome:"Almirante 11",end:"Av. Rui Barbosa, 4791",bairro:"Ipe",cidade:"São José Dos Pinhais",estado:"PR",bandeira:"Ipiranga",hrs:"24h"},
+  {id:"012",nome:"Almirante 12",end:"Rod RS 240, 5280",bairro:"Ri",cidade:"Portão",estado:"RS",bandeira:"Ipiranga",hrs:"6h-22h"},
+  {id:"013",nome:"Almirante 13 (São Dimas)",end:"Rua Presidente Faria, 116",bairro:"Colonia Faria",cidade:"Colombo",estado:"PR",bandeira:"BR",hrs:"24h"},
+  {id:"014",nome:"Almirante 14 (Rosas)",end:"Avenida Ely Correa, 5600",bairro:"Jd Do Cedro",cidade:"Gravataí",estado:"RS",bandeira:"Ipiranga",hrs:"6h-22h"},
+  {id:"015",nome:"Almirante 15 (Gravo)",end:"Rua Porto Palmeira, 2509",bairro:"Campo Da Brazina",cidade:"Araricá",estado:"RS",bandeira:"Ipiranga",hrs:"24h"},
+  {id:"017",nome:"Almirante 17 (Gravi)",end:"R Jose Appelonio Da Costa, 2160",bairro:"Estação",cidade:"Araricá",estado:"RS",bandeira:"Ipiranga",hrs:"6h-22h"},
+  {id:"018",nome:"Almirante 18 (Sapucaia)",end:"Av. Coronel Theodomiro, 885",bairro:"Nova Sapucaia",cidade:"Sapucaia Do Sul",estado:"RS",bandeira:"Ipiranga",hrs:"24h"},
+  {id:"019",nome:"Almirante 19 (San Michael)",end:"R. João Bettega, 3015",bairro:"Cidade Industrial",cidade:"Curitiba",estado:"PR",bandeira:"Ipiranga",hrs:"24h"},
+  {id:"024a",nome:"Almirante 24 (Oceano)",end:"R Carlos Dietzsch, 1115",bairro:"Portão",cidade:"Curitiba",estado:"PR",bandeira:"Ipiranga",hrs:"6h-22h"},
+  {id:"020",nome:"Almirante Matriz",end:"Almirante Alexandrino, 1526",bairro:"Afonso Pena",cidade:"São José Dos Pinhais",estado:"PR",bandeira:"Ipiranga",hrs:"24h"},
+  {id:"021",nome:"Posto América",end:"Av. Marginal Jose de Anchieta, 956",bairro:"Guarani",cidade:"Colombo",estado:"PR",bandeira:"Ipiranga",hrs:"24h"},
+  {id:"022",nome:"Posto Beira Rio",end:"Av. Armando de Sales Oliveira, 1101",bairro:"Jd Santa Eliza",cidade:"Porto Feliz",estado:"SP",bandeira:"BR",hrs:"6h-22h"},
+  {id:"023",nome:"Posto Brasil",end:"AV. Brasil, 846",bairro:"Eucaliptos",cidade:"Fazenda Rio Grande",estado:"PR",bandeira:"Ipiranga",hrs:"24h"},
+  {id:"025",nome:"Posto Cisne",end:"Avenida Portugal, 3205",bairro:"Nações",cidade:"Fazenda Rio Grande",estado:"PR",bandeira:"BR",hrs:"24h"},
+  {id:"026",nome:"Posto Dom Afonso",end:"R. Dom Afonso, 680",bairro:"Vila Real",cidade:"Balneário Camboriú",estado:"SC",bandeira:"Ipiranga",hrs:"6h-22h"},
+  {id:"027",nome:"Posto Duque De Caxias",end:"Rodovia Duque De Caxias, SC301",bairro:"Reta",cidade:"São Francisco Do Sul",estado:"SC",bandeira:"Ipiranga",hrs:"24h"},
+  {id:"028",nome:"Posto Estaiada",end:"Av. Cristovao Colombo, 2935",bairro:"Jd Algodoal",cidade:"Piracicaba",estado:"SP",bandeira:"Shell",hrs:"24h"},
+  {id:"029",nome:"Posto Izaac",end:"Rua Izaac Ferreira Da Cruz, 1497",bairro:"Pinheirinho",cidade:"Curitiba",estado:"PR",bandeira:"Trapézio",hrs:"24h"},
+  {id:"030",nome:"Linha Verde 02",end:"Av. Marechal Floriano Peixoto, 7825",bairro:"Boqueirão",cidade:"Curitiba",estado:"PR",bandeira:"Ipiranga",hrs:"24h"},
+  {id:"031",nome:"Linha Verde 03 (Palmares)",end:"Av. Dos Palmares, 20",bairro:"Jardim Liberdade",cidade:"Maringá",estado:"PR",bandeira:"Ipiranga",hrs:"6h-22h"},
+  {id:"032",nome:"Linha Verde 04",end:"Av. Dos Estados, 2435",bairro:"Centro",cidade:"Campo Bom",estado:"RS",bandeira:"Ipiranga",hrs:"24h"},
+  {id:"033",nome:"Linha Verde 05",end:"Av. Sen. Salgado Filho, 7277",bairro:"Viamópolis",cidade:"Viamão",estado:"RS",bandeira:"Ipiranga",hrs:"6h-22h"},
+  {id:"034",nome:"Linha Verde 06 (Makiolka)",end:"Rua Theodoro Makiolka, 3115",bairro:"Barreirinha",cidade:"Curitiba",estado:"PR",bandeira:"BR",hrs:"6h-22h"},
+  {id:"035",nome:"Linha Verde 07 (Borda)",end:"Rua Estela Mari Rezende, 10789",bairro:"Borda Do Campo",cidade:"São José Dos Pinhais",estado:"PR",bandeira:"Ipiranga",hrs:"24h"},
+  {id:"036",nome:"Linha Verde 10 (Petrus)",end:"Rua Das Carmelitas, 2963",bairro:"Boqueirão",cidade:"Curitiba",estado:"PR",bandeira:"Shell",hrs:"6h-22h"},
+  {id:"037",nome:"Linha Verde 11",end:"Av. Dorival Cândido, 2029",bairro:"Jansen",cidade:"Gravataí",estado:"RS",bandeira:"Ipiranga",hrs:"24h"},
+  {id:"038",nome:"Linha Verde 13 (Gonçales)",end:"Rua Uirapuru, 1901",bairro:"Centro",cidade:"Arapongas",estado:"PR",bandeira:"Ipiranga",hrs:"6h-22h"},
+  {id:"039",nome:"Linha Verde 14 (Marques)",end:"Rua Marques De Olinda, 2385",bairro:"Costa E Silva",cidade:"Joinville",estado:"SC",bandeira:"Shell",hrs:"24h"},
+  {id:"040",nome:"Linha Verde 15 (Lustosa)",end:"Rua Duque De Caxias, 399",bairro:"São Francisco",cidade:"Curitiba",estado:"PR",bandeira:"Trapézio",hrs:"24h"},
+  {id:"041",nome:"Linha Verde 16 (Bairro Novo)",end:"R. Tijucas Do Sul, 1963",bairro:"Sítio Cercado",cidade:"Curitiba",estado:"PR",bandeira:"Trapézio",hrs:"24h"},
+  {id:"042",nome:"Linha Verde 18 (4Z)",end:"Av. Farrapos, 858",bairro:"Floresta",cidade:"Porto Alegre",estado:"RS",bandeira:"Ipiranga",hrs:"6h-22h"},
+  {id:"043",nome:"Linha Verde 20 (3Z)",end:"Av. Saturnino De Brito, 1018",bairro:"Vila Jardim",cidade:"Porto Alegre",estado:"RS",bandeira:"Ipiranga",hrs:"24h"},
+  {id:"044",nome:"Linha Verde 21 (BV)",end:"Est. João Oliveira Remião, 7810",bairro:"São Tome",cidade:"Viamão",estado:"RS",bandeira:"Shell",hrs:"6h-22h"},
+  {id:"045",nome:"Linha Verde 22 (Trapézio)",end:"Rua Raul Pompeia, 1350",bairro:"Cidade Industrial",cidade:"Curitiba",estado:"PR",bandeira:"BR",hrs:"24h"},
+  {id:"046",nome:"Linha Verde 23 (Angra Batel)",end:"Av. Sete De Setembro, 4814",bairro:"Batel",cidade:"Curitiba",estado:"PR",bandeira:"Ipiranga",hrs:"6h-22h"},
+  {id:"047",nome:"Linha Verde 24 (Branquinha)",end:"Est. Bérico José Bernardes, 142",bairro:"São Tomé",cidade:"Viamão",estado:"RS",bandeira:"Trapézio",hrs:"24h"},
+  {id:"048",nome:"Linha Verde 25",end:"Av. São Borja, 2035",bairro:"Fazenda São Borja",cidade:"São Leopoldo",estado:"RS",bandeira:"BR",hrs:"6h-22h"},
+  {id:"049",nome:"Linha Verde 26",end:"RS-240, 8092",bairro:"Rincão do Cascalho",cidade:"Portão",estado:"RS",bandeira:"Shell",hrs:"24h"},
+  {id:"050",nome:"Linha Verde 27",end:"R Visconde De São Leopoldo, 620",bairro:"Vicentina",cidade:"São Leopoldo",estado:"RS",bandeira:"Trapézio",hrs:"6h-22h"},
+  {id:"051",nome:"Linha Verde 28 (RDP)",end:"Rua das Neves, 2112",bairro:"Serra Alta",cidade:"São Bento do Sul",estado:"SC",bandeira:"RDP",hrs:"24h"},
+  {id:"052",nome:"Linha Verde Matriz",end:"Km 79, 005 - BR-116",bairro:"Jardim Menino Deus",cidade:"Curitiba",estado:"PR",bandeira:"Ipiranga",hrs:"24h"},
+  {id:"053",nome:"Posto Marechal",end:"Av. Manoel Ribas, 8051",bairro:"Butiatuvinha",cidade:"Curitiba",estado:"PR",bandeira:"Shell",hrs:"6h-22h"},
+  {id:"054",nome:"Mirante Piracicaba",end:"Av. Barão De Serra Negra, 101",bairro:"Vila Rezende",cidade:"Piracicaba",estado:"SP",bandeira:"Shell",hrs:"24h"},
+  {id:"055",nome:"Posto Neninha",end:"Av. das Amoreiras, 2062",bairro:"Jardim do Lago",cidade:"Campinas",estado:"SP",bandeira:"Trapézio",hrs:"6h-22h"},
+  {id:"056",nome:"Posto NSA",end:"Rua Sao Romualdo, 778",bairro:"Santa Terezinha",cidade:"Fazenda Rio Grande",estado:"PR",bandeira:"Ipiranga",hrs:"24h"},
+  {id:"057",nome:"Posto Premiere",end:"Rua Prof. Pedro Viriato P Souza, 1846",bairro:"Mossungue",cidade:"Curitiba",estado:"PR",bandeira:"Shell",hrs:"6h-22h"},
+  {id:"058",nome:"Posto Rio Verde",end:"Avenida Argentina, 324",bairro:"Rio Verde",cidade:"Colombo",estado:"PR",bandeira:"Ipiranga",hrs:"24h"},
+  {id:"059",nome:"Posto Tijucas",end:"Rua Izaac Ferreira Da Cruz, 2920",bairro:"Sitio Cercado",cidade:"Curitiba",estado:"PR",bandeira:"BR",hrs:"6h-22h"},
+  {id:"060",nome:"Posto TOF",end:"Av. dos Esportes, 1092",bairro:"Jardim Primavera",cidade:"Valinhos",estado:"SP",bandeira:"TOF",hrs:"24h"},
+  {id:"061",nome:"Posto Triangulo",end:"Rua Sao Salvador, 360",bairro:"Pilarzinho",cidade:"Curitiba",estado:"PR",bandeira:"BR",hrs:"24h"},
+  {id:"062",nome:"Posto TS",end:"Av. Anita Garibaldi, 1305",bairro:"Ahú",cidade:"Curitiba",estado:"PR",bandeira:"Shell",hrs:"6h-22h"},
+  {id:"063",nome:"Posto Via Torres",end:"Comendador Franco, 3133",bairro:"Jardim Das Américas",cidade:"Curitiba",estado:"PR",bandeira:"BR",hrs:"24h"},
+  {id:"064",nome:"Posto Vila Resende",end:"Av. Dona Francisca, 549",bairro:"Vila Rezende",cidade:"Piracicaba",estado:"SP",bandeira:"Shell",hrs:"6h-22h"},
+  {id:"065",nome:"Posto WC",end:"Rod BR-101, 8600",bairro:"Quarta Linha",cidade:"Criciúma",estado:"SC",bandeira:"Ipiranga",hrs:"24h"},
+];
+
+const COMBS=[{k:"gc",l:"Gasolina Comum"},{k:"ga",l:"Gasolina Aditivada"},{k:"et",l:"Etanol"},{k:"ds",l:"Diesel S10"}];
+const ESTADOS=["Todos","PR","RS","SC","SP"];
+const BCLS={Ipiranga:"b-ipa",Shell:"b-she",BR:"b-br","Trapézio":"b-tra",RDP:"b-rdp",TOF:"b-oth"};
+
+let S={dados:[],aba:"geral",estado:"Todos",busca:"",det:null};
+
+function gerarDados(){
+  return POSTOS.map(p=>{
+    const reg=Math.random()>0.25;
+    const conc=reg?Math.floor(Math.random()*5)+3:0;
+    const pr={gc:+(6.1+Math.random()*0.7).toFixed(2),ga:+(6.4+Math.random()*0.7).toFixed(2),et:+(3.9+Math.random()*0.5).toFixed(2),ds:+(5.9+Math.random()*0.5).toFixed(2)};
+    const mc={gc:+(6.1+Math.random()*0.7).toFixed(2),ga:+(6.4+Math.random()*0.7).toFixed(2),et:+(3.9+Math.random()*0.5).toFixed(2),ds:+(5.9+Math.random()*0.5).toFixed(2)};
+    const alertas=COMBS.filter(c=>pr[c.k]-mc[c.k]>0.08).map(c=>c.l);
+    return{...p,reg,conc,pr,mc,alertas};
+  });
+}
+
+function bcls(b){return BCLS[b]||"b-oth"}
+function stCls(d){
+  if(d>0.08) return{l:`+R$ ${d.toFixed(2)}`,c:"b-red"};
+  if(d<-0.08) return{l:`-R$ ${Math.abs(d).toFixed(2)}`,c:"b-grn"};
+  return{l:"Na média",c:"b-amb"};
+}
+function filtrados(){
+  return S.dados
+    .filter(p=>S.estado==="Todos"||p.estado===S.estado)
+    .filter(p=>
+      p.nome.toLowerCase().includes(S.busca.toLowerCase())||
+      p.bairro.toLowerCase().includes(S.busca.toLowerCase())||
+      p.cidade.toLowerCase().includes(S.busca.toLowerCase())
+    );
+}
+
+function renderKPIs(){
+  const d=S.dados,tot=d.length;
+  const reg=d.filter(p=>p.reg).length;
+  const pend=tot-reg;
+  const alrt=d.filter(p=>p.alertas.length>0).length;
+  const pct=Math.round(reg/tot*100);
+  document.getElementById("cnt-total").textContent=tot;
+  document.getElementById("cnt-alrt").textContent=alrt;
+  document.getElementById("cnt-pend").textContent=pend;
+  document.getElementById("kpis").innerHTML=[
+    {l:"Total de postos",v:tot,s:"PR · RS · SC · SP",cor:"#5aaeff"},
+    {l:"Registraram hoje",v:reg,s:`${pct}% da rede`,cor:"#4dd87a"},
+    {l:"Aguardando",v:pend,s:"sem registro",cor:pend>0?"#e24b4a":"#4dd87a"},
+    {l:"Alertas de preço",v:alrt,s:"acima da média",cor:alrt>0?"#e24b4a":"#4dd87a"},
+  ].map(k=>`<div class="kpi"><div class="kpi-label">${k.l}</div><div class="kpi-val" style="color:${k.cor}">${k.v}</div><div class="kpi-sub">${k.s}</div></div>`).join("");
+}
+
+function renderEstados(){
+  const d=S.dados;
+  document.getElementById("estados").innerHTML=["PR","RS","SC","SP"].map(e=>{
+    const tot=d.filter(p=>p.estado===e).length;
+    const ok=d.filter(p=>p.estado===e&&p.reg).length;
+    const pct=Math.round(ok/tot*100);
+    const cor=pct===100?"#4dd87a":pct>=70?"#2e7dd1":"#e24b4a";
+    return`<div class="estado-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span class="estado-nome">${e}</span>
+        <span style="font-size:12px;color:#4a6a8a;">${ok}/${tot}</span>
+      </div>
+      <div class="prog-wrap"><div class="prog-bar" style="width:${pct}%;background:${cor}"></div></div>
+      <div style="font-size:11px;color:#4a6a8a;">${pct}% registraram</div>
+    </div>`;
+  }).join("");
+}
+
+function renderEstBtns(){
+  document.getElementById("est-btns").innerHTML=ESTADOS.map(e=>
+    `<button class="btn-est ${S.estado===e?"on":""}" onclick="setEst('${e}')">${e}</button>`
+  ).join("");
+}
+
+function renderLista(){
+  const df=filtrados();
+  const lista=document.getElementById("lista");
+
+  if(S.det){
+    renderDetalhe();
+    return;
+  }
+
+  let html="";
+  if(S.aba==="geral"){
+    if(!df.length){html=`<div class="empty">Nenhum posto encontrado.</div>`}
+    else df.forEach(p=>{
+      html+=`<div class="posto-row${p.alertas.length>0?" tem-alerta":""}" onclick="abrirDet('${p.id}')">
+        <div class="row-left">
+          <span class="dot ${p.reg?"dot-g":"dot-r"}"></span>
+          <div class="row-info">
+            <div class="row-nome">${p.nome} <span class="badge ${bcls(p.bandeira)}" style="margin-left:4px">${p.bandeira}</span> <span class="badge b-hrs">${p.hrs}</span></div>
+            <div class="row-sub" style="margin-top:3px;">
+              <span style="color:#2e7dd1;font-size:11px;">↑</span> ${p.end} · ${p.bairro} · ${p.cidade}/${p.estado}
+            </div>
+          </div>
+        </div>
+        <div class="row-right">
+          ${p.alertas.length>0?`<span class="badge b-red">${p.alertas.length} alerta${p.alertas.length>1?"s":""}</span>`:""}
+          ${!p.reg?`<span class="badge b-amb">Pendente</span>`:""}
+          <button class="buscar-btn">Ver detalhes →</button>
+        </div>
+      </div>`;
+    });
+  } else if(S.aba==="alertas"){
+    const lista2=df.filter(p=>p.alertas.length>0);
+    if(!lista2.length){html=`<div class="empty">Nenhum alerta no filtro selecionado.</div>`}
+    else lista2.forEach(p=>{
+      html+=`<div class="alerta-row" onclick="abrirDet('${p.id}')">
+        <div>
+          <div style="font-weight:500;font-size:13px;color:#e0e8f0;">${p.nome} <span class="badge ${bcls(p.bandeira)}" style="margin-left:4px">${p.bandeira}</span></div>
+          <div style="font-size:11px;color:#e24b4a;margin-top:3px;">${p.cidade}/${p.estado} · Acima da média: ${p.alertas.join(", ")}</div>
+        </div>
+        <button class="buscar-btn">Ver detalhes →</button>
+      </div>`;
+    });
+  } else if(S.aba==="pendentes"){
+    const lista3=df.filter(p=>!p.reg);
+    if(!lista3.length){html=`<div class="empty">Todos os postos registraram hoje!</div>`}
+    else lista3.forEach(p=>{
+      html+=`<div class="pend-row">
+        <div>
+          <div style="font-weight:500;font-size:13px;color:#e0e8f0;">${p.nome} <span class="badge ${bcls(p.bandeira)}" style="margin-left:4px">${p.bandeira}</span></div>
+          <div style="font-size:11px;color:#f0a030;margin-top:3px;">${p.cidade}/${p.estado} · ${p.bairro} · Sem registro hoje</div>
+        </div>
+        <span class="badge b-amb">Cobrar gerente</span>
+      </div>`;
+    });
+  }
+  lista.innerHTML=html;
+}
+
+function renderDetalhe(){
+  const p=S.det;
+  const bc=bcls(p.bandeira);
+  document.getElementById("lista").innerHTML=`
+    <div class="det-back">
+      <button class="btn-back" onclick="fecharDet()">←</button>
+      <div>
+        <div style="font-size:11px;color:#4a6a8a;text-transform:uppercase;letter-spacing:0.06em;">${p.bairro} · ${p.cidade}/${p.estado}</div>
+        <div style="font-size:18px;font-weight:700;color:#e0e8f0;">${p.nome}</div>
+      </div>
+    </div>
+    <div class="kpi-grid" style="margin-bottom:14px;">
+      ${[
+        {l:"Bandeira",v:`<span class="badge ${bc}" style="font-size:12px;padding:3px 10px;">${p.bandeira}</span>`},
+        {l:"Status hoje",v:p.reg?"Registrou":"Pendente",cor:p.reg?"#4dd87a":"#e24b4a"},
+        {l:"Concorrentes",v:`${p.conc} postos`,cor:"#5aaeff"},
+        {l:"Alertas",v:p.alertas.length>0?`${p.alertas.length} combustíveis`:"Nenhum",cor:p.alertas.length>0?"#e24b4a":"#4dd87a"},
+      ].map(k=>`<div class="kpi"><div class="kpi-label">${k.l}</div><div style="font-size:15px;font-weight:600;margin-top:6px;${k.cor?`color:${k.cor}`:""}">${k.v}</div></div>`).join("")}
+    </div>
+    <div class="sec-label">Comparativo de preços hoje</div>
+    <div class="comp-card">
+      <table class="comp-table">
+        <thead><tr>
+          <th>Combustível</th>
+          <th style="text-align:right;color:#5aaeff;">Nosso preço</th>
+          <th style="text-align:right;">Média conc.</th>
+          <th style="text-align:right;">Status</th>
+        </tr></thead>
+        <tbody>
+          ${COMBS.map(({k,l})=>{
+            const st=stCls(p.pr[k]-p.mc[k]);
+            return`<tr>
+              <td style="font-weight:500;color:#e0e8f0;">${l}</td>
+              <td style="text-align:right;font-weight:700;color:#5aaeff;">R$ ${p.pr[k].toFixed(2)}</td>
+              <td style="text-align:right;color:#4a6a8a;">R$ ${p.mc[k].toFixed(2)}</td>
+              <td style="text-align:right;"><span class="badge ${st.c}">${st.l}</span></td>
+            </tr>`;
+          }).join("")}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function render(){
+  renderKPIs();
+  renderEstados();
+  renderEstBtns();
+  renderLista();
+}
+
+function setAba(v,el){
+  S.aba=v;S.det=null;
+  document.querySelectorAll(".nav-tab").forEach(t=>t.classList.remove("on"));
+  if(el) el.classList.add("on");
+  renderLista();
+}
+function setEst(v){S.estado=v;renderEstBtns();renderLista()}
+function setBusca(v){S.busca=v;renderLista()}
+function abrirDet(id){S.det=S.dados.find(p=>p.id===id);renderDetalhe()}
+function fecharDet(){S.det=null;renderLista()}
+function atualizar(){S.dados=gerarDados();render()}
+
+document.getElementById("topdate").textContent=
+  new Date().toLocaleDateString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit",year:"2-digit"});
+
+S.dados=gerarDados();
+render();
+setInterval(()=>{S.dados=gerarDados();renderKPIs();renderEstados();},5*60*1000);
+</script>
+</body>
+</html>
