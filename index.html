@@ -582,11 +582,11 @@ function irLista()    { state.tela = 'lista';    render(); }
 function irColeta()   { state.form = { nome:'', bandeira:'Bandeira Branca', gc:'', ga:'', et:'', ds:'', obs:'', imgPreview:null, imgFile:null, iaUsada:false, erroIA:false, loading:false, dropOpen:false }; state.tela = 'coleta'; render(); }
 function irResumo()   { state.tela = 'resumo';   render(); }
 
-function setNome(v)     { state.form.nome = v; render(); }
-function setBandeira(v) { state.form.bandeira = v; render(); }
-function setPreco(k, v) { state.form[k] = v; render(); }
-function setObs(v)      { state.form.obs = v; render(); }
-function setDrop(v)     { state.form.dropOpen = v; render(); }
+function setNome(v)     { state.form.nome = v; atualizarBotao(); }
+function setBandeira(v) { state.form.bandeira = v; }
+function setPreco(k, v) { state.form[k] = v; atualizarBotao(); }
+function setObs(v)      { state.form.obs = v; }
+function setDrop(v)     { state.form.dropOpen = v; }
 
 function escolherBandeira(b) {
   state.form.nome = b;
@@ -626,6 +626,15 @@ async function handleFoto(input) {
   }
   state.form.loading = false;
   render();
+}
+
+function atualizarBotao() {
+  const f = state.form;
+  const btn = document.querySelector('.btn-primary');
+  if (btn) {
+    const pode = f.nome.trim().length > 0;
+    btn.disabled = !pode;
+  }
 }
 
 function salvar() {
