@@ -199,7 +199,7 @@ async function lerFotoComIA(file) {
     r.readAsDataURL(file);
   });
 
-  const resp = await fetch('/api/ocr.cjs', {
+  const resp = await fetch('/api/ocr', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ image: b64, mediaType: file.type || 'image/jpeg' }),
