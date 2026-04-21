@@ -177,9 +177,21 @@ let state = {
   form: { nome:'', bandeira:'Bandeira Branca', gc:'', ga:'', et:'', ds:'', obs:'', imgPreview:null, imgFile:null, iaUsada:false, erroIA:false, loading:false, dropOpen:false, lat:'', lng:'', locStatus:'' },
 };
 
+function slugify(str) {
+  return str.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
 function getPostoFromURL() {
-  const id = new URLSearchParams(location.search).get('posto');
-  return id ? POSTOS.find(p => p.id === id) : null;
+  const param = new URLSearchParams(location.search).get('posto');
+  if (!param) return null;
+  // Tenta por ID primeiro (retrocompatível)
+  const porId = POSTOS.find(p => p.id === param);
+  if (porId) return porId;
+  // Tenta por slug do nome
+  return POSTOS.find(p => slugify(p.nome) === param) || null;
 }
 
 function calcStatus(nosso, deles) {
@@ -228,10 +240,13 @@ async function salvarSupabase(registro) {
         posto_id: state.posto.id,
         concorrente_nome: registro.nome,
         concorrente_bandeira: registro.bandeira,
-        gc: registro.gc ? parseFloat(registro.gc) : null,
-        ga: registro.ga ? parseFloat(registro.ga) : null,
-        et: registro.et ? parseFloat(registro.et) : null,
-        ds: registro.ds ? parseFloat(registro.ds) : null,
+        gc:   registro.gc   ? parseFloat(registro.gc)   : null,
+        ga:   registro.ga   ? parseFloat(registro.ga)   : null,
+        et:   registro.et   ? parseFloat(registro.et)   : null,
+        eta:  registro.eta  ? parseFloat(registro.eta)  : null,
+        ds:   registro.ds   ? parseFloat(registro.ds)   : null,
+        ds500:registro.ds500? parseFloat(registro.ds500): null,
+        dsa:  registro.dsa  ? parseFloat(registro.dsa)  : null,
         observacoes: registro.obs || null,
         ia_usada: registro.iaUsada || false,
         lat: registro.lat || null,
