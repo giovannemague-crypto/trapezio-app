@@ -225,7 +225,32 @@ async function lerFotoComIA(file) {
   return data;
 }
 
-// ── Supabase ───────────────────────────────────────────────
+async function uploadFoto(file, postoId) {
+  try {
+    console.log('Iniciando upload foto:', file.name, file.size);
+    const ext = file.type === 'image/png' ? 'png' : 'jpg';
+    const nome = `${postoId}/${Date.now()}.${ext}`;
+    const resp = await fetch(`${CONFIG.SUPABASE_URL}/storage/v1/object/fotos/${nome}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${CONFIG.SUPABASE_KEY}`,
+        'apikey': CONFIG.SUPABASE_KEY,
+        'Content-Type': file.type,
+        'x-upsert': 'true',
+      },
+      body: file,
+    });
+    const result = await resp.json();
+    console.log('Upload resultado:', result);
+    if (!resp.ok) throw new Error(JSON.stringify(result));
+    const url = `${CONFIG.SUPABASE_URL}/storage/v1/object/public/fotos/${nome}`;
+    console.log('Foto URL:', url);
+    return url;
+  } catch(e) {
+    console.error('Erro upload foto:', e);
+    return null;
+  }
+}
 async function salvarSupabase(registro) {
   try {
     await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/registros`, {
@@ -251,6 +276,7 @@ async function salvarSupabase(registro) {
         ia_usada: registro.iaUsada || false,
         lat: registro.lat || null,
         lng: registro.lng || null,
+        foto_url: registro.fotoUrl || null,
       }),
     });
     console.log('Salvo no Supabase!');
@@ -559,11 +585,27 @@ async function handleFoto(input) {
   }, 100);
 }
 
-function salvar() {
+async function salvar() {
   const f = state.form;
-  const reg = { nome:f.nome, bandeira:f.bandeira, gc:f.gc, ga:f.ga, et:f.et, ds:f.ds, obs:f.obs, imgPreview:f.imgPreview, iaUsada:f.iaUsada, hora:hora(), lat:f.lat, lng:f.lng };
+  const btn = document.getElementById('btn-salvar');
+  if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
+
+  // Faz upload da foto se existir
+  let fotoUrl = null;
+  if (f.imgFile) {
+    fotoUrl = await uploadFoto(f.imgFile, state.posto.id);
+  }
+
+  const reg = {
+    nome: f.nome, bandeira: f.bandeira,
+    gc: f.gc, ga: f.ga, et: f.et, eta: f.eta,
+    ds: f.ds, ds500: f.ds500, dsa: f.dsa,
+    obs: f.obs, imgPreview: fotoUrl || f.imgPreview,
+    iaUsada: f.iaUsada, hora: hora(),
+    lat: f.lat, lng: f.lng, fotoUrl,
+  };
   state.registros.push(reg);
-  salvarSupabase(reg);
+  await salvarSupabase(reg);
   irLista();
 }
 
