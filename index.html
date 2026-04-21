@@ -184,7 +184,8 @@ function slugify(str) {
     .replace(/^-|-$/g, '');
 }
 
-function getPostoFromURL() {
+// Guarda o arquivo fora do state para não perder na re-renderização
+let _fotoFile = null;
   const param = new URLSearchParams(location.search).get('posto');
   if (!param) return null;
   // Tenta por ID primeiro (retrocompatível)
@@ -529,6 +530,7 @@ function escolherBandeira(b) {
 }
 
 function trocarFoto() {
+  _fotoFile = null;
   state.form.imgPreview = null; state.form.imgFile = null;
   state.form.iaUsada = false; state.form.erroIA = false;
   state.form.gc = state.form.ga = state.form.et = state.form.ds = '';
@@ -538,6 +540,7 @@ function trocarFoto() {
 async function handleFoto(input) {
   const file = input.files[0];
   if (!file) return;
+  _fotoFile = file; // salva referência global
   state.form.imgPreview = URL.createObjectURL(file);
   state.form.imgFile = file;
   state.form.loading = true;
@@ -590,10 +593,13 @@ async function salvar() {
   const btn = document.getElementById('btn-salvar');
   if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
 
-  // Faz upload da foto se existir
+  // Usa a referência global do arquivo
   let fotoUrl = null;
-  if (f.imgFile) {
-    fotoUrl = await uploadFoto(f.imgFile, state.posto.id);
+  if (_fotoFile) {
+    console.log('Arquivo para upload:', _fotoFile.name, _fotoFile.size);
+    fotoUrl = await uploadFoto(_fotoFile, state.posto.id);
+  } else {
+    console.warn('Nenhum arquivo de foto disponível');
   }
 
   const reg = {
@@ -606,6 +612,7 @@ async function salvar() {
   };
   state.registros.push(reg);
   await salvarSupabase(reg);
+  _fotoFile = null;
   irLista();
 }
 
