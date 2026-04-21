@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Trapézio — Supervisor</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f1520;color:#e0e8f0;min-height:100vh}
+.topbar{background:#111927;border-bottom:1px solid #1e2d42;padding:0 16px;display:flex;justify-content:space-between;align-items:center;height:56px;position:sticky;top:0;z-index:100}
+.logo-name{font-size:16px;font-weight:800;color:#fff;letter-spacing:0.06em;text-transform:uppercase;font-style:italic}
+.logo-sub{font-size:9px;color:#4a6a8a;letter-spacing:0.15em;text-transform:uppercase}
+.btn-dash{font-size:12px;padding:6px 14px;border-radius:6px;border:1px solid #2e7dd1;background:transparent;color:#2e7dd1;cursor:pointer;text-decoration:none;display:inline-block}
+.content{padding:16px}
+.filtros{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.input-s{width:100%;padding:10px 14px;font-size:14px;border-radius:10px;border:1px solid #1e2d42;background:#131e2e;color:#e0e8f0;outline:none}
+.input-s:focus{border-color:#2e7dd1}
+.input-s::placeholder{color:#3a5a7a}
+.filtros-row{display:flex;gap:8px;flex-wrap:wrap}
+.btn-est{padding:7px 14px;font-size:12px;border-radius:8px;border:1px solid #1e2d42;background:#131e2e;color:#6a8aaa;cursor:pointer}
+.btn-est.on{background:#2e7dd1;color:#fff;border-color:#2e7dd1}
+.sec-label{font-size:10px;font-weight:600;color:#4a6a8a;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.sec-label::after{content:"";flex:1;height:1px;background:#1e2d42}
+.contagem{font-size:12px;color:#4a6a8a;margin-bottom:10px}
+.posto-card{background:#131e2e;border:1px solid #1e2d42;border-radius:10px;padding:12px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer;transition:all 0.12s;text-decoration:none}
+.posto-card:hover{border-color:#2e7dd1;background:#172030}
+.card-left{flex:1;min-width:0}
+.card-nome{font-size:13px;font-weight:500;color:#e0e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-sub{font-size:11px;color:#4a6a8a;margin-top:3px}
+.card-end{font-size:10px;color:#3a5a7a;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:5px;white-space:nowrap;border:1px solid;font-weight:600}
+.b-ipa{background:rgba(250,174,50,0.12);color:#faa932;border-color:rgba(250,174,50,0.3)}
+.b-she{background:rgba(226,75,74,0.12);color:#e24b4a;border-color:rgba(226,75,74,0.3)}
+.b-br{background:rgba(46,125,209,0.12);color:#5aaeff;border-color:rgba(46,125,209,0.3)}
+.b-tra{background:rgba(100,100,220,0.12);color:#9090ff;border-color:rgba(100,100,220,0.3)}
+.b-rdp{background:rgba(29,158,117,0.12);color:#2ec496;border-color:rgba(29,158,117,0.3)}
+.b-oth{background:rgba(255,255,255,0.06);color:#8aaac0;border-color:rgba(255,255,255,0.1)}
+.est-badge{font-size:10px;padding:2px 7px;border-radius:5px;background:#1e2d42;color:#8aaac0;border:1px solid #2a3a52}
+.chevron{font-size:16px;color:#3a5a7a}
+.empty{text-align:center;padding:3rem;color:#3a5a7a;font-size:14px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="logo-sub">Supervisor</div>
+    <div class="logo-name">Grupo Trapézio</div>
+  </div>
+  <a href="/dashboard.html" class="btn-dash">Dashboard →</a>
+</div>
+
+<div class="content">
+  <div class="filtros">
+    <input class="input-s" id="busca" type="text" placeholder="Buscar por nome, cidade ou endereço...">
+    <div class="filtros-row" id="estados"></div>
+  </div>
+
+  <div class="sec-label">Postos</div>
+  <div class="contagem" id="contagem"></div>
+  <div id="lista"></div>
+</div>
+
+<script>
+const BASE = 'https://trapezio-app.vercel.app';
+
+const POSTOS = [
+  {id:"001",nome:"Posto Alfa",cidade:"Colombo",estado:"PR",bandeira:"Ipiranga",end:"Est Da Graciosa, 3253"},
+  {id:"002",nome:"Posto Almirante Filial 02",cidade:"São Bento Do Sul",estado:"SC",bandeira:"Ipiranga",end:"R Antonio Kaesemodel, 2339"},
+  {id:"003",nome:"Posto Almirante Filial 03",cidade:"São Leopoldo",estado:"RS",bandeira:"Ipiranga",end:"Av. Getúlio Vargas, 2130"},
+  {id:"004",nome:"Posto Almirante Filial 04",cidade:"Porto Alegre",estado:"RS",bandeira:"Ipiranga",end:"Av. Borges De Medeiros, 2205"},
+  {id:"005",nome:"Posto Almirante Filial 05",cidade:"Novo Hamburgo",estado:"RS",bandeira:"Ipiranga",end:"Av. Primeiro De Marco, 4600"},
+  {id:"006",nome:"Posto Almirante Filial 06",cidade:"Canoas",estado:"RS",bandeira:"Ipiranga",end:"Av. Santos Ferreira, 2700"},
+  {id:"007",nome:"Posto Almirante Filial 07",cidade:"Canoas",estado:"RS",bandeira:"Ipiranga",end:"Av. Do Nazario, 1024"},
+  {id:"008",nome:"Posto Almirante Filial 08",cidade:"Gravataí",estado:"RS",bandeira:"Ipiranga",end:"Av. Dorival Candido, 1460"},
+  {id:"009",nome:"Posto Almirante Filial 09",cidade:"Sapucaia Do Sul",estado:"RS",bandeira:"Ipiranga",end:"Av. Luiz Pasteur, 4799"},
+  {id:"011",nome:"Posto Almirante Filial 11",cidade:"São José Dos Pinhais",estado:"PR",bandeira:"Ipiranga",end:"Av. Rui Barbosa, 4791"},
+  {id:"012",nome:"Posto Almirante Filial 12",cidade:"Portão",estado:"RS",bandeira:"Ipiranga",end:"Rod RS 240, 5280"},
+  {id:"013",nome:"Posto Almirante Filial 13 (São Dimas)",cidade:"Colombo",estado:"PR",bandeira:"BR",end:"Rua Presidente Faria, 116"},
+  {id:"014",nome:"Posto Almirante Filial 14 (Rosas)",cidade:"Gravataí",estado:"RS",bandeira:"Ipiranga",end:"Avenida Ely Correa, 5600"},
+  {id:"015",nome:"Posto Almirante Filial 15 (Gravo)",cidade:"Araricá",estado:"RS",bandeira:"Ipiranga",end:"Rua Porto Palmeira, 2509"},
+  {id:"017",nome:"Posto Almirante Filial 17 (Gravi)",cidade:"Araricá",estado:"RS",bandeira:"Ipiranga",end:"R Jose Appelonio Da Costa, 2160"},
+  {id:"018",nome:"Posto Almirante Filial 18 (Sapucaia)",cidade:"Sapucaia Do Sul",estado:"RS",bandeira:"Ipiranga",end:"Av. Coronel Theodomiro, 885"},
+  {id:"019",nome:"Posto Almirante Filial 19 (San Michael)",cidade:"Curitiba",estado:"PR",bandeira:"Ipiranga",end:"R. João Bettega, 3015"},
+  {id:"024a",nome:"Posto Almirante Filial 24 (Oceano)",cidade:"Curitiba",estado:"PR",bandeira:"Ipiranga",end:"R Carlos Dietzsch, 1115"},
+  {id:"020",nome:"Posto Almirante Matriz",cidade:"São José Dos Pinhais",estado:"PR",bandeira:"Ipiranga",end:"Almirante Alexandrino, 1526"},
+  {id:"021",nome:"Posto América",cidade:"Colombo",estado:"PR",bandeira:"Ipiranga",end:"Av. Marginal Jose de Anchieta, 956"},
+  {id:"022",nome:"Posto Beira Rio",cidade:"Porto Feliz",estado:"SP",bandeira:"BR",end:"Av. Armando de Sales Oliveira, 1101"},
+  {id:"023",nome:"Posto Brasil",cidade:"Fazenda Rio Grande",estado:"PR",bandeira:"Ipiranga",end:"AV. Brasil, 846"},
+  {id:"025",nome:"Posto Cisne",cidade:"Fazenda Rio Grande",estado:"PR",bandeira:"BR",end:"Avenida Portugal, 3205"},
+  {id:"026",nome:"Posto Dom Afonso",cidade:"Balneário Camboriú",estado:"SC",bandeira:"Ipiranga",end:"R. Dom Afonso, 680"},
+  {id:"027",nome:"Posto Duque De Caxias",cidade:"São Francisco Do Sul",estado:"SC",bandeira:"Ipiranga",end:"Rodovia Duque De Caxias, SC301"},
+  {id:"028",nome:"Posto Estaiada",cidade:"Piracicaba",estado:"SP",bandeira:"Shell",end:"Av. Cristovao Colombo, 2935"},
+  {id:"029",nome:"Posto Izaac",cidade:"Curitiba",estado:"PR",bandeira:"Trapézio",end:"Rua Izaac Ferreira Da Cruz, 1497"},
+  {id:"030",nome:"Posto Linha Verde Filial 02",cidade:"Curitiba",estado:"PR",bandeira:"Ipiranga",end:"Av. Marechal Floriano Peixoto, 7825"},
+  {id:"031",nome:"Posto Linha Verde Filial 03 (Palmares)",cidade:"Maringá",estado:"PR",bandeira:"Ipiranga",end:"Av. Dos Palmares, 20"},
+  {id:"032",nome:"Posto Linha Verde Filial 04",cidade:"Campo Bom",estado:"RS",bandeira:"Ipiranga",end:"Av. Dos Estados, 2435"},
+  {id:"033",nome:"Posto Linha Verde Filial 05",cidade:"Viamão",estado:"RS",bandeira:"Ipiranga",end:"Av. Sen. Salgado Filho, 7277"},
+  {id:"034",nome:"Posto Linha Verde Filial 06 (Makiolka)",cidade:"Curitiba",estado:"PR",bandeira:"BR",end:"Rua Theodoro Makiolka, 3115"},
+  {id:"035",nome:"Posto Linha Verde Filial 07 (Borda)",cidade:"São José Dos Pinhais",estado:"PR",bandeira:"Ipiranga",end:"Rua Estela Mari Rezende, 10789"},
+  {id:"036",nome:"Posto Linha Verde Filial 10 (Petrus)",cidade:"Curitiba",estado:"PR",bandeira:"Shell",end:"Rua Das Carmelitas, 2963"},
+  {id:"037",nome:"Posto Linha Verde Filial 11",cidade:"Gravataí",estado:"RS",bandeira:"Ipiranga",end:"Av. Dorival Cândido, 2029"},
+  {id:"038",nome:"Posto Linha Verde Filial 13 (Gonçales)",cidade:"Arapongas",estado:"PR",bandeira:"Ipiranga",end:"Rua Uirapuru, 1901"},
+  {id:"039",nome:"Posto Linha Verde Filial 14 (Marques)",cidade:"Joinville",estado:"SC",bandeira:"Shell",end:"Rua Marques De Olinda, 2385"},
+  {id:"040",nome:"Posto Linha Verde Filial 15 (Lustosa)",cidade:"Curitiba",estado:"PR",bandeira:"Trapézio",end:"Rua Duque De Caxias, 399"},
+  {id:"041",nome:"Posto Linha Verde Filial 16 (Bairro Novo)",cidade:"Curitiba",estado:"PR",bandeira:"Trapézio",end:"R. Tijucas Do Sul, 1963"},
+  {id:"042",nome:"Posto Linha Verde Filial 18 (4Z)",cidade:"Porto Alegre",estado:"RS",bandeira:"Ipiranga",end:"Av. Farrapos, 858"},
+  {id:"043",nome:"Posto Linha Verde Filial 20 (3Z)",cidade:"Porto Alegre",estado:"RS",bandeira:"Ipiranga",end:"Av. Saturnino De Brito, 1018"},
+  {id:"044",nome:"Posto Linha Verde Filial 21 (BV)",cidade:"Viamão",estado:"RS",bandeira:"Shell",end:"Est. João Oliveira Remião, 7810"},
+  {id:"045",nome:"Posto Linha Verde Filial 22 (Trapézio)",cidade:"Curitiba",estado:"PR",bandeira:"BR",end:"Rua Raul Pompeia, 1350"},
+  {id:"046",nome:"Posto Linha Verde Filial 23 (Angra Batel)",cidade:"Curitiba",estado:"PR",bandeira:"Ipiranga",end:"Av. Sete De Setembro, 4814"},
+  {id:"047",nome:"Posto Linha Verde Filial 24 (Branquinha)",cidade:"Viamão",estado:"RS",bandeira:"Trapézio",end:"Est. Bérico José Bernardes, 142"},
+  {id:"048",nome:"Posto Linha Verde Filial 25",cidade:"São Leopoldo",estado:"RS",bandeira:"BR",end:"Av. São Borja, 2035"},
+  {id:"049",nome:"Posto Linha Verde Filial 26",cidade:"Portão",estado:"RS",bandeira:"Shell",end:"RS-240, 8092"},
+  {id:"050",nome:"Posto Linha Verde Filial 27",cidade:"São Leopoldo",estado:"RS",bandeira:"Trapézio",end:"R Visconde De São Leopoldo, 620"},
+  {id:"051",nome:"Posto Linha Verde Filial 28 (RDP)",cidade:"São Bento do Sul",estado:"SC",bandeira:"RDP",end:"Rua das Neves, 2112"},
+  {id:"052",nome:"Posto Linha Verde Matriz",cidade:"Curitiba",estado:"PR",bandeira:"Ipiranga",end:"Km 79 BR-116"},
+  {id:"053",nome:"Posto Marechal",cidade:"Curitiba",estado:"PR",bandeira:"Shell",end:"Av. Manoel Ribas, 8051"},
+  {id:"054",nome:"Posto Mirante Piracicaba",cidade:"Piracicaba",estado:"SP",bandeira:"Shell",end:"Av. Barão De Serra Negra, 101"},
+  {id:"055",nome:"Posto Neninha",cidade:"Campinas",estado:"SP",bandeira:"Trapézio",end:"Av. das Amoreiras, 2062"},
+  {id:"056",nome:"Posto NSA",cidade:"Fazenda Rio Grande",estado:"PR",bandeira:"Ipiranga",end:"Rua Sao Romualdo, 778"},
+  {id:"057",nome:"Posto Premiere",cidade:"Curitiba",estado:"PR",bandeira:"Shell",end:"Rua Prof. Pedro Viriato P Souza, 1846"},
+  {id:"058",nome:"Posto Rio Verde",cidade:"Colombo",estado:"PR",bandeira:"Ipiranga",end:"Avenida Argentina, 324"},
+  {id:"059",nome:"Posto Tijucas",cidade:"Curitiba",estado:"PR",bandeira:"BR",end:"Rua Izaac Ferreira Da Cruz, 2920"},
+  {id:"060",nome:"Posto TOF",cidade:"Valinhos",estado:"SP",bandeira:"TOF",end:"Av. dos Esportes, 1092"},
+  {id:"061",nome:"Posto Triangulo",cidade:"Curitiba",estado:"PR",bandeira:"BR",end:"Rua Sao Salvador, 360"},
+  {id:"062",nome:"Posto TS",cidade:"Curitiba",estado:"PR",bandeira:"Shell",end:"Av. Anita Garibaldi, 1305"},
+  {id:"063",nome:"Posto Via Torres",cidade:"Curitiba",estado:"PR",bandeira:"BR",end:"Comendador Franco, 3133"},
+  {id:"064",nome:"Posto Vila Resende",cidade:"Piracicaba",estado:"SP",bandeira:"Shell",end:"Av. Dona Francisca, 549"},
+  {id:"065",nome:"Posto WC",cidade:"Criciúma",estado:"SC",bandeira:"Ipiranga",end:"Rod BR-101, 8600"},
+];
+
+const BCLS={Ipiranga:"b-ipa",Shell:"b-she",BR:"b-br","Trapézio":"b-tra",RDP:"b-rdp",TOF:"b-oth"};
+const ESTADOS=["Todos","PR","RS","SC","SP"];
+let estado="Todos", busca="";
+
+function slugify(str){
+  return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+}
+
+function filtrados(){
+  return POSTOS
+    .filter(p=>estado==="Todos"||p.estado===estado)
+    .filter(p=>{
+      const q=busca.toLowerCase();
+      return p.nome.toLowerCase().includes(q)||p.cidade.toLowerCase().includes(q)||p.end.toLowerCase().includes(q)||p.bandeira.toLowerCase().includes(q);
+    });
+}
+
+function render(){
+  const df=filtrados();
+  document.getElementById('contagem').textContent=`${df.length} posto${df.length!==1?'s':''} encontrado${df.length!==1?'s':''}`;
+  document.getElementById('lista').innerHTML=df.length===0
+    ?`<div class="empty">Nenhum posto encontrado.</div>`
+    :df.map(p=>`
+      <a class="posto-card" href="${BASE}/?posto=${slugify(p.nome)}" target="_blank">
+        <div class="card-left">
+          <div class="card-nome">${p.nome}</div>
+          <div class="card-sub">${p.cidade} · ${p.estado} · <span class="badge ${BCLS[p.bandeira]||'b-oth'}">${p.bandeira}</span></div>
+          <div class="card-end">${p.end}</div>
+        </div>
+        <div class="card-right">
+          <span class="est-badge">${p.estado}</span>
+          <span class="chevron">›</span>
+        </div>
+      </a>`).join('');
+}
+
+function renderEstados(){
+  document.getElementById('estados').innerHTML=ESTADOS.map(e=>
+    `<button class="btn-est ${estado===e?'on':''}" onclick="setEst('${e}')">${e}</button>`
+  ).join('');
+}
+
+function setEst(v){estado=v;renderEstados();render();}
+
+// Busca sem re-render completo
+document.getElementById('busca').addEventListener('input',e=>{busca=e.target.value;render();});
+
+renderEstados();
+render();
+</script>
+</body>
+</html>
