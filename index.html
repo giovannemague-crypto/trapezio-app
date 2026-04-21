@@ -186,12 +186,12 @@ function slugify(str) {
 
 // Guarda o arquivo fora do state para não perder na re-renderização
 let _fotoFile = null;
+
+function getPostoFromURL() {
   const param = new URLSearchParams(location.search).get('posto');
   if (!param) return null;
-  // Tenta por ID primeiro (retrocompatível)
   const porId = POSTOS.find(p => p.id === param);
   if (porId) return porId;
-  // Tenta por slug do nome
   return POSTOS.find(p => slugify(p.nome) === param) || null;
 }
 
