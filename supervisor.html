@@ -6,39 +6,34 @@
 <title>Trapézio — Supervisor</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f1520;color:#e0e8f0;min-height:100vh}
+body{font-family:-apple-system,sans-serif;background:#0f1520;color:#e0e8f0;min-height:100vh}
 .topbar{background:#111927;border-bottom:1px solid #1e2d42;padding:0 16px;display:flex;justify-content:space-between;align-items:center;height:56px;position:sticky;top:0;z-index:100}
 .logo-name{font-size:16px;font-weight:800;color:#fff;letter-spacing:0.06em;text-transform:uppercase;font-style:italic}
 .logo-sub{font-size:9px;color:#4a6a8a;letter-spacing:0.15em;text-transform:uppercase}
-.btn-dash{font-size:12px;padding:6px 14px;border-radius:6px;border:1px solid #2e7dd1;background:transparent;color:#2e7dd1;cursor:pointer;text-decoration:none;display:inline-block}
+.btn-dash{font-size:12px;padding:6px 14px;border-radius:6px;border:1px solid #2e7dd1;background:transparent;color:#2e7dd1;cursor:pointer;text-decoration:none}
 .content{padding:16px}
-.filtros{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
-.input-s{width:100%;padding:10px 14px;font-size:14px;border-radius:10px;border:1px solid #1e2d42;background:#131e2e;color:#e0e8f0;outline:none}
+.input-s{width:100%;padding:10px 14px;font-size:14px;border-radius:10px;border:1px solid #1e2d42;background:#131e2e;color:#e0e8f0;outline:none;margin-bottom:10px}
 .input-s:focus{border-color:#2e7dd1}
 .input-s::placeholder{color:#3a5a7a}
-.filtros-row{display:flex;gap:8px;flex-wrap:wrap}
+.estados{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
 .btn-est{padding:7px 14px;font-size:12px;border-radius:8px;border:1px solid #1e2d42;background:#131e2e;color:#6a8aaa;cursor:pointer}
 .btn-est.on{background:#2e7dd1;color:#fff;border-color:#2e7dd1}
-.sec-label{font-size:10px;font-weight:600;color:#4a6a8a;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;display:flex;align-items:center;gap:8px}
-.sec-label::after{content:"";flex:1;height:1px;background:#1e2d42}
 .contagem{font-size:12px;color:#4a6a8a;margin-bottom:10px}
-.posto-card{background:#131e2e;border:1px solid #1e2d42;border-radius:10px;padding:12px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer;transition:all 0.12s;text-decoration:none}
+.posto-card{background:#131e2e;border:1px solid #1e2d42;border-radius:10px;padding:12px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer;transition:border-color 0.12s}
 .posto-card:hover{border-color:#2e7dd1;background:#172030}
-.card-left{flex:1;min-width:0}
-.card-nome{font-size:13px;font-weight:500;color:#e0e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-nome{font-size:13px;font-weight:500;color:#e0e8f0}
 .card-sub{font-size:11px;color:#4a6a8a;margin-top:3px}
-.card-end{font-size:10px;color:#3a5a7a;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.card-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
-.badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:5px;white-space:nowrap;border:1px solid;font-weight:600}
+.card-end{font-size:10px;color:#3a5a7a;margin-top:2px}
+.badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:5px;border:1px solid;font-weight:600}
 .b-ipa{background:rgba(250,174,50,0.12);color:#faa932;border-color:rgba(250,174,50,0.3)}
 .b-she{background:rgba(226,75,74,0.12);color:#e24b4a;border-color:rgba(226,75,74,0.3)}
 .b-br{background:rgba(46,125,209,0.12);color:#5aaeff;border-color:rgba(46,125,209,0.3)}
 .b-tra{background:rgba(100,100,220,0.12);color:#9090ff;border-color:rgba(100,100,220,0.3)}
 .b-rdp{background:rgba(29,158,117,0.12);color:#2ec496;border-color:rgba(29,158,117,0.3)}
 .b-oth{background:rgba(255,255,255,0.06);color:#8aaac0;border-color:rgba(255,255,255,0.1)}
-.est-badge{font-size:10px;padding:2px 7px;border-radius:5px;background:#1e2d42;color:#8aaac0;border:1px solid #2a3a52}
-.chevron{font-size:16px;color:#3a5a7a}
-.empty{text-align:center;padding:3rem;color:#3a5a7a;font-size:14px}
+.est-tag{font-size:10px;padding:2px 7px;border-radius:5px;background:#1e2d42;color:#8aaac0;border:1px solid #2a3a52}
+.chevron{font-size:16px;color:#3a5a7a;flex-shrink:0}
+.empty{text-align:center;padding:3rem;color:#3a5a7a}
 </style>
 </head>
 <body>
@@ -52,20 +47,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </div>
 
 <div class="content">
-  <div class="filtros">
-    <input class="input-s" id="busca" type="text" placeholder="Buscar por nome, cidade ou endereço...">
-    <div class="filtros-row" id="estados"></div>
-  </div>
-
-  <div class="sec-label">Postos</div>
+  <input class="input-s" id="busca" type="text" placeholder="Buscar por nome, cidade ou endereço...">
+  <div class="estados" id="estados"></div>
   <div class="contagem" id="contagem"></div>
   <div id="lista"></div>
 </div>
 
 <script>
-const BASE = 'https://trapezio-app.vercel.app';
-
-const POSTOS = [
+var POSTOS = [
   {id:"001",nome:"Posto Alfa",cidade:"Colombo",estado:"PR",bandeira:"Ipiranga",end:"Est Da Graciosa, 3253"},
   {id:"002",nome:"Posto Almirante Filial 02",cidade:"São Bento Do Sul",estado:"SC",bandeira:"Ipiranga",end:"R Antonio Kaesemodel, 2339"},
   {id:"003",nome:"Posto Almirante Filial 03",cidade:"São Leopoldo",estado:"RS",bandeira:"Ipiranga",end:"Av. Getúlio Vargas, 2130"},
@@ -128,55 +117,87 @@ const POSTOS = [
   {id:"062",nome:"Posto TS",cidade:"Curitiba",estado:"PR",bandeira:"Shell",end:"Av. Anita Garibaldi, 1305"},
   {id:"063",nome:"Posto Via Torres",cidade:"Curitiba",estado:"PR",bandeira:"BR",end:"Comendador Franco, 3133"},
   {id:"064",nome:"Posto Vila Resende",cidade:"Piracicaba",estado:"SP",bandeira:"Shell",end:"Av. Dona Francisca, 549"},
-  {id:"065",nome:"Posto WC",cidade:"Criciúma",estado:"SC",bandeira:"Ipiranga",end:"Rod BR-101, 8600"},
+  {id:"065",nome:"Posto WC",cidade:"Criciúma",estado:"SC",bandeira:"Ipiranga",end:"Rod BR-101, 8600"}
 ];
 
-const BCLS={Ipiranga:"b-ipa",Shell:"b-she",BR:"b-br","Trapézio":"b-tra",RDP:"b-rdp",TOF:"b-oth"};
-const ESTADOS=["Todos","PR","RS","SC","SP"];
-let estado="Todos", busca="";
+var BCLS = {Ipiranga:"b-ipa",Shell:"b-she",BR:"b-br","Trapézio":"b-tra",RDP:"b-rdp",TOF:"b-oth"};
+var ESTADOS = ["Todos","PR","RS","SC","SP"];
+var estado = "Todos";
+var busca = "";
 
-function slugify(str){
-  return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+function slugify(str) {
+  return str.toLowerCase()
+    .replace(/[àáâãäå]/g,'a').replace(/[èéêë]/g,'e')
+    .replace(/[ìíîï]/g,'i').replace(/[òóôõö]/g,'o')
+    .replace(/[ùúûü]/g,'u').replace(/[ç]/g,'c')
+    .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 }
 
-function filtrados(){
-  return POSTOS
-    .filter(p=>estado==="Todos"||p.estado===estado)
-    .filter(p=>{
-      const q=busca.toLowerCase();
-      return p.nome.toLowerCase().includes(q)||p.cidade.toLowerCase().includes(q)||p.end.toLowerCase().includes(q)||p.bandeira.toLowerCase().includes(q);
-    });
+function getFiltrados() {
+  var q = busca.toLowerCase();
+  return POSTOS.filter(function(p) {
+    var estadoOk = estado === "Todos" || p.estado === estado;
+    var buscaOk = q === "" ||
+      p.nome.toLowerCase().indexOf(q) >= 0 ||
+      p.cidade.toLowerCase().indexOf(q) >= 0 ||
+      p.end.toLowerCase().indexOf(q) >= 0 ||
+      p.bandeira.toLowerCase().indexOf(q) >= 0;
+    return estadoOk && buscaOk;
+  });
 }
 
-function render(){
-  const df=filtrados();
-  document.getElementById('contagem').textContent=`${df.length} posto${df.length!==1?'s':''} encontrado${df.length!==1?'s':''}`;
-  document.getElementById('lista').innerHTML=df.length===0
-    ?`<div class="empty">Nenhum posto encontrado.</div>`
-    :df.map(p=>`
-      <div class="posto-card" onclick="window.location.href='/?posto=${slugify(p.nome)}'">
-        <div class="card-left">
-          <div class="card-nome">${p.nome}</div>
-          <div class="card-sub">${p.cidade} · ${p.estado} · <span class="badge ${BCLS[p.bandeira]||'b-oth'}">${p.bandeira}</span></div>
-          <div class="card-end">${p.end}</div>
-        </div>
-        <div class="card-right">
-          <span class="est-badge">${p.estado}</span>
-          <span class="chevron">›</span>
-        </div>
-      </div>`).join('');
+function irParaPosto(slug) {
+  window.location.href = '/?posto=' + slug;
 }
 
-function renderEstados(){
-  document.getElementById('estados').innerHTML=ESTADOS.map(e=>
-    `<button class="btn-est ${estado===e?'on':''}" onclick="setEst('${e}')">${e}</button>`
-  ).join('');
+function render() {
+  var df = getFiltrados();
+  document.getElementById('contagem').textContent = df.length + ' posto' + (df.length !== 1 ? 's' : '') + ' encontrado' + (df.length !== 1 ? 's' : '');
+
+  if (df.length === 0) {
+    document.getElementById('lista').innerHTML = '<div class="empty">Nenhum posto encontrado.</div>';
+    return;
+  }
+
+  var html = '';
+  for (var i = 0; i < df.length; i++) {
+    var p = df[i];
+    var slug = slugify(p.nome);
+    var bcls = BCLS[p.bandeira] || 'b-oth';
+    html += '<div class="posto-card" onclick="irParaPosto(\'' + slug + '\')">';
+    html += '<div style="flex:1;min-width:0">';
+    html += '<div class="card-nome">' + p.nome + '</div>';
+    html += '<div class="card-sub">' + p.cidade + ' · ' + p.estado + ' · <span class="badge ' + bcls + '">' + p.bandeira + '</span></div>';
+    html += '<div class="card-end">' + p.end + '</div>';
+    html += '</div>';
+    html += '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0">';
+    html += '<span class="est-tag">' + p.estado + '</span>';
+    html += '<span class="chevron">›</span>';
+    html += '</div>';
+    html += '</div>';
+  }
+  document.getElementById('lista').innerHTML = html;
 }
 
-function setEst(v){estado=v;renderEstados();render();}
+function renderEstados() {
+  var html = '';
+  for (var i = 0; i < ESTADOS.length; i++) {
+    var e = ESTADOS[i];
+    html += '<button class="btn-est' + (estado === e ? ' on' : '') + '" onclick="setEst(\'' + e + '\')">' + e + '</button>';
+  }
+  document.getElementById('estados').innerHTML = html;
+}
 
-// Busca sem re-render completo
-document.getElementById('busca').addEventListener('input',e=>{busca=e.target.value;render();});
+function setEst(v) {
+  estado = v;
+  renderEstados();
+  render();
+}
+
+document.getElementById('busca').addEventListener('input', function(e) {
+  busca = e.target.value;
+  render();
+});
 
 renderEstados();
 render();
