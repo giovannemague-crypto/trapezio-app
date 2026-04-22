@@ -259,8 +259,8 @@ function mapearRegistroSupabase(row) {
     iaUsada: !!row.ia_usada,
     lat: row.lat || '',
     lng: row.lng || '',
-    hora: row.created_at ? new Date(row.created_at).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }) : '',
-    createdAt: row.created_at,
+    hora: row.criado_em ? new Date(row.criado_em).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }) : '',
+    createdAt: row.criado_em,
   };
 }
 
@@ -268,7 +268,7 @@ async function carregarRegistros(postoId) {
   const dataCorte = new Date();
   dataCorte.setDate(dataCorte.getDate() - CONFIG.DIAS_HISTORICO);
   const dataISO = dataCorte.toISOString();
-  const url = `${CONFIG.SUPABASE_URL}/rest/v1/registros?posto_id=eq.${encodeURIComponent(postoId)}&created_at=gte.${encodeURIComponent(dataISO)}&order=created_at.desc`;
+  const url = `${CONFIG.SUPABASE_URL}/rest/v1/registros?posto_id=eq.${encodeURIComponent(postoId)}&criado_em=gte.${encodeURIComponent(dataISO)}&order=criado_em.desc`;
 
   try {
     const resp = await fetch(url, {
