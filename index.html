@@ -65,6 +65,8 @@
     .resumo-table th { text-align: left; padding: 8px 10px; font-weight: 500; color: #73726c; border-bottom: 0.5px solid rgba(0,0,0,0.1); }
     .resumo-table td { padding: 10px 10px; border-bottom: 0.5px solid rgba(0,0,0,0.06); }
     .empty { border: 0.5px dashed rgba(0,0,0,0.15); border-radius: 12px; padding: 2rem; text-align: center; color: #73726c; margin-bottom: 12px; font-size: 13px; line-height: 1.7; }
+    .dia-separador { font-size: 11px; color: #73726c; text-transform: uppercase; letter-spacing: 0.05em; margin: 16px 0 8px 4px; display: flex; align-items: center; gap: 8px; }
+    .dia-separador::after { content: ''; flex: 1; height: 0.5px; background: rgba(0,0,0,0.1); }
     @media (prefers-color-scheme: dark) {
       body { background: #1a1a18; color: #e8e8e4; }
       .card, .reg-card { background: #2c2c2a; border-color: rgba(255,255,255,0.1); }
@@ -78,6 +80,7 @@
       .tab { color: #9c9a92; }
       .tab.active { color: #e8e8e4; border-bottom-color: #e8e8e4; }
       .empty { border-color: rgba(255,255,255,0.1); color: #9c9a92; }
+      .dia-separador::after { background: rgba(255,255,255,0.1); }
     }
   </style>
 </head>
@@ -89,6 +92,7 @@ const CONFIG = {
   SUPABASE_KEY:  'sb_publishable_SL_hHlR1S1nFDAlMUN7Fzg_qvuWcmmW',
   ANTHROPIC_KEY: '',
   N8N_WEBHOOK:   'https://SEU_N8N/webhook/trapezio',
+  DIAS_HISTORICO: 5, // quantos dias de histórico mostrar na lista
 };
 
 const POSTOS = [
@@ -174,6 +178,7 @@ let state = {
   tela: 'selector',
   posto: null,
   registros: [],
+  carregando: false,
   form: { nome:'', bandeira:'Bandeira Branca', gc:'', ga:'', et:'', ds:'', obs:'', imgPreview:null, imgFile:null, iaUsada:false, erroIA:false, loading:false, dropOpen:false, lat:'', lng:'', locStatus:'' },
 };
 
@@ -204,7 +209,84 @@ function calcStatus(nosso, deles) {
 
 function hoje() { return new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'2-digit', month:'2-digit', year:'numeric' }); }
 function hora()  { return new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }); }
+
+function formatarDataAmigavel(dataISO) {
+  const d = new Date(dataISO);
+  const hoje = new Date();
+  const ontem = new Date(); ontem.setDate(ontem.getDate() - 1);
+  const sameDay = (a,b) => a.toDateString() === b.toDateString();
+  if (sameDay(d, hoje))  return 'Hoje · ' + d.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' });
+  if (sameDay(d, ontem)) return 'Ontem · ' + d.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' });
+  return d.toLocaleDateString('pt-BR', { weekday:'short', day:'2-digit', month:'2-digit' });
+}
+
 function render() { document.getElementById('app').innerHTML = views[state.tela](); }
+
+// ── Persistência local (cache) ─────────────────────────────
+function chaveCache(postoId) { return `trapezio:registros:${postoId}`; }
+
+function salvarCacheLocal(postoId, registros) {
+  try {
+    localStorage.setItem(chaveCache(postoId), JSON.stringify(registros));
+  } catch(e) { console.warn('Falha salvando cache local:', e); }
+}
+
+function carregarCacheLocal(postoId) {
+  try {
+    const raw = localStorage.getItem(chaveCache(postoId));
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr : [];
+  } catch(e) { return []; }
+}
+
+// ── Supabase: carregar registros dos últimos N dias ────────
+function mapearRegistroSupabase(row) {
+  return {
+    id: row.id,
+    nome: row.concorrente_nome,
+    bandeira: row.concorrente_bandeira,
+    gc: row.gc != null ? String(row.gc) : '',
+    ga: row.ga != null ? String(row.ga) : '',
+    et: row.et != null ? String(row.et) : '',
+    eta: row.eta != null ? String(row.eta) : '',
+    ds: row.ds != null ? String(row.ds) : '',
+    ds500: row.ds500 != null ? String(row.ds500) : '',
+    dsa: row.dsa != null ? String(row.dsa) : '',
+    obs: row.observacoes || '',
+    imgPreview: row.foto_url || null,
+    fotoUrl: row.foto_url || null,
+    iaUsada: !!row.ia_usada,
+    lat: row.lat || '',
+    lng: row.lng || '',
+    hora: row.created_at ? new Date(row.created_at).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }) : '',
+    createdAt: row.created_at,
+  };
+}
+
+async function carregarRegistros(postoId) {
+  const dataCorte = new Date();
+  dataCorte.setDate(dataCorte.getDate() - CONFIG.DIAS_HISTORICO);
+  const dataISO = dataCorte.toISOString();
+  const url = `${CONFIG.SUPABASE_URL}/rest/v1/registros?posto_id=eq.${encodeURIComponent(postoId)}&created_at=gte.${encodeURIComponent(dataISO)}&order=created_at.desc`;
+
+  try {
+    const resp = await fetch(url, {
+      headers: {
+        'apikey': CONFIG.SUPABASE_KEY,
+        'Authorization': `Bearer ${CONFIG.SUPABASE_KEY}`,
+      },
+    });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const rows = await resp.json();
+    const registros = rows.map(mapearRegistroSupabase);
+    salvarCacheLocal(postoId, registros);
+    return registros;
+  } catch(e) {
+    console.warn('Erro carregando do Supabase, usando cache local:', e);
+    return carregarCacheLocal(postoId);
+  }
+}
 
 // ── Anthropic OCR ──────────────────────────────────────────
 async function lerFotoComIA(file) {
@@ -252,6 +334,7 @@ async function uploadFoto(file, postoId) {
     return null;
   }
 }
+
 async function salvarSupabase(registro) {
   try {
     await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/registros`, {
@@ -287,6 +370,26 @@ async function salvarSupabase(registro) {
   }
 }
 
+// ── Agrupar registros por dia ──────────────────────────────
+function agruparPorDia(registros) {
+  const grupos = {};
+  registros.forEach(r => {
+    const chave = r.createdAt ? r.createdAt.substring(0,10) : new Date().toISOString().substring(0,10);
+    if (!grupos[chave]) grupos[chave] = [];
+    grupos[chave].push(r);
+  });
+  // ordena dias do mais recente para o mais antigo
+  return Object.keys(grupos).sort().reverse().map(d => ({ data: d, registros: grupos[d] }));
+}
+
+function registrosDeHoje(registros) {
+  const hojeISO = new Date().toISOString().substring(0,10);
+  return registros.filter(r => {
+    const d = r.createdAt ? r.createdAt.substring(0,10) : hojeISO;
+    return d === hojeISO;
+  });
+}
+
 // ── Views ──────────────────────────────────────────────────
 const views = {
   selector() {
@@ -309,7 +412,11 @@ const views = {
   },
 
   lista() {
-    const p = state.posto, regs = state.registros, meta = regs.length >= 7;
+    const p = state.posto, regs = state.registros;
+    const regsHoje = registrosDeHoje(regs);
+    const meta = regsHoje.length >= 7;
+    const grupos = agruparPorDia(regs);
+
     return `
       <div class="header">
         <div class="card" style="margin-bottom:1.25rem;">
@@ -328,32 +435,39 @@ const views = {
       </div>
       <div class="status-bar">
         <div class="card-gray">
-          <div class="label">Registrados</div>
-          <div style="font-size:22px;font-weight:500;">${regs.length} <span style="font-size:13px;font-weight:400;color:${meta?'#3b6d11':'#9c9a92'};">/ 7+</span></div>
+          <div class="label">Hoje</div>
+          <div style="font-size:22px;font-weight:500;">${regsHoje.length} <span style="font-size:13px;font-weight:400;color:${meta?'#3b6d11':'#9c9a92'};">/ 7+</span></div>
         </div>
         <div class="card-gray" style="${meta?'background:#eaf3de;border:0.5px solid #639922;':''}">
           <div class="label" style="${meta?'color:#3b6d11;':''}">Status</div>
-          <div style="font-size:15px;font-weight:500;color:${meta?'#3b6d11':'#1a1a18'};">${regs.length===0?'Aguardando':meta?'Meta atingida':'Em andamento'}</div>
+          <div style="font-size:15px;font-weight:500;color:${meta?'#3b6d11':'#1a1a18'};">${regsHoje.length===0?'Aguardando':meta?'Meta atingida':'Em andamento'}</div>
         </div>
       </div>
-      ${regs.length===0
-        ? `<div class="empty">Nenhum concorrente registrado ainda hoje.<br><span style="font-size:12px;color:#9c9a92;">Toque no botão abaixo para começar.</span></div>`
-        : regs.map(r => `
-          <div class="reg-card">
-            <div class="reg-header">
-              <div>
-                <div style="font-weight:500;font-size:14px;">${r.nome}</div>
-                <div class="sub">${r.hora} · <span class="badge ${BANDEIRA_BADGE[r.bandeira]||'badge-gray'}" style="font-size:10px;">${r.bandeira}</span></div>
-              </div>
-              ${r.imgPreview?`<img src="${r.imgPreview}" style="width:40px;height:40px;object-fit:cover;border-radius:6px;">`:'' }
-            </div>
-            <div class="reg-tags">
-              ${COMBUSTIVEIS.filter(c=>r[c.key]).map(c=>`<span class="badge badge-gray" style="font-size:10px;">${c.label.replace('Gasolina ','Gás.')}: R$ ${parseFloat(r[c.key]).toFixed(2)}</span>`).join('')}
-            </div>
-            ${r.obs?`<div style="margin-top:6px;font-size:12px;color:#73726c;font-style:italic;">"${r.obs}"</div>`:''}
-          </div>`).join('')}
+
+      ${state.carregando
+        ? `<div class="spinner-wrap"><div class="spinner"></div><div style="font-size:13px;color:#73726c;">Carregando histórico...</div></div>`
+        : regs.length === 0
+          ? `<div class="empty">Nenhum concorrente registrado nos últimos ${CONFIG.DIAS_HISTORICO} dias.<br><span style="font-size:12px;color:#9c9a92;">Toque no botão abaixo para começar.</span></div>`
+          : grupos.map(g => `
+              <div class="dia-separador">${formatarDataAmigavel(g.data)} · ${g.registros.length} registro${g.registros.length>1?'s':''}</div>
+              ${g.registros.map(r => `
+                <div class="reg-card">
+                  <div class="reg-header">
+                    <div>
+                      <div style="font-weight:500;font-size:14px;">${r.nome}</div>
+                      <div class="sub">${r.hora} · <span class="badge ${BANDEIRA_BADGE[r.bandeira]||'badge-gray'}" style="font-size:10px;">${r.bandeira}</span></div>
+                    </div>
+                    ${r.imgPreview?`<img src="${r.imgPreview}" style="width:40px;height:40px;object-fit:cover;border-radius:6px;">`:'' }
+                  </div>
+                  <div class="reg-tags">
+                    ${COMBUSTIVEIS.filter(c=>r[c.key]).map(c=>`<span class="badge badge-gray" style="font-size:10px;">${c.label.replace('Gasolina ','Gás.')}: R$ ${parseFloat(r[c.key]).toFixed(2)}</span>`).join('')}
+                  </div>
+                  ${r.obs?`<div style="margin-top:6px;font-size:12px;color:#73726c;font-style:italic;">"${r.obs}"</div>`:''}
+                </div>`).join('')}
+            `).join('')}
+
       <button class="btn-primary" onclick="irColeta()">+ Registrar concorrente</button>
-      ${regs.length>0?`<button class="btn-secondary" onclick="irResumo()">Ver relatório do dia →</button>`:''}`;
+      ${regsHoje.length>0?`<button class="btn-secondary" onclick="irResumo()">Ver relatório do dia →</button>`:''}`;
   },
 
   coleta() {
@@ -367,7 +481,7 @@ const views = {
           <label>${label}</label>
           <div class="price-row">
             <span>R$</span>
-            <input type="number" step="0.01" placeholder="0,00" value="${val}"
+            <input type="number" step="0.01" placeholder="0,00" value="${val||''}"
               style="${st?`border-color:${st.cls==='badge-red'?'#e24b4a':st.cls==='badge-green'?'#639922':'#ba7517'};`:''}"
               oninput="setPreco('${key}',this.value)" />
           </div>
@@ -432,7 +546,9 @@ const views = {
   },
 
   resumo() {
-    const p = state.posto, regs = state.registros;
+    const p = state.posto;
+    // Relatório do dia usa apenas registros de hoje
+    const regs = registrosDeHoje(state.registros);
     const tabelas = COMBUSTIVEIS.map(({ key, label }) => {
       const vals = regs.filter(r=>r[key]).map(r=>parseFloat(r[key]));
       if (!vals.length) return '';
@@ -476,15 +592,27 @@ const views = {
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.25rem;">
         <div class="card-gray"><div class="label">Posto</div><div style="font-size:13px;font-weight:500;">${p.nome}</div></div>
         <div class="card-gray"><div class="label">Cidade</div><div style="font-size:13px;font-weight:500;">${p.cidade}</div></div>
-        <div class="card-gray"><div class="label">Concorrentes</div><div style="font-size:13px;font-weight:500;">${regs.length}</div></div>
+        <div class="card-gray"><div class="label">Concorrentes hoje</div><div style="font-size:13px;font-weight:500;">${regs.length}</div></div>
       </div>
-      ${tabelas}
+      ${regs.length === 0 ? '<div class="empty">Ainda não há registros de hoje.</div>' : tabelas}
       <button class="btn-secondary" onclick="irLista()">Voltar e adicionar mais</button>`;
   },
 };
 
 // ── Ações ──────────────────────────────────────────────────
-function selecionarPosto(id) { state.posto = POSTOS.find(p=>p.id===id); state.tela='lista'; render(); }
+async function selecionarPosto(id) {
+  state.posto = POSTOS.find(p=>p.id===id);
+  state.tela = 'lista';
+  // Mostra primeiro o cache local (instantâneo), depois atualiza do Supabase
+  state.registros = carregarCacheLocal(state.posto.id);
+  state.carregando = state.registros.length === 0;
+  render();
+  const frescos = await carregarRegistros(state.posto.id);
+  state.registros = frescos;
+  state.carregando = false;
+  render();
+}
+
 function trocarPosto() { state.tela='selector'; render(); }
 function irLista()    { state.tela='lista'; render(); }
 function irResumo()   { state.tela='resumo'; render(); }
@@ -501,20 +629,6 @@ function irColeta() {
         state.form.locStatus = 'ok';
         const el = document.getElementById('loc-status');
         if (el) el.innerHTML = `<span class="badge badge-green" style="font-size:10px;">GPS: ${state.form.lat}, ${state.form.lng}</span>`;
-
-        // Busca posto próximo pela localização atual
-        buscarPostoProximo(state.form.lat, state.form.lng).then(postoCerca => {
-          if (postoCerca && postoCerca.nome && !state.form.nome) {
-            state.form.nome = postoCerca.nome;
-            if (postoCerca.bandeira) state.form.bandeira = postoCerca.bandeira;
-            const inp = document.getElementById('inputNome');
-            if (inp) inp.value = postoCerca.nome;
-            const sel = document.querySelector('select');
-            if (sel && postoCerca.bandeira) sel.value = postoCerca.bandeira;
-            const el2 = document.getElementById('loc-status');
-            if (el2) el2.innerHTML = `<span class="badge badge-green" style="font-size:10px;">Posto encontrado</span>`;
-          }
-        });
       },
       () => {
         state.form.locStatus = 'erro';
@@ -530,7 +644,6 @@ function setNome(v)     { state.form.nome=v; atualizarBotao(); }
 function setBandeira(v) { state.form.bandeira=v; }
 function setPreco(k,v) {
   state.form[k] = v;
-  // Marca como editado manualmente se IA havia preenchido valor diferente
   if (state.form.precosIA && state.form.precosIA[k] !== undefined) {
     if (v !== state.form.precosIA[k]) {
       state.form.camposEditados = state.form.camposEditados || {};
@@ -567,7 +680,7 @@ function trocarFoto() {
 async function handleFoto(input) {
   const file = input.files[0];
   if (!file) return;
-  _fotoFile = file; // salva referência global
+  _fotoFile = file;
   state.form.imgPreview = URL.createObjectURL(file);
   state.form.imgFile = file;
   state.form.loading = true;
@@ -575,7 +688,6 @@ async function handleFoto(input) {
   state.form.erroIA = false;
   render();
 
-  // Lê GPS do EXIF e busca posto próximo
   try {
     const exif = await exifr.parse(file, { gps:true });
     if (exif && exif.latitude && exif.longitude) {
@@ -584,19 +696,9 @@ async function handleFoto(input) {
       state.form.locStatus = 'ok';
       const el = document.getElementById('loc-status');
       if (el) el.innerHTML = `<span class="badge badge-green" style="font-size:10px;">GPS da foto</span>`;
-
-      // Busca posto próximo automaticamente
-      const postoCerca = await buscarPostoProximo(state.form.lat, state.form.lng);
-      if (postoCerca && postoCerca.nome && !state.form.nome) {
-        state.form.nome = postoCerca.nome;
-        if (postoCerca.bandeira) state.form.bandeira = postoCerca.bandeira;
-        const el2 = document.getElementById('loc-status');
-        if (el2) el2.innerHTML = `<span class="badge badge-green" style="font-size:10px;">GPS + posto encontrado</span>`;
-      }
     }
   } catch(e) { console.warn('EXIF:', e); }
 
-  // OCR via Anthropic
   try {
     const precos = await lerFotoComIA(file);
     state.form.gc = precos.gc || '';
@@ -606,13 +708,11 @@ async function handleFoto(input) {
     state.form.ds = precos.ds || '';
     state.form.ds500 = precos.ds500 || '';
     state.form.dsa = precos.dsa || '';
-    // Preenche bandeira se detectada pela IA
     if (precos.bandeira && precos.bandeira !== '' && precos.bandeira !== 'Outros') {
       const bandeirasValidas = ['Ipiranga','Shell','BR','Petrobras','Raízen','Bandeira Branca'];
       const encontrada = bandeirasValidas.find(b => b.toLowerCase() === precos.bandeira.toLowerCase());
       if (encontrada) state.form.bandeira = encontrada;
     }
-    // Guarda preços originais da IA para detectar edições manuais
     state.form.precosIA = { gc: precos.gc||'', ga: precos.ga||'', et: precos.et||'', eta: precos.eta||'', ds: precos.ds||'', ds500: precos.ds500||'', dsa: precos.dsa||'' };
     state.form.camposEditados = {};
     state.form.iaUsada = !!(precos.gc || precos.ga || precos.et || precos.eta || precos.ds || precos.ds500 || precos.dsa);
@@ -625,7 +725,6 @@ async function handleFoto(input) {
   state.form.loading = false;
   render();
 
-  // Preenche campos no DOM
   setTimeout(() => {
     ['gc','ga','et','ds'].forEach(k => {
       if (!state.form[k]) return;
@@ -641,7 +740,6 @@ async function salvar() {
   const btn = document.getElementById('btn-salvar');
   if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
 
-  // Usa a referência global do arquivo
   let fotoUrl = null;
   if (_fotoFile) {
     console.log('Arquivo para upload:', _fotoFile.name, _fotoFile.size);
@@ -650,6 +748,7 @@ async function salvar() {
     console.warn('Nenhum arquivo de foto disponível');
   }
 
+  const agoraISO = new Date().toISOString();
   const reg = {
     nome: f.nome, bandeira: f.bandeira,
     gc: f.gc, ga: f.ga, et: f.et, eta: f.eta,
@@ -657,18 +756,44 @@ async function salvar() {
     obs: f.obs, imgPreview: fotoUrl || f.imgPreview,
     iaUsada: f.iaUsada, hora: hora(),
     lat: f.lat, lng: f.lng, fotoUrl,
+    createdAt: agoraISO, // importante pra agrupar por dia no front
   };
-  state.registros.push(reg);
-  await salvarSupabase(reg);
+
+  // Adiciona localmente e atualiza cache (otimista — aparece na lista na hora)
+  state.registros = [reg, ...state.registros];
+  salvarCacheLocal(state.posto.id, state.registros);
+
+  // Salva no Supabase em background
+  salvarSupabase(reg).then(async () => {
+    // Depois de salvar, recarrega do servidor pra pegar o ID real e sincronizar
+    const frescos = await carregarRegistros(state.posto.id);
+    if (frescos && frescos.length) {
+      state.registros = frescos;
+      if (state.tela === 'lista') render();
+    }
+  });
+
   _fotoFile = null;
   irLista();
 }
 
-function init() {
+async function init() {
   const p = getPostoFromURL();
-  if (p) { state.posto = p; state.tela = 'lista'; }
-  else state.tela = 'selector';
-  render();
+  if (p) {
+    state.posto = p;
+    state.tela = 'lista';
+    // cache primeiro, depois atualiza
+    state.registros = carregarCacheLocal(p.id);
+    state.carregando = state.registros.length === 0;
+    render();
+    const frescos = await carregarRegistros(p.id);
+    state.registros = frescos;
+    state.carregando = false;
+    render();
+  } else {
+    state.tela = 'selector';
+    render();
+  }
 }
 
 init();
