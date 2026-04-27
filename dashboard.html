@@ -17,13 +17,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 .content{padding:14px 16px}
 
-/* Seletor de período */
-.periodo-label{font-size:10px;font-weight:600;color:#4a6a8a;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px}
-.periodo-wrap{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px}
-.btn-periodo{padding:8px 16px;font-size:12px;border-radius:8px;border:1px solid #1e2d42;background:#131e2e;color:#6a8aaa;cursor:pointer;white-space:nowrap;font-weight:500}
-.btn-periodo.on{background:#2e7dd1;color:#fff;border-color:#2e7dd1}
-.erro-box{background:rgba(226,75,74,0.12);border:1px solid rgba(226,75,74,0.3);color:#e24b4a;padding:12px 14px;border-radius:8px;font-size:13px;margin-bottom:12px}
-
 /* KPI */
 .kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
 @media(min-width:600px){.kpi-grid{grid-template-columns:repeat(4,1fr)}}
@@ -74,11 +67,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .row-sub{font-size:11px;color:#4a6a8a;margin-top:2px}
 .row-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
 .badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:5px;white-space:nowrap;border:1px solid;font-weight:600}
-.b-ipa{background:rgba(250,174,50,0.12);color:#faa932;border-color:rgba(250,174,50,0.3)}
-.b-she{background:rgba(226,75,74,0.12);color:#e24b4a;border-color:rgba(226,75,74,0.3)}
-.b-br{background:rgba(46,125,209,0.12);color:#5aaeff;border-color:rgba(46,125,209,0.3)}
+.b-ipa{background:rgba(245,196,0,0.15);color:#8a6000;border-color:rgba(245,196,0,0.6)}
+.b-she{background:rgba(226,75,74,0.12);color:#8a0000;border-color:rgba(226,75,74,0.5)}
+.b-br{background:rgba(39,174,96,0.12);color:#145a2a;border-color:rgba(39,174,96,0.5)}
 .b-tra{background:rgba(100,100,220,0.12);color:#9090ff;border-color:rgba(100,100,220,0.3)}
 .b-rdp{background:rgba(29,158,117,0.12);color:#2ec496;border-color:rgba(29,158,117,0.3)}
+.b-bca{background:rgba(255,255,255,0.08);color:#ccc;border-color:rgba(255,255,255,0.25)}
 .b-oth{background:rgba(255,255,255,0.06);color:#8aaac0;border-color:rgba(255,255,255,0.1)}
 .b-red{background:rgba(226,75,74,0.15);color:#e24b4a;border-color:rgba(226,75,74,0.3)}
 .b-amb{background:rgba(186,117,23,0.15);color:#f0a030;border-color:rgba(186,117,23,0.3)}
@@ -97,9 +91,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .comp-table td{padding:9px 8px;border-bottom:1px solid #1a2535;color:#e0e8f0}
 .comp-table tr:last-child td{border-bottom:none}
 .tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:4px;background:rgba(255,255,255,0.06);color:#8aaac0;border:1px solid rgba(255,255,255,0.1);margin:2px}
-
-.dia-sep{font-size:10px;font-weight:600;color:#4a6a8a;text-transform:uppercase;letter-spacing:0.08em;margin:16px 0 8px;display:flex;align-items:center;gap:8px}
-.dia-sep::after{content:"";flex:1;height:1px;background:#1e2d42}
 
 .spinner{width:28px;height:28px;border:2px solid #1e2d42;border-top-color:#2e7dd1;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -186,85 +177,44 @@ const COMBS=[
   {k:"et",l:"Etanol"},{k:"eta",l:"Etanol Aditivado"},
   {k:"ds",l:"Diesel S10"},{k:"ds500",l:"Diesel S500"},{k:"dsa",l:"Diesel S10 Aditivado"},
 ];
-const BCLS={Ipiranga:"b-ipa",Shell:"b-she",BR:"b-br","Trapézio":"b-tra",RDP:"b-rdp",TOF:"b-oth"};
-
-const PERIODOS=[
-  {k:"1",l:"1 dia",dias:1},
-  {k:"2",l:"2 dias",dias:2},
-  {k:"3",l:"3 dias",dias:3},
-  {k:"4",l:"4 dias",dias:4},
-  {k:"5",l:"5 dias",dias:5},
-  {k:"tudo",l:"Tudo",dias:null},
-];
-
-let S={
-  dados:[],
-  loading:true,
-  erro:null,
-  aba:"geral",
-  estado:"Todos",
-  busca:"",
-  postoFiltro:"",
-  det:null,
-  periodo:"1", // padrão: 1 dia (hoje)
+const BCLS={
+  Ipiranga:"b-ipa",
+  Shell:"b-she",
+  BR:"b-br",
+  "Trapézio":"b-tra",
+  Petrobras:"b-br",
+  "Raízen":"b-br",
+  RDP:"b-rdp",
+  TOF:"b-oth",
+  "Bandeira Branca":"b-bca"
 };
+
+let S={dados:[],loading:true,aba:"geral",estado:"Todos",busca:"",postoFiltro:"",det:null};
 
 function bcls(b){return BCLS[b]||"b-oth";}
 
-function dataCorte(periodoKey){
-  const p=PERIODOS.find(x=>x.k===periodoKey);
-  if(!p||p.dias===null)return null;
-  const d=new Date();
-  d.setHours(0,0,0,0);
-  d.setDate(d.getDate()-(p.dias-1)); // 1 dia = hoje; 2 dias = hoje + ontem; etc.
-  return d;
-}
-
 async function carregarDados(){
-  S.loading=true;
-  S.erro=null;
-  renderAll();
+  S.loading=true; renderAll();
   try{
-    const corte=dataCorte(S.periodo);
-    let url=`${SUPABASE_URL}/rest/v1/registros?select=*&order=criado_em.desc`;
-    if(corte){
-      url+=`&criado_em=gte.${corte.toISOString()}`;
-    }
-    const resp=await fetch(url,{
-      headers:{
-        'apikey':SUPABASE_KEY,
-        'Authorization':`Bearer ${SUPABASE_KEY}`,
-      },
-    });
-    if(!resp.ok){
-      const txt=await resp.text();
-      throw new Error(`HTTP ${resp.status}: ${txt}`);
-    }
+    const hoje=new Date().toISOString().split('T')[0];
+    const url=`${SUPABASE_URL}/rest/v1/registros?criado_em=gte.${hoje}T00:00:00&select=posto_id,concorrente_nome,concorrente_bandeira,gc,ga,et,eta,ds,ds500,dsa,lat,lng,ia_usada,foto_url,criado_em`;
+    const resp=await fetch(url,{headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`}});
     const regs=await resp.json();
-    if(!Array.isArray(regs)){
-      throw new Error('Resposta inválida do Supabase');
-    }
     const mapa={};
-    for(const r of regs){
-      if(!mapa[r.posto_id])mapa[r.posto_id]=[];
-      mapa[r.posto_id].push(r);
-    }
+    for(const r of regs){if(!mapa[r.posto_id])mapa[r.posto_id]=[];mapa[r.posto_id].push(r);}
     S.dados=POSTOS.map(p=>{
       const rs=mapa[p.id]||[];
       const medias={};
       for(const {k} of COMBS){
-        const vals=rs.filter(r=>r[k]!=null&&parseFloat(r[k])>0).map(r=>parseFloat(r[k]));
+        const vals=rs.filter(r=>r[k]>0).map(r=>parseFloat(r[k]));
         medias[k]=vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length):null;
       }
       return{...p,registrou:rs.length>0,concorrentes:rs.length,regs:rs,medias};
     });
   }catch(e){
-    console.error('Erro carregando dados:',e);
-    S.erro=e.message||'Erro ao carregar dados';
     S.dados=POSTOS.map(p=>({...p,registrou:false,concorrentes:0,regs:[],medias:{}}));
   }
-  S.loading=false;
-  renderAll();
+  S.loading=false; renderAll();
 }
 
 function filtrados(){
@@ -288,14 +238,6 @@ function renderTopbar(){
     </div>`;
 }
 
-function rotuloPeriodo(){
-  const p=PERIODOS.find(x=>x.k===S.periodo);
-  if(!p)return'';
-  if(p.dias===null)return'histórico completo';
-  if(p.dias===1)return'hoje';
-  return`últimos ${p.dias} dias`;
-}
-
 function renderAll(){
   renderTopbar();
   if(S.det){
@@ -314,24 +256,15 @@ function renderDash(){
   const reg=d.filter(p=>p.registrou).length;
   const pend=tot-reg;
   const totalRegs=d.reduce((s,p)=>s+p.regs.length,0);
-  const pct=tot?Math.round(reg/tot*100):0;
+  const pct=Math.round(reg/tot*100);
   const df=filtrados();
 
-  const periodoHtml=`
-    <div class="periodo-label">Período</div>
-    <div class="periodo-wrap">
-      ${PERIODOS.map(p=>`<button class="btn-periodo ${S.periodo===p.k?'on':''}" onclick="setPeriodo('${p.k}')">${p.l}</button>`).join('')}
-    </div>`;
-
-  const erroHtml=S.erro?`<div class="erro-box">⚠ ${S.erro}<br><span style="font-size:11px;opacity:0.7">Se isso acontecer sempre, verifique as policies de RLS no Supabase.</span></div>`:'';
-
-  const kpiLabelSub=S.periodo==='1'?'':rotuloPeriodo();
   const kpisHtml=`<div class="kpi-grid">
     ${[
       {cls:"kpi-0",l:"Total postos",v:tot,s:"PR·RS·SC·SP"},
-      {cls:"kpi-1",l:"Registraram",v:reg,s:`${pct}% ${kpiLabelSub||'da rede'}`},
-      {cls:"kpi-2",l:"Aguardando",v:pend,s:kpiLabelSub||'sem registro'},
-      {cls:"kpi-3",l:`Registros (${rotuloPeriodo()})`,v:totalRegs,s:"lançamentos"},
+      {cls:"kpi-1",l:"Registraram",v:reg,s:`${pct}% da rede`},
+      {cls:"kpi-2",l:"Aguardando",v:pend,s:"sem registro"},
+      {cls:"kpi-3",l:"Registros hoje",v:totalRegs,s:"lançamentos"},
     ].map(k=>`<div class="kpi ${k.cls}"><div class="kpi-label">${k.l}</div><div class="kpi-val">${k.v}</div><div class="kpi-sub">${k.s}</div></div>`).join('')}
   </div>`;
 
@@ -374,7 +307,7 @@ function renderDash(){
         </div>`).join('');
   } else if(S.aba==="pendentes"){
     const lista=df.filter(p=>!p.registrou);
-    rowsHtml=lista.length===0?`<div class="empty">Todos registraram no período!</div>`:
+    rowsHtml=lista.length===0?`<div class="empty">Todos registraram hoje!</div>`:
       lista.map(p=>`
         <div class="pend-row">
           <div>
@@ -385,40 +318,21 @@ function renderDash(){
         </div>`).join('');
   } else if(S.aba==="registros"){
     const todos=df.flatMap(p=>p.regs.map(r=>({...r,pNome:p.nome,pEstado:p.estado})));
-    todos.sort((a,b)=>new Date(b.criado_em)-new Date(a.criado_em));
-
-    if(todos.length===0){
-      rowsHtml=`<div class="empty">Nenhum registro no período selecionado.</div>`;
-    } else {
-      // Agrupa por dia
-      const grupos={};
-      for(const r of todos){
-        const dia=r.criado_em?r.criado_em.substring(0,10):'sem-data';
-        if(!grupos[dia])grupos[dia]=[];
-        grupos[dia].push(r);
-      }
-      const diasOrd=Object.keys(grupos).sort().reverse();
-      rowsHtml=diasOrd.map(dia=>{
-        const rotDia=formatarDia(dia);
-        return`<div class="dia-sep">${rotDia} · ${grupos[dia].length} registro${grupos[dia].length>1?'s':''}</div>`+
-        grupos[dia].map(r=>`
-          <div class="comp-card" style="cursor:pointer" onclick="abrirDet('${r.posto_id}')">
-            <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-              <div>
-                <div style="font-weight:500;font-size:13px;">${r.pNome}</div>
-                <div style="font-size:11px;color:#4a6a8a;">${r.concorrente_nome||'—'} · <span class="badge ${bcls(r.concorrente_bandeira)}" style="font-size:9px;">${r.concorrente_bandeira||'—'}</span></div>
-              </div>
-              <div style="font-size:11px;color:#4a6a8a">${r.criado_em?new Date(r.criado_em).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):''}</div>
+    rowsHtml=todos.length===0?`<div class="empty">Nenhum registro hoje.</div>`:
+      todos.sort((a,b)=>new Date(b.criado_em)-new Date(a.criado_em)).map(r=>`
+        <div class="comp-card" style="cursor:pointer" onclick="abrirDet('${r.posto_id}')">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+            <div>
+              <div style="font-weight:500;font-size:13px;">${r.pNome}</div>
+              <div style="font-size:11px;color:#4a6a8a;">${r.concorrente_nome||'—'} · <span class="badge ${bcls(r.concorrente_bandeira)}" style="font-size:9px;">${r.concorrente_bandeira||'—'}</span></div>
             </div>
-            <div>${COMBS.filter(c=>r[c.k]!=null&&parseFloat(r[c.k])>0).map(c=>`<span class="tag">${c.l}: R$ ${parseFloat(r[c.k]).toFixed(2)}</span>`).join('')}</div>
-          </div>`).join('');
-      }).join('');
-    }
+            <div style="font-size:11px;color:#4a6a8a">${new Date(r.criado_em).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</div>
+          </div>
+          <div>${COMBS.filter(c=>r[c.k]>0).map(c=>`<span class="tag">${c.l}: R$ ${parseFloat(r[c.k]).toFixed(2)}</span>`).join('')}</div>
+        </div>`).join('');
   }
 
   document.getElementById('content').innerHTML=`
-    ${periodoHtml}
-    ${erroHtml}
     ${S.loading?`<div class="loading"><div class="spinner"></div>Carregando...</div>`:`
     ${kpisHtml}
     ${estadosHtml}
@@ -438,9 +352,9 @@ function renderDash(){
         ${["Todos","PR","RS","SC","SP"].map(e=>`<button class="btn-est ${S.estado===e?'on':''}" onclick="setEst('${e}')">${e}</button>`).join('')}
       </div>
     </div>
-    <div id="rows-wrap">${rowsHtml}</div>`}`;
+    ${rowsHtml}`}`;
 
-  // Bind busca com re-render só das rows
+  // Bind busca sem re-render completo
   const bi=document.getElementById('busca-input');
   if(bi){
     bi.addEventListener('input',e=>{S.busca=e.target.value;renderRows();});
@@ -448,21 +362,12 @@ function renderDash(){
   }
 }
 
-function formatarDia(diaISO){
-  if(diaISO==='sem-data')return'Sem data';
-  const [y,m,d]=diaISO.split('-');
-  const data=new Date(+y,+m-1,+d);
-  const hoje=new Date();hoje.setHours(0,0,0,0);
-  const ontem=new Date();ontem.setDate(ontem.getDate()-1);ontem.setHours(0,0,0,0);
-  const sameDay=(a,b)=>a.toDateString()===b.toDateString();
-  if(sameDay(data,hoje))return'Hoje · '+data.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
-  if(sameDay(data,ontem))return'Ontem · '+data.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
-  return data.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'});
-}
-
 function renderRows(){
-  // Re-renderiza só o container de rows (mais eficiente que renderDash inteiro)
+  // Atualiza só as rows sem recriar tudo
   const df=filtrados();
+  const d=S.dados;
+  const tot=d.length,pend=d.filter(p=>!p.registrou).length;
+  const totalRegs=d.reduce((s,p)=>s+p.regs.length,0);
   let rowsHtml='';
   if(S.aba==="geral"){
     rowsHtml=df.length===0?`<div class="empty">Nenhum posto encontrado.</div>`:
@@ -490,37 +395,16 @@ function renderRows(){
         <div style="font-size:11px;color:#f0a030;">${p.cidade} · ${p.estado}</div></div>
         <span class="badge b-amb">Pendente</span>
       </div>`).join('');
-  } else if(S.aba==="registros"){
-    const todos=df.flatMap(p=>p.regs.map(r=>({...r,pNome:p.nome})));
-    todos.sort((a,b)=>new Date(b.criado_em)-new Date(a.criado_em));
-    if(todos.length===0){
-      rowsHtml=`<div class="empty">Nenhum registro no período.</div>`;
-    } else {
-      const grupos={};
-      for(const r of todos){
-        const dia=r.criado_em?r.criado_em.substring(0,10):'sem-data';
-        if(!grupos[dia])grupos[dia]=[];
-        grupos[dia].push(r);
-      }
-      const diasOrd=Object.keys(grupos).sort().reverse();
-      rowsHtml=diasOrd.map(dia=>{
-        return`<div class="dia-sep">${formatarDia(dia)} · ${grupos[dia].length} registro${grupos[dia].length>1?'s':''}</div>`+
-        grupos[dia].map(r=>`
-          <div class="comp-card" style="cursor:pointer" onclick="abrirDet('${r.posto_id}')">
-            <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-              <div>
-                <div style="font-weight:500;font-size:13px;">${r.pNome}</div>
-                <div style="font-size:11px;color:#4a6a8a;">${r.concorrente_nome||'—'} · <span class="badge ${bcls(r.concorrente_bandeira)}" style="font-size:9px;">${r.concorrente_bandeira||'—'}</span></div>
-              </div>
-              <div style="font-size:11px;color:#4a6a8a">${r.criado_em?new Date(r.criado_em).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):''}</div>
-            </div>
-            <div>${COMBS.filter(c=>r[c.k]!=null&&parseFloat(r[c.k])>0).map(c=>`<span class="tag">${c.l}: R$ ${parseFloat(r[c.k]).toFixed(2)}</span>`).join('')}</div>
-          </div>`).join('');
-      }).join('');
-    }
   }
-  const wrap=document.getElementById('rows-wrap');
-  if(wrap)wrap.innerHTML=rowsHtml;
+  // Injeta só as rows depois dos filtros
+  const rows=document.querySelector('.filtros');
+  if(rows&&rows.nextSibling){
+    let next=rows.nextSibling;
+    while(next){const n=next.nextSibling;next.parentNode.removeChild(next);next=n;}
+  }
+  const div=document.createElement('div');
+  div.innerHTML=rowsHtml;
+  document.getElementById('content').appendChild(div);
 }
 
 function renderDet(){
@@ -535,11 +419,11 @@ function renderDet(){
       <span class="badge ${bcls(p.bandeira)}">${p.bandeira}</span>
     </div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
-      <div class="kpi kpi-0" style="padding:12px 14px"><div class="kpi-label">Período</div><div style="font-size:13px;font-weight:700;color:#fff">${rotuloPeriodo()}</div></div>
+      <div class="kpi kpi-0" style="padding:12px 14px"><div class="kpi-label">Status</div><div style="font-size:14px;font-weight:700;color:#fff">${p.registrou?'Registrou':'Pendente'}</div></div>
       <div class="kpi kpi-1" style="padding:12px 14px"><div class="kpi-label">Concorrentes</div><div style="font-size:22px;font-weight:700;color:#fff">${p.concorrentes}</div></div>
       <div class="kpi kpi-2" style="padding:12px 14px"><div class="kpi-label">Registros</div><div style="font-size:22px;font-weight:700;color:#fff">${p.regs.length}</div></div>
     </div>
-    ${p.regs.length===0?`<div class="empty">Nenhum registro no período.</div>`:
+    ${p.regs.length===0?`<div class="empty">Nenhum registro hoje.</div>`:
       p.regs.map(r=>`
         <div class="comp-card">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
@@ -548,16 +432,15 @@ function renderDet(){
               <span class="badge ${bcls(r.concorrente_bandeira)}">${r.concorrente_bandeira||'—'}</span>
               ${r.ia_usada?`<span class="badge b-grn" style="margin-left:4px">IA</span>`:''}
             </div>
-            <div style="font-size:11px;color:#4a6a8a">${r.criado_em?new Date(r.criado_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—'}</div>
+            <div style="font-size:11px;color:#4a6a8a">${new Date(r.criado_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
           </div>
           ${r.foto_url?`<img src="${r.foto_url}" onclick="window.open('${r.foto_url}','_blank')" style="width:100%;max-height:200px;object-fit:contain;border-radius:8px;background:#0f1520;cursor:pointer;border:1px solid #1e2d42;margin-bottom:10px">`:''}
           <table class="comp-table">
             <thead><tr><th>Combustível</th><th style="text-align:right">Preço</th></tr></thead>
-            <tbody>${COMBS.filter(c=>r[c.k]!=null&&parseFloat(r[c.k])>0).map(c=>`<tr><td>${c.l}</td><td style="text-align:right;font-weight:600;color:#4dd87a">R$ ${parseFloat(r[c.k]).toFixed(2)}</td></tr>`).join('')}</tbody>
+            <tbody>${COMBS.filter(c=>r[c.k]>0).map(c=>`<tr><td>${c.l}</td><td style="text-align:right;font-weight:600;color:#4dd87a">R$ ${parseFloat(r[c.k]).toFixed(2)}</td></tr>`).join('')}</tbody>
           </table>
-          ${r.observacoes?`<div style="margin-top:10px;padding:10px;background:rgba(255,255,255,0.03);border-radius:6px;font-size:12px;color:#8aaac0;font-style:italic">"${r.observacoes}"</div>`:''}
           <div style="margin-top:10px;padding-top:10px;border-top:1px solid #1e2d42;display:flex;gap:10px;flex-wrap:wrap;font-size:11px;">
-            <span style="color:#8aaac0">${r.criado_em?new Date(r.criado_em).toLocaleString('pt-BR'):'—'}</span>
+            <span style="color:#8aaac0">${new Date(r.criado_em).toLocaleString('pt-BR')}</span>
             ${r.lat&&r.lng?`<a href="https://www.google.com/maps?q=${r.lat},${r.lng}" target="_blank" style="color:#2e7dd1;font-weight:600;text-decoration:none">Ver no mapa ↗</a><span class="badge b-grn">GPS verificado</span>`:
             `<span class="badge b-amb">Sem GPS</span>`}
           </div>
@@ -567,7 +450,6 @@ function renderDet(){
 function setAba(v){S.aba=v;renderDash();}
 function setEst(v){S.estado=v;renderDash();}
 function setPostoFiltro(v){S.postoFiltro=v;renderDash();}
-function setPeriodo(v){S.periodo=v;carregarDados();}
 function abrirDet(id){S.det=S.dados.find(p=>p.id===id);renderAll();}
 function fecharDet(){S.det=null;renderAll();}
 
