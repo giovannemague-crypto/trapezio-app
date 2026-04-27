@@ -18,42 +18,23 @@ body{font-family:-apple-system,sans-serif;background:#0f1520;color:#e0e8f0;min-h
 .estados{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
 .btn-est{padding:7px 14px;font-size:12px;border-radius:8px;border:1px solid #1e2d42;background:#131e2e;color:#6a8aaa;cursor:pointer}
 .btn-est.on{background:#2e7dd1;color:#fff;border-color:#2e7dd1}
-.resumo{background:#131e2e;border:1px solid #1e2d42;border-radius:10px;padding:12px 14px;margin-bottom:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-.resumo-item{text-align:center}
-.resumo-valor{font-size:20px;font-weight:700;color:#e0e8f0}
-.resumo-valor.v-on{color:#2ec496}
-.resumo-valor.v-off{color:#faa932}
-.resumo-label{font-size:10px;color:#4a6a8a;text-transform:uppercase;letter-spacing:0.05em;margin-top:2px}
-.filtros{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
-.btn-filt{padding:6px 12px;font-size:11px;border-radius:6px;border:1px solid #1e2d42;background:#131e2e;color:#6a8aaa;cursor:pointer}
-.btn-filt.on{background:#faa932;color:#0f1520;border-color:#faa932;font-weight:600}
 .contagem{font-size:12px;color:#4a6a8a;margin-bottom:10px}
-.loading-top{font-size:11px;color:#2e7dd1;margin-bottom:8px;text-align:center}
 .posto-card{background:#131e2e;border:1px solid #1e2d42;border-radius:10px;padding:12px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer;transition:border-color 0.12s}
 .posto-card:hover{border-color:#2e7dd1;background:#172030}
-.posto-card.inativo{border-left:3px solid #faa932}
-.posto-card.ativo{border-left:3px solid #2ec496}
 .card-nome{font-size:13px;font-weight:500;color:#e0e8f0}
 .card-sub{font-size:11px;color:#4a6a8a;margin-top:3px}
 .card-end{font-size:10px;color:#3a5a7a;margin-top:2px}
-.card-status{font-size:10px;margin-top:4px;font-weight:600}
-.card-status.ok{color:#2ec496}
-.card-status.alerta{color:#faa932}
 .badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:5px;border:1px solid;font-weight:600}
-.b-ipa{background:rgba(250,174,50,0.12);color:#faa932;border-color:rgba(250,174,50,0.3)}
-.b-she{background:rgba(226,75,74,0.12);color:#e24b4a;border-color:rgba(226,75,74,0.3)}
-.b-br{background:rgba(46,125,209,0.12);color:#5aaeff;border-color:rgba(46,125,209,0.3)}
+.b-ipa{background:rgba(245,196,0,0.15);color:#8a6000;border-color:rgba(245,196,0,0.6)}
+.b-she{background:rgba(226,75,74,0.12);color:#8a0000;border-color:rgba(226,75,74,0.5)}
+.b-br{background:rgba(39,174,96,0.12);color:#145a2a;border-color:rgba(39,174,96,0.5)}
 .b-tra{background:rgba(100,100,220,0.12);color:#9090ff;border-color:rgba(100,100,220,0.3)}
 .b-rdp{background:rgba(29,158,117,0.12);color:#2ec496;border-color:rgba(29,158,117,0.3)}
+.b-bca{background:rgba(255,255,255,0.08);color:#888;border-color:rgba(0,0,0,0.15)}
 .b-oth{background:rgba(255,255,255,0.06);color:#8aaac0;border-color:rgba(255,255,255,0.1)}
 .est-tag{font-size:10px;padding:2px 7px;border-radius:5px;background:#1e2d42;color:#8aaac0;border:1px solid #2a3a52}
-.contador-hoje{font-size:11px;padding:3px 8px;border-radius:5px;font-weight:700;white-space:nowrap}
-.contador-hoje.ok{background:rgba(46,196,150,0.15);color:#2ec496;border:1px solid rgba(46,196,150,0.3)}
-.contador-hoje.meta{background:rgba(46,196,150,0.25);color:#2ec496;border:1px solid #2ec496}
-.contador-hoje.zero{background:rgba(250,174,50,0.12);color:#faa932;border:1px solid rgba(250,174,50,0.3)}
 .chevron{font-size:16px;color:#3a5a7a;flex-shrink:0}
 .empty{text-align:center;padding:3rem;color:#3a5a7a}
-.refresh-btn{background:transparent;border:1px solid #2e7dd1;color:#2e7dd1;padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;margin-left:8px}
 </style>
 </head>
 <body>
@@ -67,32 +48,13 @@ body{font-family:-apple-system,sans-serif;background:#0f1520;color:#e0e8f0;min-h
 </div>
 
 <div class="content">
-  <div class="resumo" id="resumo">
-    <div class="resumo-item"><div class="resumo-valor" id="r-total">—</div><div class="resumo-label">Postos</div></div>
-    <div class="resumo-item"><div class="resumo-valor v-on" id="r-ativos">—</div><div class="resumo-label">Ativos hoje</div></div>
-    <div class="resumo-item"><div class="resumo-valor v-off" id="r-inativos">—</div><div class="resumo-label">Sem registros</div></div>
-  </div>
-
-  <div id="status-carga" class="loading-top"></div>
-
   <input class="input-s" id="busca" type="text" placeholder="Buscar por nome, cidade ou endereço...">
   <div class="estados" id="estados"></div>
-  <div class="filtros" id="filtros"></div>
-  <div class="contagem">
-    <span id="contagem"></span>
-    <button class="refresh-btn" onclick="recarregarDados()">↻ Atualizar</button>
-  </div>
+  <div class="contagem" id="contagem"></div>
   <div id="lista"></div>
 </div>
 
 <script>
-var CONFIG = {
-  SUPABASE_URL: 'https://rpuiptwlmomwbjcmnwbd.supabase.co',
-  SUPABASE_KEY: 'sb_publishable_SL_hHlR1S1nFDAlMUN7Fzg_qvuWcmmW',
-  AUTO_REFRESH_MS: 30000, // 30 segundos
-  META_REGISTROS: 7,
-};
-
 var POSTOS = [
   {id:"001",nome:"Posto Alfa",cidade:"Colombo",estado:"PR",bandeira:"Ipiranga",end:"Est Da Graciosa, 3253"},
   {id:"002",nome:"Posto Almirante Filial 02",cidade:"São Bento Do Sul",estado:"SC",bandeira:"Ipiranga",end:"R Antonio Kaesemodel, 2339"},
@@ -159,20 +121,15 @@ var POSTOS = [
   {id:"065",nome:"Posto WC",cidade:"Criciúma",estado:"SC",bandeira:"Ipiranga",end:"Rod BR-101, 8600"}
 ];
 
-var BCLS = {Ipiranga:"b-ipa",Shell:"b-she",BR:"b-br","Trapézio":"b-tra",RDP:"b-rdp",TOF:"b-oth"};
+var BCLS = {
+  Ipiranga:"b-ipa", Shell:"b-she", BR:"b-br",
+  Petrobras:"b-br", "Raízen":"b-br",
+  "Trapézio":"b-tra", RDP:"b-rdp", TOF:"b-oth",
+  "Bandeira Branca":"b-bca"
+};
 var ESTADOS = ["Todos","PR","RS","SC","SP"];
-var FILTROS = [
-  {key:"todos", label:"Todos"},
-  {key:"ativos", label:"Ativos hoje"},
-  {key:"inativos", label:"Sem registros hoje"},
-  {key:"meta", label:"Meta atingida (7+)"},
-];
-
 var estado = "Todos";
 var busca = "";
-var filtroStatus = "todos";
-var contagemPorPosto = {}; // { "001": 3, "002": 0, ... }
-var autoRefreshTimer = null;
 
 function slugify(str) {
   return str.toLowerCase()
@@ -180,49 +137,6 @@ function slugify(str) {
     .replace(/[ìíîï]/g,'i').replace(/[òóôõö]/g,'o')
     .replace(/[ùúûü]/g,'u').replace(/[ç]/g,'c')
     .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-}
-
-// ── Buscar registros de hoje de todos os postos ──────────────
-async function carregarContagens() {
-  var inicioDia = new Date();
-  inicioDia.setHours(0, 0, 0, 0);
-  var dataISO = inicioDia.toISOString();
-  var url = CONFIG.SUPABASE_URL + '/rest/v1/registros?criado_em=gte.' + encodeURIComponent(dataISO) + '&select=posto_id';
-
-  var statusEl = document.getElementById('status-carga');
-  statusEl.textContent = 'Atualizando...';
-
-  try {
-    var resp = await fetch(url, {
-      headers: {
-        'apikey': CONFIG.SUPABASE_KEY,
-        'Authorization': 'Bearer ' + CONFIG.SUPABASE_KEY,
-      },
-    });
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    var rows = await resp.json();
-
-    // Agrupa por posto_id
-    var novo = {};
-    for (var i = 0; i < rows.length; i++) {
-      var pid = rows[i].posto_id;
-      novo[pid] = (novo[pid] || 0) + 1;
-    }
-    contagemPorPosto = novo;
-
-    var agora = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
-    statusEl.textContent = 'Atualizado às ' + agora;
-    setTimeout(function() { statusEl.textContent = ''; }, 3000);
-  } catch (e) {
-    console.error('Erro carregando contagens:', e);
-    statusEl.textContent = 'Erro ao atualizar — tentando de novo em 30s';
-  }
-  render();
-  renderResumo();
-}
-
-function recarregarDados() {
-  carregarContagens();
 }
 
 function getFiltrados() {
@@ -234,14 +148,7 @@ function getFiltrados() {
       p.cidade.toLowerCase().indexOf(q) >= 0 ||
       p.end.toLowerCase().indexOf(q) >= 0 ||
       p.bandeira.toLowerCase().indexOf(q) >= 0;
-
-    var c = contagemPorPosto[p.id] || 0;
-    var statusOk = true;
-    if (filtroStatus === "ativos")   statusOk = c > 0;
-    if (filtroStatus === "inativos") statusOk = c === 0;
-    if (filtroStatus === "meta")     statusOk = c >= CONFIG.META_REGISTROS;
-
-    return estadoOk && buscaOk && statusOk;
+    return estadoOk && buscaOk;
   });
 }
 
@@ -249,59 +156,30 @@ function irParaPosto(slug) {
   window.location.href = '/?posto=' + slug;
 }
 
-function renderResumo() {
-  var total = POSTOS.length;
-  var ativos = 0;
-  for (var i = 0; i < POSTOS.length; i++) {
-    if ((contagemPorPosto[POSTOS[i].id] || 0) > 0) ativos++;
-  }
-  document.getElementById('r-total').textContent = total;
-  document.getElementById('r-ativos').textContent = ativos;
-  document.getElementById('r-inativos').textContent = total - ativos;
-}
-
 function render() {
   var df = getFiltrados();
-  document.getElementById('contagem').textContent =
-    df.length + ' posto' + (df.length !== 1 ? 's' : '');
+  document.getElementById('contagem').textContent = df.length + ' posto' + (df.length !== 1 ? 's' : '') + ' encontrado' + (df.length !== 1 ? 's' : '');
 
   if (df.length === 0) {
     document.getElementById('lista').innerHTML = '<div class="empty">Nenhum posto encontrado.</div>';
     return;
   }
 
-  // Ordena: inativos primeiro (chama atenção do supervisor), depois por nome
-  df.sort(function(a, b) {
-    var ca = contagemPorPosto[a.id] || 0;
-    var cb = contagemPorPosto[b.id] || 0;
-    if (ca === 0 && cb > 0) return -1;
-    if (cb === 0 && ca > 0) return 1;
-    return a.nome.localeCompare(b.nome);
-  });
-
   var html = '';
   for (var i = 0; i < df.length; i++) {
     var p = df[i];
     var slug = slugify(p.nome);
     var bcls = BCLS[p.bandeira] || 'b-oth';
-    var cont = contagemPorPosto[p.id] || 0;
-    var cardClass = cont > 0 ? 'ativo' : 'inativo';
-    var contClass = cont === 0 ? 'zero' : (cont >= CONFIG.META_REGISTROS ? 'meta' : 'ok');
-    var contTexto = cont === 0
-      ? 'Sem registros'
-      : cont + (cont >= CONFIG.META_REGISTROS ? ' ✓ meta' : ' hoje');
-
-    html += '<div class="posto-card ' + cardClass + '" onclick="irParaPosto(\'' + slug + '\')">';
+    html += '<div class="posto-card" onclick="irParaPosto(\'' + slug + '\')">';
     html += '<div style="flex:1;min-width:0">';
     html += '<div class="card-nome">' + p.nome + '</div>';
     html += '<div class="card-sub">' + p.cidade + ' · ' + p.estado + ' · <span class="badge ' + bcls + '">' + p.bandeira + '</span></div>';
     html += '<div class="card-end">' + p.end + '</div>';
     html += '</div>';
-    html += '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">';
-    html += '<span class="contador-hoje ' + contClass + '">' + contTexto + '</span>';
+    html += '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0">';
     html += '<span class="est-tag">' + p.estado + '</span>';
-    html += '</div>';
     html += '<span class="chevron">›</span>';
+    html += '</div>';
     html += '</div>';
   }
   document.getElementById('lista').innerHTML = html;
@@ -316,24 +194,9 @@ function renderEstados() {
   document.getElementById('estados').innerHTML = html;
 }
 
-function renderFiltros() {
-  var html = '';
-  for (var i = 0; i < FILTROS.length; i++) {
-    var f = FILTROS[i];
-    html += '<button class="btn-filt' + (filtroStatus === f.key ? ' on' : '') + '" onclick="setFiltro(\'' + f.key + '\')">' + f.label + '</button>';
-  }
-  document.getElementById('filtros').innerHTML = html;
-}
-
 function setEst(v) {
   estado = v;
   renderEstados();
-  render();
-}
-
-function setFiltro(v) {
-  filtroStatus = v;
-  renderFiltros();
   render();
 }
 
@@ -342,28 +205,8 @@ document.getElementById('busca').addEventListener('input', function(e) {
   render();
 });
 
-// Auto-refresh a cada 30s
-function iniciarAutoRefresh() {
-  if (autoRefreshTimer) clearInterval(autoRefreshTimer);
-  autoRefreshTimer = setInterval(carregarContagens, CONFIG.AUTO_REFRESH_MS);
-}
-
-// Pausa refresh quando aba fica oculta, retoma ao voltar
-document.addEventListener('visibilitychange', function() {
-  if (document.hidden) {
-    if (autoRefreshTimer) { clearInterval(autoRefreshTimer); autoRefreshTimer = null; }
-  } else {
-    carregarContagens();
-    iniciarAutoRefresh();
-  }
-});
-
 renderEstados();
-renderFiltros();
 render();
-renderResumo();
-carregarContagens();
-iniciarAutoRefresh();
 </script>
 </body>
 </html>
