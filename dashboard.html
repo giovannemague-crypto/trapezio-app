@@ -189,7 +189,7 @@ const BCLS={
   "Bandeira Branca":"b-bca"
 };
 
-let S={dados:[],loading:true,aba:"geral",estado:"Todos",busca:"",postoFiltro:"",det:null};
+let S={dados:[],loading:true,aba:"geral",estado:"Todos",busca:"",postoFiltro:"",det:null,dias:1};
 
 function bcls(b){return BCLS[b]||"b-oth";}
 
@@ -197,8 +197,8 @@ async function carregarDados(){
   S.loading=true; renderAll();
   try{
     const hoje=new Date().toISOString().split('T')[0];
-    const cincoAtras=new Date(Date.now()-5*24*60*60*1000).toISOString().split('T')[0];
-    const url=`${SUPABASE_URL}/rest/v1/registros?criado_em=gte.${cincoAtras}T00:00:00&select=posto_id,concorrente_nome,concorrente_bandeira,gc,ga,et,eta,ds,ds500,dsa,lat,lng,ia_usada,foto_url,criado_em`;
+    const dataInicio=new Date(Date.now()-((S.dias-1)*24*60*60*1000)).toISOString().split('T')[0];
+    const url=`${SUPABASE_URL}/rest/v1/registros?criado_em=gte.${dataInicio}T00:00:00&select=posto_id,concorrente_nome,concorrente_bandeira,gc,ga,et,eta,ds,ds500,dsa,lat,lng,ia_usada,foto_url,criado_em`;
     const resp=await fetch(url,{headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`}});
     const regs=await resp.json();
     const mapa={};
@@ -233,6 +233,9 @@ function renderTopbar(){
         <div class="logo-name">Grupo Trapézio</div>
       </div>
       <div class="topbar-right">
+        <div style="display:flex;gap:4px;background:#131e2e;border:1px solid #1e2d42;border-radius:8px;padding:3px;">
+          ${[1,2,3,4,5].map(d=>`<button onclick="setDias(${d})" style="padding:4px 10px;font-size:11px;border:none;border-radius:6px;cursor:pointer;font-weight:600;background:${S.dias===d?'#2e7dd1':'transparent'};color:${S.dias===d?'#fff':'#4a6a8a'};">${d}d</button>`).join('')}
+        </div>
         <span class="pill-live">● Ao vivo</span>
         <button class="btn-top" onclick="carregarDados()">Atualizar</button>
       </div>
@@ -448,7 +451,8 @@ function renderDet(){
         </div>`).join('')}`;
 }
 
-function setAba(v){S.aba=v;renderDash();}
+function setDias(v){S.dias=v;carregarDados();}
+function setAba(v){S.aba=v;renderDash()}
 function setEst(v){S.estado=v;renderDash();}
 function setPostoFiltro(v){S.postoFiltro=v;renderDash();}
 function abrirDet(id){S.det=S.dados.find(p=>p.id===id);renderAll();}
