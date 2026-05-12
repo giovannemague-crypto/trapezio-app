@@ -220,12 +220,80 @@ function hora()  { return new Date().toLocaleTimeString('pt-BR', { hour:'2-digit
 function render() { document.getElementById('app').innerHTML = views[state.tela](); }
 
 // ── Anthropic OCR ──────────────────────────────────────────
+async function melhorarImagem(file) {
+  return new Promise((res) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const escala = Math.min(1200 / img.width, 1200 / img.height, 2);
+      canvas.width = img.width * escala;
+      canvas.height = img.height * escala;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      const id = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const d = id.data;
+
+      // Calcula brilho médio
+      let totalBrilho = 0;
+      for (let i = 0; i < d.length; i += 16) totalBrilho += (d[i] + d[i+1] + d[i+2]) / 3;
+      const brilhoMedio = totalBrilho / (d.length / 16);
+
+      console.log('Brilho médio da imagem:', Math.round(brilhoMedio));
+
+      if (brilhoMedio < 80) {
+        // Muito escura — aumenta brilho bastante
+        for (let i = 0; i < d.length; i += 4) {
+          d[i]   = Math.min(255, d[i]   * 2.0 + 40);
+          d[i+1] = Math.min(255, d[i+1] * 2.0 + 40);
+          d[i+2] = Math.min(255, d[i+2] * 2.0 + 40);
+        }
+        console.log('Aplicado: aumento de brilho (imagem escura)');
+      } else if (brilhoMedio < 120) {
+        // Um pouco escura — ajuste leve
+        for (let i = 0; i < d.length; i += 4) {
+          d[i]   = Math.min(255, d[i]   * 1.4 + 15);
+          d[i+1] = Math.min(255, d[i+1] * 1.4 + 15);
+          d[i+2] = Math.min(255, d[i+2] * 1.4 + 15);
+        }
+        console.log('Aplicado: ajuste leve de brilho');
+      } else if (brilhoMedio > 200) {
+        // Muito clara/saturada — reduz brilho e aumenta contraste
+        for (let i = 0; i < d.length; i += 4) {
+          d[i]   = Math.min(255, Math.max(0, (d[i]   - 128) * 1.4 + 100));
+          d[i+1] = Math.min(255, Math.max(0, (d[i+1] - 128) * 1.4 + 100));
+          d[i+2] = Math.min(255, Math.max(0, (d[i+2] - 128) * 1.4 + 100));
+        }
+        console.log('Aplicado: redução de brilho (imagem clara)');
+      } else if (brilhoMedio > 160) {
+        // Um pouco clara — ajuste leve de contraste
+        for (let i = 0; i < d.length; i += 4) {
+          d[i]   = Math.min(255, Math.max(0, (d[i]   - 128) * 1.2 + 110));
+          d[i+1] = Math.min(255, Math.max(0, (d[i+1] - 128) * 1.2 + 110));
+          d[i+2] = Math.min(255, Math.max(0, (d[i+2] - 128) * 1.2 + 110));
+        }
+        console.log('Aplicado: ajuste leve de contraste');
+      } else {
+        console.log('Imagem ok — sem ajuste necessário');
+      }
+
+      ctx.putImageData(id, 0, 0);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(blob => res(blob || file), 'image/jpeg', 0.92);
+    };
+    img.onerror = () => res(file);
+    img.src = url;
+  });
+}
+
 async function lerFotoComIA(file) {
+  const fileOtimizado = await melhorarImagem(file);
   const b64 = await new Promise((res, rej) => {
     const r = new FileReader();
     r.onload = () => res(r.result.split(',')[1]);
     r.onerror = rej;
-    r.readAsDataURL(file);
+    r.readAsDataURL(fileOtimizado);
   });
 
   const resp = await fetch('/api/ocr', {
@@ -371,7 +439,11 @@ const views = {
 
   coleta() {
     const f = state.form, posto = state.posto;
-    const sugestoes = BANDEIRAS.filter(b => f.nome && b.toLowerCase().includes(f.nome.toLowerCase())).slice(0,5);
+    const historico = getHistorico(state.posto.id);
+    const sugestoes = f.nome
+      ? BANDEIRAS.filter(b => b.toLowerCase().includes(f.nome.toLowerCase())).slice(0,3)
+        .concat(historico.filter(h => h.nome.toLowerCase().includes(f.nome.toLowerCase()) && !BANDEIRAS.includes(h.nome)).map(h=>h.nome).slice(0,5))
+      : historico.slice(0,7).map(h => h.nome);
     const campos = COMBUSTIVEIS.map(({ key, label }) => {
       const val = f[key], nosso = posto.precos[key];
       const st = val && !isNaN(parseFloat(val)) && nosso > 0 ? calcStatus(nosso, parseFloat(val)) : null;
@@ -405,7 +477,12 @@ const views = {
         <div class="input-wrap">
           <input type="text" placeholder="Ex: Ipiranga Av. Brasil" value="${f.nome}"
             oninput="setNome(this.value)" onfocus="setDrop(true)" onblur="setTimeout(()=>setDrop(false),200)" />
-          ${f.dropOpen && sugestoes.length>0?`<div class="dropdown">${sugestoes.map(b=>`<div class="dropdown-item" onmousedown="escolherBandeira('${b}')">${b}</div>`).join('')}</div>`:''}
+          ${(f.dropOpen && sugestoes.length>0)?`<div class="dropdown">
+            ${f.nome===''?'<div style="font-size:10px;color:#9c9a92;padding:6px 12px;border-bottom:0.5px solid rgba(0,0,0,0.06);">Recentes</div>':''}
+            ${sugestoes.map(b=>`<div class="dropdown-item" onmousedown="escolherSugestao('${b.replace(/'/g,"\\'")}')">
+              ${typeof b === 'string' ? b : b.nome}
+            </div>`).join('')}
+          </div>`:''}
         </div>
         <div style="margin-top:12px;">
           <div class="label" style="margin-bottom:6px;">Bandeira</div>
@@ -563,6 +640,16 @@ function atualizarBotao() {
   if (btn) btn.disabled = !state.form.nome.trim() || !state.form.imgPreview;
 }
 
+function escolherSugestao(nome) {
+  const historico = getHistorico(state.posto.id);
+  const item = historico.find(h => h.nome === nome);
+  state.form.nome = nome;
+  if (item && item.bandeira) state.form.bandeira = item.bandeira;
+  else if (BANDEIRAS.includes(nome)) state.form.bandeira = nome;
+  state.form.dropOpen = false;
+  render();
+}
+
 function escolherBandeira(b) {
   state.form.nome = b;
   state.form.bandeira = BANDEIRAS.includes(b) ? b : 'Outros';
@@ -673,6 +760,7 @@ async function salvar() {
     lat: f.lat, lng: f.lng, fotoUrl,
   };
   state.registros.push(reg);
+  salvarHistorico(state.posto.id, f.nome, f.bandeira);
   await salvarSupabase(reg);
   _fotoFile = null;
   irLista();
