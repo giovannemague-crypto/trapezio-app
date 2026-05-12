@@ -367,7 +367,24 @@ async function salvarSupabase(registro) {
     console.warn('Erro Supabase:', e);
   }
 }
+function getHistorico(postoId) {
+  try {
+    const h = localStorage.getItem('historico_' + postoId);
+    return h ? JSON.parse(h) : [];
+  } catch(e) { return []; }
+}
 
+function salvarHistorico(postoId, nome, bandeira) {
+  try {
+    const h = getHistorico(postoId);
+    const existe = h.find(function(c){ return c.nome === nome; });
+    if (!existe) {
+      h.unshift({ nome: nome, bandeira: bandeira });
+      if (h.length > 20) h.pop();
+      localStorage.setItem('historico_' + postoId, JSON.stringify(h));
+    }
+  } catch(e) {}
+}
 // ── Views ──────────────────────────────────────────────────
 const views = {
   selector() {
