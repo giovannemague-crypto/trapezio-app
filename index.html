@@ -518,8 +518,9 @@ const views = {
         <div class="label" style="margin-bottom:6px;">Observações (opcional)</div>
         <textarea rows="3" placeholder="Ex: Promoção no etanol até sexta..." oninput="setObs(this.value)">${f.obs}</textarea>
       </div>
-      <button class="btn-primary" id="btn-salvar" onclick="salvar()" ${!f.nome.trim() || !f.imgPreview ? 'disabled' : ''}>Salvar registro</button>
-      ${!f.imgPreview ? `<div style="font-size:11px;color:#a32d2d;text-align:center;margin-top:4px;">⚠️ Foto do painel é obrigatória</div>` : ''}`;
+      <button class="btn-primary" id="btn-salvar" onclick="salvar()" ${(!f.nome.trim() || !f.imgPreview) ? 'disabled' : ''}>Salvar registro</button>
+      ${!f.imgPreview ? `<div style="font-size:11px;color:#a32d2d;text-align:center;margin-top:4px;">⚠️ Foto do painel é obrigatória</div>` : ''}
+      ${!f.nome.trim() ? `<div style="font-size:11px;color:#a32d2d;text-align:center;margin-top:4px;">⚠️ Nome do concorrente é obrigatório</div>` : ''}`;
   },
 
   resumo() {
@@ -637,7 +638,10 @@ function setDrop(v)     { state.form.dropOpen=v; }
 
 function atualizarBotao() {
   const btn = document.getElementById('btn-salvar');
-  if (btn) btn.disabled = !state.form.nome.trim() || !state.form.imgPreview;
+  if (!btn) return;
+  const temNome = state.form.nome.trim().length > 0;
+  const temFoto = !!state.form.imgPreview;
+  btn.disabled = !temNome || !temFoto;
 }
 
 function escolherSugestao(nome) {
