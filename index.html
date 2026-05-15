@@ -486,6 +486,7 @@ const views = {
           </div>`).join('')}
 
       <button class="btn-primary" onclick="irColeta()">+ Registrar concorrente</button>
+      ${regs.length>0 && !state.proprio?`<button class="btn-accent" onclick="finalizarPesquisa()">✓ Finalizar pesquisa do dia</button>`:''}
       ${regs.length>0?`<button class="btn-secondary" onclick="irResumo()">Ver relatório do dia →</button>`:''}`;
   },
 
@@ -726,6 +727,15 @@ function startGPS() {
 
 function irColeta()  { state.form = emptyForm(false); state.form.locStatus='buscando'; state.tela='coleta';  render(); startGPS(); }
 function irProprio() { state.form = emptyForm(true);  state.form.locStatus='buscando'; state.tela='proprio'; render(); startGPS(); }
+
+function finalizarPesquisa() {
+  const n = state.registros.length;
+  if (n < 7) {
+    const ok = confirm(`Você só registrou ${n} concorrente${n===1?'':'s'} (meta é 7).\n\nTem certeza que quer finalizar a pesquisa agora?`);
+    if (!ok) return;
+  }
+  irProprio();
+}
 
 function setNome(v)     { state.form.nome=v; atualizarBotao(); }
 function setBandeira(v) { state.form.bandeira=v; }
