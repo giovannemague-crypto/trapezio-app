@@ -18,8 +18,10 @@
     .hint { font-size: 11px; color: #9c9a92; margin-top: 6px; }
     .card { background: #fff; border: 0.5px solid rgba(0,0,0,0.12); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
     .card-gray { background: #f5f5f3; border-radius: 8px; padding: 12px 14px; }
+    .card-highlight { background: linear-gradient(135deg, #fff9e0, #fff); border: 0.5px solid #f5c400; }
     .btn-primary { width: 100%; padding: 12px; font-size: 14px; font-weight: 500; border-radius: 8px; border: 0.5px solid rgba(0,0,0,0.2); background: #1a1a18; color: #fff; cursor: pointer; margin-bottom: 8px; }
     .btn-primary:disabled { background: #e8e8e4; color: #9c9a92; cursor: not-allowed; border-color: transparent; }
+    .btn-accent { width: 100%; padding: 12px; font-size: 14px; font-weight: 500; border-radius: 8px; border: 0.5px solid #f5c400; background: #fff9e0; color: #8a6000; cursor: pointer; margin-bottom: 8px; }
     .btn-secondary { width: 100%; padding: 12px; font-size: 14px; border-radius: 8px; border: 0.5px solid rgba(0,0,0,0.2); background: transparent; color: #1a1a18; cursor: pointer; }
     .btn-small { padding: 5px 12px; font-size: 12px; border-radius: 6px; border: 0.5px solid rgba(0,0,0,0.2); background: transparent; color: #73726c; cursor: pointer; }
     .btn-back { background: transparent; border: none; font-size: 22px; cursor: pointer; color: #73726c; padding: 0; line-height: 1; }
@@ -62,11 +64,9 @@
     .spinner-wrap { text-align: center; padding: 1.5rem 0; }
     .spinner { width: 28px; height: 28px; border: 2px solid #e8e8e4; border-top-color: #1a1a18; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 8px; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .tabs { display: flex; border-bottom: 0.5px solid rgba(0,0,0,0.1); margin-bottom: 1.25rem; }
-    .tab { padding: 8px 16px; font-size: 13px; border: none; border-bottom: 2px solid transparent; background: transparent; color: #73726c; cursor: pointer; }
-    .tab.active { border-bottom-color: #1a1a18; color: #1a1a18; font-weight: 500; }
     .alert-amber { background: #faeeda; border: 0.5px solid #ba7517; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #854f0b; margin-bottom: 12px; }
     .alert-blue { background: #e6f1fb; border: 0.5px solid #b5d4f4; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #185fa5; margin-bottom: 12px; }
+    .alert-green { background: #eaf3de; border: 0.5px solid #639922; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #3b6d11; margin-bottom: 12px; }
     .resumo-table { width: 100%; border-collapse: collapse; font-size: 13px; }
     .resumo-table th { text-align: left; padding: 8px 10px; font-weight: 500; color: #73726c; border-bottom: 0.5px solid rgba(0,0,0,0.1); }
     .resumo-table td { padding: 10px 10px; border-bottom: 0.5px solid rgba(0,0,0,0.06); }
@@ -75,14 +75,14 @@
       body { background: #1a1a18; color: #e8e8e4; }
       .card, .reg-card { background: #2c2c2a; border-color: rgba(255,255,255,0.1); }
       .card-gray { background: #232321; }
+      .card-highlight { background: linear-gradient(135deg, #3a2f10, #2c2c2a); border-color: #8a6000; }
       input[type=text], input[type=number], textarea, select { background: #232321; color: #e8e8e4; border-color: rgba(255,255,255,0.15); }
       .foto-btn { background: #232321; border-color: rgba(255,255,255,0.15); color: #9c9a92; }
       .dropdown { background: #2c2c2a; border-color: rgba(255,255,255,0.15); }
       .btn-primary { background: #e8e8e4; color: #1a1a18; }
       .btn-primary:disabled { background: #333331; color: #666663; }
+      .btn-accent { background: #3a2f10; color: #f5c400; }
       .btn-secondary, .btn-small { color: #e8e8e4; border-color: rgba(255,255,255,0.2); }
-      .tab { color: #9c9a92; }
-      .tab.active { color: #e8e8e4; border-bottom-color: #e8e8e4; }
       .empty { border-color: rgba(255,255,255,0.1); color: #9c9a92; }
     }
   </style>
@@ -93,11 +93,9 @@
 const CONFIG = {
   SUPABASE_URL:  'https://rpuiptwlmomwbjcmnwbd.supabase.co',
   SUPABASE_KEY:  'sb_publishable_SL_hHlR1S1nFDAlMUN7Fzg_qvuWcmmW',
-  ANTHROPIC_KEY: '',
-  N8N_WEBHOOK:   'https://SEU_N8N/webhook/trapezio',
 };
 
-// ─── POSTOS: precos agora cobre os 7 combustíveis ───────────
+// ─── POSTOS: precos cobre os 7 combustíveis ───────────
 const _zeros = { gc:0, ga:0, et:0, eta:0, ds:0, ds500:0, dsa:0 };
 const _p = (extras = {}) => ({ ..._zeros, ...extras });
 
@@ -191,12 +189,24 @@ const BANDEIRA_BADGE = {
 let state = {
   tela: 'selector',
   posto: null,
-  registros: [],
-  form: emptyForm(),
+  registros: [],          // concorrentes
+  proprio: null,          // registro do próprio posto (após captura)
+  form: emptyForm(false),
 };
 
-function emptyForm() {
-  return { nome:'', bandeira:'Bandeira Branca', gc:'', ga:'', et:'', eta:'', ds:'', ds500:'', dsa:'', obs:'', imgPreview:null, imgFile:null, iaUsada:false, erroIA:false, loading:false, dropOpen:false, lat:'', lng:'', locStatus:'', precosIA:null, camposEditados:{} };
+function emptyForm(isProprio) {
+  return {
+    nome: '',
+    bandeira: 'Bandeira Branca',
+    gc:'', ga:'', et:'', eta:'', ds:'', ds500:'', dsa:'',
+    obs:'',
+    imgPreview:null, imgFile:null,
+    iaUsada:false, erroIA:false, loading:false,
+    dropOpen:false,
+    lat:'', lng:'', locStatus:'',
+    precosIA:null, camposEditados:{},
+    isProprio: !!isProprio,
+  };
 }
 
 function slugify(str) {
@@ -206,7 +216,6 @@ function slugify(str) {
     .replace(/^-|-$/g, '');
 }
 
-// Guarda o arquivo fora do state para não perder na re-renderização
 let _fotoFile = null;
 
 function getPostoFromURL() {
@@ -217,78 +226,44 @@ function getPostoFromURL() {
   return POSTOS.find(p => slugify(p.nome) === param) || null;
 }
 
-function calcStatus(nosso, deles) {
-  const d = nosso - deles;
-  if (d > 0.05)  return { label:`+R$ ${d.toFixed(2)} acima`, cls:'badge-red', cor:'#a32d2d' };
-  if (d < -0.05) return { label:`R$ ${Math.abs(d).toFixed(2)} abaixo`, cls:'badge-green', cor:'#3b6d11' };
-  return { label:'Na média', cls:'badge-amber', cor:'#854f0b' };
-}
-
 function hoje() { return new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'2-digit', month:'2-digit', year:'numeric' }); }
-function hora()  { return new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }); }
+function hora() { return new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }); }
 function render() { document.getElementById('app').innerHTML = views[state.tela](); }
 
-// ── Histórico de concorrentes (localStorage) ────────────────
+// ── Histórico em localStorage ───────────────────────────────
 function getHistorico(postoId) {
   try {
     const raw = localStorage.getItem(`trapezio_hist_${postoId}`);
     if (!raw) return [];
     const arr = JSON.parse(raw);
     return Array.isArray(arr) ? arr : [];
-  } catch(e) {
-    console.warn('Erro lendo histórico:', e);
-    return [];
-  }
+  } catch(e) { return []; }
 }
-
 function salvarHistorico(postoId, nome, bandeira) {
   if (!nome || !nome.trim()) return;
   try {
     const hist = getHistorico(postoId);
-    // Remove se já existe (case insensitive) para subir para o topo
     const filtrado = hist.filter(h => h.nome.toLowerCase() !== nome.toLowerCase());
     filtrado.unshift({ nome: nome.trim(), bandeira: bandeira || 'Outros', ts: Date.now() });
-    // Mantém só os 20 mais recentes
-    const final = filtrado.slice(0, 20);
-    localStorage.setItem(`trapezio_hist_${postoId}`, JSON.stringify(final));
-  } catch(e) {
-    console.warn('Erro salvando histórico:', e);
-  }
+    localStorage.setItem(`trapezio_hist_${postoId}`, JSON.stringify(filtrado.slice(0, 20)));
+  } catch(e) {}
 }
 
-// ── Distância Haversine + busca de posto próximo ────────────
-function distanciaKm(lat1, lng1, lat2, lng2) {
-  const toRad = x => x * Math.PI / 180;
-  const R = 6371; // km
-  const dLat = toRad(lat2 - lat1);
-  const dLng = toRad(lng2 - lng1);
-  const a = Math.sin(dLat/2)**2 +
-            Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-            Math.sin(dLng/2)**2;
-  return 2 * R * Math.asin(Math.sqrt(a));
+async function buscarPostoProximo(lat, lng) { return null; }
+
+// ── Comparação preço próprio vs concorrentes (menor e maior) ──
+function compararProprioVsMercado(combKey) {
+  if (!state.proprio || !state.proprio[combKey]) return null;
+  const nosso = parseFloat(state.proprio[combKey]);
+  const vals = state.registros
+    .filter(r => r[combKey])
+    .map(r => parseFloat(r[combKey]))
+    .filter(v => !isNaN(v) && v > 0);
+  if (!vals.length) return { nosso, menor:null, maior:null };
+  return { nosso, menor: Math.min(...vals), maior: Math.max(...vals) };
 }
 
-// Busca posto concorrente próximo (atualmente: heurística simples baseada em postos cadastrados)
-// Retorna { nome, bandeira } ou null. Como não temos API externa, retorna null por padrão.
-// Você pode plugar uma chamada a Google Places ou Overpass aqui se quiser.
-async function buscarPostoProximo(lat, lng) {
-  try {
-    lat = parseFloat(lat);
-    lng = parseFloat(lng);
-    if (!lat || !lng) return null;
-    // Sem API externa configurada, não autopreenche.
-    // Para ativar, descomente e configure uma chamada como:
-    // const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
-    // const j = await r.json();
-    // return { nome: j.display_name?.split(',')[0] || '', bandeira: '' };
-    return null;
-  } catch(e) {
-    console.warn('buscarPostoProximo:', e);
-    return null;
-  }
-}
-
-// ── Anthropic OCR ──────────────────────────────────────────
+// ── Image / OCR ─────────────────────────────────────────────
 async function melhorarImagem(file) {
   return new Promise((res) => {
     const img = new Image();
@@ -300,49 +275,36 @@ async function melhorarImagem(file) {
       canvas.height = img.height * escala;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
       const id = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const d = id.data;
-
-      // Calcula brilho médio
       let totalBrilho = 0;
       for (let i = 0; i < d.length; i += 16) totalBrilho += (d[i] + d[i+1] + d[i+2]) / 3;
       const brilhoMedio = totalBrilho / (d.length / 16);
-
-      console.log('Brilho médio da imagem:', Math.round(brilhoMedio));
-
       if (brilhoMedio < 80) {
         for (let i = 0; i < d.length; i += 4) {
           d[i]   = Math.min(255, d[i]   * 2.0 + 40);
           d[i+1] = Math.min(255, d[i+1] * 2.0 + 40);
           d[i+2] = Math.min(255, d[i+2] * 2.0 + 40);
         }
-        console.log('Aplicado: aumento de brilho (imagem escura)');
       } else if (brilhoMedio < 120) {
         for (let i = 0; i < d.length; i += 4) {
           d[i]   = Math.min(255, d[i]   * 1.4 + 15);
           d[i+1] = Math.min(255, d[i+1] * 1.4 + 15);
           d[i+2] = Math.min(255, d[i+2] * 1.4 + 15);
         }
-        console.log('Aplicado: ajuste leve de brilho');
       } else if (brilhoMedio > 200) {
         for (let i = 0; i < d.length; i += 4) {
           d[i]   = Math.min(255, Math.max(0, (d[i]   - 128) * 1.4 + 100));
           d[i+1] = Math.min(255, Math.max(0, (d[i+1] - 128) * 1.4 + 100));
           d[i+2] = Math.min(255, Math.max(0, (d[i+2] - 128) * 1.4 + 100));
         }
-        console.log('Aplicado: redução de brilho (imagem clara)');
       } else if (brilhoMedio > 160) {
         for (let i = 0; i < d.length; i += 4) {
           d[i]   = Math.min(255, Math.max(0, (d[i]   - 128) * 1.2 + 110));
           d[i+1] = Math.min(255, Math.max(0, (d[i+1] - 128) * 1.2 + 110));
           d[i+2] = Math.min(255, Math.max(0, (d[i+2] - 128) * 1.2 + 110));
         }
-        console.log('Aplicado: ajuste leve de contraste');
-      } else {
-        console.log('Imagem ok — sem ajuste necessário');
       }
-
       ctx.putImageData(id, 0, 0);
       URL.revokeObjectURL(url);
       canvas.toBlob(blob => res(blob || file), 'image/jpeg', 0.92);
@@ -360,13 +322,11 @@ async function lerFotoComIA(file) {
     r.onerror = rej;
     r.readAsDataURL(fileOtimizado);
   });
-
   const resp = await fetch('/api/ocr', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ image: b64, mediaType: file.type || 'image/jpeg' }),
   });
-
   const data = await resp.json();
   if (data.error) throw new Error(data.error);
   return data;
@@ -374,7 +334,6 @@ async function lerFotoComIA(file) {
 
 async function uploadFoto(file, postoId) {
   try {
-    console.log('Iniciando upload foto:', file.name, file.size);
     const ext = file.type === 'image/png' ? 'png' : 'jpg';
     const nome = `${postoId}/${Date.now()}.${ext}`;
     const resp = await fetch(`${CONFIG.SUPABASE_URL}/storage/v1/object/fotos/${nome}`, {
@@ -387,19 +346,12 @@ async function uploadFoto(file, postoId) {
       },
       body: file,
     });
-    const result = await resp.json();
-    console.log('Upload resultado:', result);
-    if (!resp.ok) throw new Error(JSON.stringify(result));
-    const url = `${CONFIG.SUPABASE_URL}/storage/v1/object/public/fotos/${nome}`;
-    console.log('Foto URL:', url);
-    return url;
-  } catch(e) {
-    console.error('Erro upload foto:', e);
-    return null;
-  }
+    if (!resp.ok) throw new Error(await resp.text());
+    return `${CONFIG.SUPABASE_URL}/storage/v1/object/public/fotos/${nome}`;
+  } catch(e) { console.error('upload:', e); return null; }
 }
 
-async function salvarSupabase(registro) {
+async function salvarSupabase(registro, isProprio) {
   try {
     await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/registros`, {
       method: 'POST',
@@ -411,8 +363,8 @@ async function salvarSupabase(registro) {
       },
       body: JSON.stringify({
         posto_id: state.posto.id,
-        concorrente_nome: registro.nome,
-        concorrente_bandeira: registro.bandeira,
+        concorrente_nome: isProprio ? state.posto.nome : registro.nome,
+        concorrente_bandeira: isProprio ? state.posto.bandeira : registro.bandeira,
         gc:    registro.gc    ? parseFloat(registro.gc)    : null,
         ga:    registro.ga    ? parseFloat(registro.ga)    : null,
         et:    registro.et    ? parseFloat(registro.et)    : null,
@@ -425,54 +377,36 @@ async function salvarSupabase(registro) {
         lat: registro.lat || null,
         lng: registro.lng || null,
         foto_url: registro.fotoUrl || null,
+        is_proprio_posto: !!isProprio,
         campos_editados: registro.camposEditados ? Object.keys(registro.camposEditados).join(',') : null,
       }),
     });
-    console.log('Salvo no Supabase!');
-  } catch(e) {
-    console.warn('Erro Supabase:', e);
-  }
+  } catch(e) { console.warn('Supabase:', e); }
 }
 
-// ── Validação de preços ────────────────────────────────────
+// ── Validação ───────────────────────────────────────────────
 function validarPrecos(f) {
   const alertas = [];
-  const gc    = parseFloat(f.gc)    || 0;
-  const ga    = parseFloat(f.ga)    || 0;
-  const et    = parseFloat(f.et)    || 0;
-  const eta   = parseFloat(f.eta)   || 0;
-  const ds    = parseFloat(f.ds)    || 0;
-  const ds500 = parseFloat(f.ds500) || 0;
-  const dsa   = parseFloat(f.dsa)   || 0;
+  const gc=parseFloat(f.gc)||0, ga=parseFloat(f.ga)||0;
+  const et=parseFloat(f.et)||0, eta=parseFloat(f.eta)||0;
+  const ds=parseFloat(f.ds)||0, ds500=parseFloat(f.ds500)||0, dsa=parseFloat(f.dsa)||0;
 
-  // Etanol deve ser mais barato que gasolina comum
   if (et > 0 && gc > 0 && et >= gc)
     alertas.push(`Etanol (R$ ${et.toFixed(2)}) deveria ser mais barato que Gasolina Comum (R$ ${gc.toFixed(2)})`);
-
-  // Gasolina aditivada >= gasolina comum
   if (ga > 0 && gc > 0 && ga < gc)
-    alertas.push(`Gasolina Aditivada (R$ ${ga.toFixed(2)}) deveria ser igual ou mais cara que Gasolina Comum (R$ ${gc.toFixed(2)})`);
-
-  // Etanol aditivado próximo do etanol comum (diferença máx de R$0,50)
+    alertas.push(`Gasolina Aditivada (R$ ${ga.toFixed(2)}) deveria ser >= Gasolina Comum (R$ ${gc.toFixed(2)})`);
   if (eta > 0 && et > 0 && Math.abs(eta - et) > 0.50)
-    alertas.push(`Etanol Aditivado (R$ ${eta.toFixed(2)}) parece distante do Etanol Comum (R$ ${et.toFixed(2)})`);
-
-  // Etanol aditivado >= etanol comum
+    alertas.push(`Etanol Aditivado (R$ ${eta.toFixed(2)}) distante do Etanol Comum (R$ ${et.toFixed(2)})`);
   if (eta > 0 && et > 0 && eta < et)
-    alertas.push(`Etanol Aditivado (R$ ${eta.toFixed(2)}) deveria ser igual ou mais caro que Etanol Comum (R$ ${et.toFixed(2)})`);
-
-  // Diesel S500 próximo do S10
+    alertas.push(`Etanol Aditivado (R$ ${eta.toFixed(2)}) deveria ser >= Etanol Comum (R$ ${et.toFixed(2)})`);
   if (ds500 > 0 && ds > 0 && Math.abs(ds500 - ds) > 0.30)
-    alertas.push(`Diesel S500 (R$ ${ds500.toFixed(2)}) parece muito diferente do Diesel S10 (R$ ${ds.toFixed(2)})`);
-
-  // Diesel aditivado >= Diesel S10
+    alertas.push(`Diesel S500 (R$ ${ds500.toFixed(2)}) muito diferente do Diesel S10 (R$ ${ds.toFixed(2)})`);
   if (dsa > 0 && ds > 0 && dsa < ds)
-    alertas.push(`Diesel S10 Aditivado (R$ ${dsa.toFixed(2)}) deveria ser igual ou mais caro que Diesel S10 (R$ ${ds.toFixed(2)})`);
-
+    alertas.push(`Diesel S10 Aditivado (R$ ${dsa.toFixed(2)}) deveria ser >= Diesel S10 (R$ ${ds.toFixed(2)})`);
   return alertas;
 }
 
-// ── Views ──────────────────────────────────────────────────
+// ── Views ───────────────────────────────────────────────────
 const views = {
   selector() {
     return `
@@ -495,6 +429,8 @@ const views = {
 
   lista() {
     const p = state.posto, regs = state.registros, meta = regs.length >= 7;
+    const podeRegistrarProprio = meta && !state.proprio;
+
     return `
       <div class="header">
         <div class="card" style="margin-bottom:1.25rem;">
@@ -513,14 +449,25 @@ const views = {
       </div>
       <div class="status-bar">
         <div class="card-gray">
-          <div class="label">Registrados</div>
+          <div class="label">Concorrentes</div>
           <div style="font-size:22px;font-weight:500;">${regs.length} <span style="font-size:13px;font-weight:400;color:${meta?'#3b6d11':'#9c9a92'};">/ 7+</span></div>
         </div>
-        <div class="card-gray" style="${meta?'background:#eaf3de;border:0.5px solid #639922;':''}">
-          <div class="label" style="${meta?'color:#3b6d11;':''}">Status</div>
-          <div style="font-size:15px;font-weight:500;color:${meta?'#3b6d11':'#1a1a18'};">${regs.length===0?'Aguardando':meta?'Meta atingida':'Em andamento'}</div>
+        <div class="card-gray" style="${state.proprio?'background:#eaf3de;border:0.5px solid #639922;':meta?'background:#fff9e0;border:0.5px solid #f5c400;':''}">
+          <div class="label">Seu painel</div>
+          <div style="font-size:15px;font-weight:500;color:${state.proprio?'#3b6d11':meta?'#8a6000':'#9c9a92'};">${state.proprio?'Registrado':meta?'Pendente':'Aguardando'}</div>
         </div>
       </div>
+
+      ${podeRegistrarProprio ? `
+        <div class="card card-highlight">
+          <div class="label" style="color:#8a6000;">Última etapa</div>
+          <div style="font-size:15px;font-weight:600;margin:6px 0 4px;">Registre o painel do seu posto</div>
+          <div class="sub" style="margin-bottom:10px;">Você bateu a meta de 7 concorrentes. Agora tire uma foto do painel de preços do <strong>${p.nome}</strong> para fechar o dia.</div>
+          <button class="btn-accent" onclick="irProprio()">📸 Tirar foto do meu painel</button>
+        </div>` : ''}
+
+      ${state.proprio ? renderResumoComparativo() : ''}
+
       ${regs.length===0
         ? `<div class="empty">Nenhum concorrente registrado ainda hoje.<br><span style="font-size:12px;color:#9c9a92;">Toque no botão abaixo para começar.</span></div>`
         : regs.map(r => `
@@ -537,102 +484,13 @@ const views = {
             </div>
             ${r.obs?`<div style="margin-top:6px;font-size:12px;color:#73726c;font-style:italic;">"${r.obs}"</div>`:''}
           </div>`).join('')}
+
       <button class="btn-primary" onclick="irColeta()">+ Registrar concorrente</button>
       ${regs.length>0?`<button class="btn-secondary" onclick="irResumo()">Ver relatório do dia →</button>`:''}`;
   },
 
-  coleta() {
-    const f = state.form, posto = state.posto;
-    const historico = getHistorico(state.posto.id);
-    const sugestoes = f.nome
-      ? BANDEIRAS.filter(b => b.toLowerCase().includes(f.nome.toLowerCase())).slice(0,3)
-        .concat(historico.filter(h => h.nome.toLowerCase().includes(f.nome.toLowerCase()) && !BANDEIRAS.includes(h.nome)).map(h=>h.nome).slice(0,5))
-      : historico.slice(0,7).map(h => h.nome);
-    const campos = COMBUSTIVEIS.map(({ key, label }) => {
-      const val = f[key], nosso = posto.precos[key];
-      const st = val && !isNaN(parseFloat(val)) && nosso > 0 ? calcStatus(nosso, parseFloat(val)) : null;
-      return `
-        <div class="price-field">
-          <label>${label}</label>
-          <div class="price-row">
-            <span>R$</span>
-            <input type="number" step="0.01" placeholder="0,00" value="${val}"
-              style="${st?`border-color:${st.cls==='badge-red'?'#e24b4a':st.cls==='badge-green'?'#639922':'#ba7517'};`:''}"
-              oninput="setPreco('${key}',this.value)" />
-          </div>
-          ${st?`<div class="price-status" style="color:${st.cor};">${st.label} do nosso</div>`:''}
-        </div>`;
-    }).join('');
-
-    const alertas = validarPrecos(f);
-
-    return `
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;">
-        <button class="btn-back" onclick="irLista()">←</button>
-        <div style="flex:1;">
-          <div class="label">${posto.cidade} · ${posto.estado}</div>
-          <div class="title">Registrar concorrente</div>
-        </div>
-        <div id="loc-status">
-          ${f.locStatus==='ok'?`<span class="badge badge-green" style="font-size:10px;">GPS: ${f.lat}, ${f.lng}</span>`:f.locStatus==='fallback'?`<span class="badge badge-amber" style="font-size:10px;">GPS atual</span>`:`<span class="badge badge-gray" style="font-size:10px;">Buscando GPS...</span>`}
-        </div>
-      </div>
-      <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="handleFoto(this)">
-      <div class="card">
-        <div class="label" style="margin-bottom:6px;">Nome do posto concorrente</div>
-        <div class="input-wrap">
-          <input type="text" id="inputNome" placeholder="Ex: Ipiranga Av. Brasil" value="${f.nome}"
-            oninput="setNome(this.value)" onfocus="setDrop(true)" onblur="setTimeout(()=>setDrop(false),200)" />
-          ${(f.dropOpen && sugestoes.length>0)?`<div class="dropdown">
-            ${f.nome===''?'<div style="font-size:10px;color:#9c9a92;padding:6px 12px;border-bottom:0.5px solid rgba(0,0,0,0.06);">Recentes</div>':''}
-            ${sugestoes.map(b=>`<div class="dropdown-item" onmousedown="escolherSugestao('${(typeof b === 'string' ? b : b.nome).replace(/'/g,"\\'")}')">
-              ${typeof b === 'string' ? b : b.nome}
-            </div>`).join('')}
-          </div>`:''}
-        </div>
-        <div style="margin-top:12px;">
-          <div class="label" style="margin-bottom:6px;">Bandeira</div>
-          <select onchange="setBandeira(this.value)">
-            ${BANDEIRAS.map(b=>`<option value="${b}" ${f.bandeira===b?'selected':''}>${b}</option>`).join('')}
-          </select>
-        </div>
-      </div>
-      <div class="card">
-        <div class="label" style="margin-bottom:8px;">Foto do painel de preços</div>
-        ${f.imgPreview
-          ? `<div class="foto-preview">
-               <img src="${f.imgPreview}" alt="foto">
-               <div class="foto-overlay">${f.iaUsada?'<span class="badge badge-blue" style="font-size:10px;">Lido pela IA</span>':''}</div>
-               <div class="foto-change"><button class="btn-small" onclick="trocarFoto()">Trocar</button></div>
-             </div>`
-          : `<button class="foto-btn" onclick="document.getElementById('fileInput').click()">
-               Tirar foto ou selecionar da galeria<br>
-               <span style="font-size:11px;color:#9c9a92;">A IA lê os preços automaticamente</span>
-             </button>`}
-        ${f.loading?`<div class="spinner-wrap"><div class="spinner"></div><div class="spinner-msg" style="font-size:13px;color:#73726c;">Lendo preços...</div></div>`:''}
-        ${f.erroIA?`<div class="alert-amber" style="margin-top:10px;">Não foi possível ler automaticamente. Preencha os preços abaixo.</div>`:''}
-      </div>
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-          <div class="label">Preços observados</div>
-          ${f.iaUsada?'<span style="font-size:11px;color:#185fa5;">Preenchido pela IA — confira</span>':''}
-        </div>
-        <div class="price-grid">${campos}</div>
-        <div class="hint">Deixe em branco os combustíveis que o posto não vende.</div>
-        ${alertas.length > 0 ? `
-        <div style="margin-top:10px;background:#faeeda;border:0.5px solid #ba7517;border-radius:8px;padding:10px 12px;">
-          <div style="font-size:11px;font-weight:500;color:#854f0b;margin-bottom:4px;">⚠️ Verifique os preços:</div>
-          ${alertas.map(a=>`<div style="font-size:11px;color:#854f0b;margin-top:2px;">· ${a}</div>`).join('')}
-        </div>` : ''}
-      </div>
-      <div class="card">
-        <div class="label" style="margin-bottom:6px;">Observações (opcional)</div>
-        <textarea rows="3" placeholder="Ex: Promoção no etanol até sexta..." oninput="setObs(this.value)">${f.obs}</textarea>
-      </div>
-      <button class="btn-primary" id="btn-salvar" onclick="salvar()" ${(!f.nome.trim() || !f.imgPreview) ? 'disabled' : ''}>Salvar registro</button>
-      ${!f.imgPreview ? `<div style="font-size:11px;color:#a32d2d;text-align:center;margin-top:4px;">⚠️ Foto do painel é obrigatória</div>` : ''}
-      ${!f.nome.trim() ? `<div style="font-size:11px;color:#a32d2d;text-align:center;margin-top:4px;">⚠️ Nome do concorrente é obrigatório</div>` : ''}`;
-  },
+  coleta() { return formView(false); },
+  proprio() { return formView(true); },
 
   resumo() {
     const p = state.posto, regs = state.registros;
@@ -641,18 +499,27 @@ const views = {
       if (!vals.length) return '';
       const media = (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2);
       const menor = Math.min(...vals).toFixed(2);
-      const nosso = p.precos[key];
-      const st = nosso > 0 ? calcStatus(nosso, parseFloat(media)) : { label:'Sem preço cadastrado', cls:'badge-gray' };
+      const maior = Math.max(...vals).toFixed(2);
+      const comp = compararProprioVsMercado(key);
+      const nosso = comp ? comp.nosso : 0;
+
+      let statusBadge = '';
+      if (nosso > 0 && comp.menor !== null) {
+        if (nosso > parseFloat(maior)) statusBadge = `<span class="badge badge-red">Acima do maior</span>`;
+        else if (nosso < parseFloat(menor)) statusBadge = `<span class="badge badge-green">Mais barato do mercado</span>`;
+        else statusBadge = `<span class="badge badge-amber">Dentro da faixa</span>`;
+      }
+
       return `
-        <div class="card" style="margin-bottom:12px;">
+        <div class="card">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
             <div style="font-weight:500;">${label}</div>
-            <span class="badge ${st.cls}">${st.label}</span>
+            ${statusBadge}
           </div>
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;">
             <div class="card-gray"><div class="label">Nosso</div><div style="font-size:14px;font-weight:500;color:#185fa5;">R$ ${nosso>0?nosso.toFixed(2):'—'}</div></div>
-            <div class="card-gray"><div class="label">Média</div><div style="font-size:14px;font-weight:500;">R$ ${media}</div></div>
-            <div class="card-gray"><div class="label">Menor</div><div style="font-size:14px;font-weight:500;">R$ ${menor}</div></div>
+            <div class="card-gray"><div class="label">Menor</div><div style="font-size:14px;font-weight:500;color:#3b6d11;">R$ ${menor}</div></div>
+            <div class="card-gray"><div class="label">Maior</div><div style="font-size:14px;font-weight:500;color:#a32d2d;">R$ ${maior}</div></div>
           </div>
           <table class="resumo-table">
             <thead><tr><th>Posto</th><th>Bandeira</th><th style="text-align:right;">Preço</th></tr></thead>
@@ -681,10 +548,156 @@ const views = {
         <div class="card-gray"><div class="label">Cidade</div><div style="font-size:13px;font-weight:500;">${p.cidade}</div></div>
         <div class="card-gray"><div class="label">Concorrentes</div><div style="font-size:13px;font-weight:500;">${regs.length}</div></div>
       </div>
+      ${!state.proprio?`<div class="alert-amber">Você ainda não registrou o painel do seu posto. As comparações ficam mais ricas com ele.</div>`:''}
       ${tabelas}
       <button class="btn-secondary" onclick="irLista()">Voltar e adicionar mais</button>`;
   },
 };
+
+// ── Resumo comparativo (cartão mostrado na lista) ───────────
+function renderResumoComparativo() {
+  const linhas = COMBUSTIVEIS.map(({ key, label }) => {
+    const c = compararProprioVsMercado(key);
+    if (!c || !c.nosso) return '';
+    if (c.menor === null) return `
+      <tr>
+        <td>${label.replace('Gasolina ','Gás.')}</td>
+        <td style="text-align:right;font-weight:500;color:#185fa5;">R$ ${c.nosso.toFixed(2)}</td>
+        <td colspan="2" style="text-align:right;color:#9c9a92;font-size:11px;">sem dados</td>
+      </tr>`;
+    let pos = '';
+    if (c.nosso > c.maior) pos = `<span class="badge badge-red">+R$ ${(c.nosso - c.maior).toFixed(2)} acima do maior</span>`;
+    else if (c.nosso < c.menor) pos = `<span class="badge badge-green">−R$ ${(c.menor - c.nosso).toFixed(2)} abaixo do menor</span>`;
+    else pos = `<span class="badge badge-amber">dentro da faixa</span>`;
+    return `
+      <tr>
+        <td>${label.replace('Gasolina ','Gás.')}</td>
+        <td style="text-align:right;font-weight:500;color:#185fa5;">R$ ${c.nosso.toFixed(2)}</td>
+        <td style="text-align:right;font-size:11px;color:#73726c;">${c.menor.toFixed(2)} / ${c.maior.toFixed(2)}</td>
+        <td style="text-align:right;">${pos}</td>
+      </tr>`;
+  }).filter(Boolean).join('');
+
+  if (!linhas) return '';
+  return `
+    <div class="card">
+      <div class="label" style="margin-bottom:8px;">Seu posto vs concorrentes</div>
+      <table class="resumo-table" style="font-size:12px;">
+        <thead><tr><th>Combustível</th><th style="text-align:right;">Nosso</th><th style="text-align:right;">Menor / Maior</th><th style="text-align:right;">Posição</th></tr></thead>
+        <tbody>${linhas}</tbody>
+      </table>
+    </div>`;
+}
+
+// ── Formulário (concorrente OU próprio) ─────────────────────
+function formView(isProprio) {
+  const f = state.form, posto = state.posto;
+  const historico = isProprio ? [] : getHistorico(posto.id);
+  const sugestoes = !isProprio && f.nome
+    ? BANDEIRAS.filter(b => b.toLowerCase().includes(f.nome.toLowerCase())).slice(0,3)
+        .concat(historico.filter(h => h.nome.toLowerCase().includes(f.nome.toLowerCase()) && !BANDEIRAS.includes(h.nome)).map(h=>h.nome).slice(0,5))
+    : (!isProprio ? historico.slice(0,7).map(h => h.nome) : []);
+
+  const campos = COMBUSTIVEIS.map(({ key, label }) => `
+    <div class="price-field">
+      <label>${label}</label>
+      <div class="price-row">
+        <span>R$</span>
+        <input type="number" step="0.01" placeholder="0,00" value="${f[key]}"
+          oninput="setPreco('${key}',this.value)" />
+      </div>
+    </div>`).join('');
+
+  const alertas = validarPrecos(f);
+  const titulo = isProprio ? 'Painel do seu posto' : 'Registrar concorrente';
+  const sublinha = isProprio ? `${posto.nome}` : `${posto.cidade} · ${posto.estado}`;
+  const voltarFn = isProprio ? 'irLista()' : 'irLista()';
+
+  return `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;">
+      <button class="btn-back" onclick="${voltarFn}">←</button>
+      <div style="flex:1;">
+        <div class="label">${sublinha}</div>
+        <div class="title">${titulo}</div>
+      </div>
+      <div id="loc-status">
+        ${f.locStatus==='ok'?`<span class="badge badge-green" style="font-size:10px;">GPS ✓</span>`:`<span class="badge badge-gray" style="font-size:10px;">GPS...</span>`}
+      </div>
+    </div>
+
+    ${isProprio ? `
+      <div class="alert-blue">📸 Tire uma foto nítida do painel de preços do seu posto. Os valores serão lidos automaticamente.</div>
+    ` : ''}
+
+    <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="handleFoto(this)">
+
+    ${!isProprio ? `
+      <div class="card">
+        <div class="label" style="margin-bottom:6px;">Nome do posto concorrente</div>
+        <div class="input-wrap">
+          <input type="text" id="inputNome" placeholder="Ex: Ipiranga Av. Brasil" value="${f.nome}"
+            oninput="setNome(this.value)" onfocus="setDrop(true)" onblur="setTimeout(()=>setDrop(false),200)" />
+          ${(f.dropOpen && sugestoes.length>0)?`<div class="dropdown">
+            ${f.nome===''?'<div style="font-size:10px;color:#9c9a92;padding:6px 12px;border-bottom:0.5px solid rgba(0,0,0,0.06);">Recentes</div>':''}
+            ${sugestoes.map(b=>`<div class="dropdown-item" onmousedown="escolherSugestao('${(typeof b === 'string' ? b : b.nome).replace(/'/g,"\\'")}')">${typeof b === 'string' ? b : b.nome}</div>`).join('')}
+          </div>`:''}
+        </div>
+        <div style="margin-top:12px;">
+          <div class="label" style="margin-bottom:6px;">Bandeira</div>
+          <select onchange="setBandeira(this.value)">
+            ${BANDEIRAS.map(b=>`<option value="${b}" ${f.bandeira===b?'selected':''}>${b}</option>`).join('')}
+          </select>
+        </div>
+      </div>` : ''}
+
+    <div class="card">
+      <div class="label" style="margin-bottom:8px;">${isProprio?'Foto do seu painel':'Foto do painel de preços'}</div>
+      ${f.imgPreview
+        ? `<div class="foto-preview">
+             <img src="${f.imgPreview}" alt="foto">
+             <div class="foto-overlay">${f.iaUsada?'<span class="badge badge-blue" style="font-size:10px;">Lido pela IA</span>':''}</div>
+             <div class="foto-change"><button class="btn-small" onclick="trocarFoto()">Trocar</button></div>
+           </div>`
+        : `<button class="foto-btn" onclick="document.getElementById('fileInput').click()">
+             Tirar foto ou selecionar da galeria<br>
+             <span style="font-size:11px;color:#9c9a92;">A IA lê os preços automaticamente</span>
+           </button>`}
+      ${f.loading?`<div class="spinner-wrap"><div class="spinner"></div><div style="font-size:13px;color:#73726c;">Lendo preços...</div></div>`:''}
+      ${f.erroIA?`<div class="alert-amber" style="margin-top:10px;">Não foi possível ler automaticamente. Preencha os preços abaixo.</div>`:''}
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div class="label">Preços observados</div>
+        ${f.iaUsada?'<span style="font-size:11px;color:#185fa5;">Preenchido pela IA — confira</span>':''}
+      </div>
+      <div class="price-grid">${campos}</div>
+      <div class="hint">Deixe em branco os combustíveis que ${isProprio?'seu posto':'o posto'} não vende.</div>
+      ${alertas.length > 0 ? `
+        <div style="margin-top:10px;background:#faeeda;border:0.5px solid #ba7517;border-radius:8px;padding:10px 12px;">
+          <div style="font-size:11px;font-weight:500;color:#854f0b;margin-bottom:4px;">⚠️ Verifique os preços:</div>
+          ${alertas.map(a=>`<div style="font-size:11px;color:#854f0b;margin-top:2px;">· ${a}</div>`).join('')}
+        </div>` : ''}
+    </div>
+
+    ${!isProprio ? `
+      <div class="card">
+        <div class="label" style="margin-bottom:6px;">Observações (opcional)</div>
+        <textarea rows="3" placeholder="Ex: Promoção no etanol até sexta..." oninput="setObs(this.value)">${f.obs}</textarea>
+      </div>` : ''}
+
+    <button class="btn-primary" id="btn-salvar" onclick="salvar(${isProprio})" ${podeSalvar(f, isProprio) ? '' : 'disabled'}>
+      ${isProprio?'Salvar painel do meu posto':'Salvar registro'}
+    </button>
+    ${!f.imgPreview ? `<div style="font-size:11px;color:#a32d2d;text-align:center;margin-top:4px;">⚠️ Foto do painel é obrigatória</div>` : ''}
+    ${!isProprio && !f.nome.trim() ? `<div style="font-size:11px;color:#a32d2d;text-align:center;margin-top:4px;">⚠️ Nome do concorrente é obrigatório</div>` : ''}`;
+}
+
+function podeSalvar(f, isProprio) {
+  if (!f.imgPreview) return false;
+  if (!isProprio && !f.nome.trim()) return false;
+  return true;
+}
 
 // ── Ações ──────────────────────────────────────────────────
 function selecionarPosto(id) { state.posto = POSTOS.find(p=>p.id===id); state.tela='lista'; render(); }
@@ -692,66 +705,47 @@ function trocarPosto() { state.tela='selector'; render(); }
 function irLista()    { state.tela='lista'; render(); }
 function irResumo()   { state.tela='resumo'; render(); }
 
-function irColeta() {
-  state.form = emptyForm();
-  state.form.locStatus = 'buscando';
-  state.tela = 'coleta';
-  render();
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      pos => {
-        state.form.lat = pos.coords.latitude.toFixed(6);
-        state.form.lng = pos.coords.longitude.toFixed(6);
-        state.form.locStatus = 'ok';
-        const el = document.getElementById('loc-status');
-        if (el) el.innerHTML = `<span class="badge badge-green" style="font-size:10px;">GPS: ${state.form.lat}, ${state.form.lng}</span>`;
-
-        buscarPostoProximo(state.form.lat, state.form.lng).then(postoCerca => {
-          if (postoCerca && postoCerca.nome && !state.form.nome) {
-            state.form.nome = postoCerca.nome;
-            if (postoCerca.bandeira) state.form.bandeira = postoCerca.bandeira;
-            const inp = document.getElementById('inputNome');
-            if (inp) inp.value = postoCerca.nome;
-            const sel = document.querySelector('select');
-            if (sel && postoCerca.bandeira) sel.value = postoCerca.bandeira;
-            const el2 = document.getElementById('loc-status');
-            if (el2) el2.innerHTML = `<span class="badge badge-green" style="font-size:10px;">Posto encontrado</span>`;
-          }
-        });
-      },
-      () => {
-        state.form.locStatus = 'erro';
-        const el = document.getElementById('loc-status');
-        if (el) el.innerHTML = `<span class="badge badge-gray" style="font-size:10px;">GPS indisponível</span>`;
-      },
-      { enableHighAccuracy:true, timeout:10000 }
-    );
-  }
+function startGPS() {
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      state.form.lat = pos.coords.latitude.toFixed(6);
+      state.form.lng = pos.coords.longitude.toFixed(6);
+      state.form.locStatus = 'ok';
+      const el = document.getElementById('loc-status');
+      if (el) el.innerHTML = `<span class="badge badge-green" style="font-size:10px;">GPS ✓</span>`;
+    },
+    () => {
+      state.form.locStatus = 'erro';
+      const el = document.getElementById('loc-status');
+      if (el) el.innerHTML = `<span class="badge badge-gray" style="font-size:10px;">Sem GPS</span>`;
+    },
+    { enableHighAccuracy:true, timeout:10000 }
+  );
 }
+
+function irColeta()  { state.form = emptyForm(false); state.form.locStatus='buscando'; state.tela='coleta';  render(); startGPS(); }
+function irProprio() { state.form = emptyForm(true);  state.form.locStatus='buscando'; state.tela='proprio'; render(); startGPS(); }
 
 function setNome(v)     { state.form.nome=v; atualizarBotao(); }
 function setBandeira(v) { state.form.bandeira=v; }
-function setPreco(k,v) {
-  state.form[k] = v;
+function setPreco(k,v)  {
+  state.form[k]=v;
   if (state.form.precosIA && state.form.precosIA[k] !== undefined) {
     if (v !== state.form.precosIA[k]) {
       state.form.camposEditados = state.form.camposEditados || {};
       state.form.camposEditados[k] = true;
-    } else {
-      if (state.form.camposEditados) delete state.form.camposEditados[k];
-    }
+    } else if (state.form.camposEditados) delete state.form.camposEditados[k];
   }
   atualizarBotao();
 }
-function setObs(v)      { state.form.obs=v; }
-function setDrop(v)     { state.form.dropOpen=v; }
+function setObs(v) { state.form.obs=v; }
+function setDrop(v){ state.form.dropOpen=v; }
 
 function atualizarBotao() {
   const btn = document.getElementById('btn-salvar');
   if (!btn) return;
-  const temNome = state.form.nome.trim().length > 0;
-  const temFoto = !!state.form.imgPreview;
-  btn.disabled = !temNome || !temFoto;
+  btn.disabled = !podeSalvar(state.form, state.form.isProprio);
 }
 
 function escolherSugestao(nome) {
@@ -764,23 +758,12 @@ function escolherSugestao(nome) {
   render();
 }
 
-function escolherBandeira(b) {
-  state.form.nome = b;
-  state.form.bandeira = BANDEIRAS.includes(b) ? b : 'Outros';
-  state.form.dropOpen = false;
-  render();
-}
-
 function trocarFoto() {
   _fotoFile = null;
-  state.form.imgPreview = null;
-  state.form.imgFile = null;
-  state.form.iaUsada = false;
-  state.form.erroIA = false;
-  state.form.gc = state.form.ga = state.form.et = state.form.eta = '';
-  state.form.ds = state.form.ds500 = state.form.dsa = '';
-  state.form.precosIA = null;
-  state.form.camposEditados = {};
+  state.form.imgPreview = null; state.form.imgFile = null;
+  state.form.iaUsada = false; state.form.erroIA = false;
+  state.form.gc=state.form.ga=state.form.et=state.form.eta=state.form.ds=state.form.ds500=state.form.dsa='';
+  state.form.precosIA = null; state.form.camposEditados = {};
   render();
 }
 
@@ -795,27 +778,15 @@ async function handleFoto(input) {
   state.form.erroIA = false;
   render();
 
-  // Lê GPS do EXIF e busca posto próximo
   try {
     const exif = await exifr.parse(file, { gps:true });
     if (exif && exif.latitude && exif.longitude) {
       state.form.lat = exif.latitude.toFixed(6);
       state.form.lng = exif.longitude.toFixed(6);
       state.form.locStatus = 'ok';
-      const el = document.getElementById('loc-status');
-      if (el) el.innerHTML = `<span class="badge badge-green" style="font-size:10px;">GPS da foto</span>`;
-
-      const postoCerca = await buscarPostoProximo(state.form.lat, state.form.lng);
-      if (postoCerca && postoCerca.nome && !state.form.nome) {
-        state.form.nome = postoCerca.nome;
-        if (postoCerca.bandeira) state.form.bandeira = postoCerca.bandeira;
-        const el2 = document.getElementById('loc-status');
-        if (el2) el2.innerHTML = `<span class="badge badge-green" style="font-size:10px;">GPS + posto encontrado</span>`;
-      }
     }
-  } catch(e) { console.warn('EXIF:', e); }
+  } catch(e) {}
 
-  // OCR via Anthropic
   try {
     const precos = await lerFotoComIA(file);
     state.form.gc    = precos.gc    || '';
@@ -825,60 +796,50 @@ async function handleFoto(input) {
     state.form.ds    = precos.ds    || '';
     state.form.ds500 = precos.ds500 || '';
     state.form.dsa   = precos.dsa   || '';
-    if (precos.bandeira && precos.bandeira !== '' && precos.bandeira !== 'Outros') {
-      const bandeirasValidas = ['Ipiranga','Shell','BR','Petrobras','Raízen','Bandeira Branca'];
-      const encontrada = bandeirasValidas.find(b => b.toLowerCase() === precos.bandeira.toLowerCase());
-      if (encontrada) state.form.bandeira = encontrada;
+    if (!state.form.isProprio && precos.bandeira) {
+      const enc = BANDEIRAS.find(b => b.toLowerCase() === (precos.bandeira||'').toLowerCase());
+      if (enc) state.form.bandeira = enc;
     }
     state.form.precosIA = {
-      gc:    precos.gc    || '',
-      ga:    precos.ga    || '',
-      et:    precos.et    || '',
-      eta:   precos.eta   || '',
-      ds:    precos.ds    || '',
-      ds500: precos.ds500 || '',
-      dsa:   precos.dsa   || ''
+      gc:precos.gc||'', ga:precos.ga||'', et:precos.et||'', eta:precos.eta||'',
+      ds:precos.ds||'', ds500:precos.ds500||'', dsa:precos.dsa||''
     };
     state.form.camposEditados = {};
-    state.form.iaUsada = !!(precos.gc || precos.ga || precos.et || precos.eta || precos.ds || precos.ds500 || precos.dsa);
-    state.form.erroIA  = !state.form.iaUsada;
+    state.form.iaUsada = !!(precos.gc||precos.ga||precos.et||precos.eta||precos.ds||precos.ds500||precos.dsa);
+    state.form.erroIA = !state.form.iaUsada;
   } catch(e) {
-    console.error('OCR erro:', e);
     state.form.erroIA = true;
   }
-
   state.form.loading = false;
   render();
 }
 
-async function salvar() {
+async function salvar(isProprio) {
   const f = state.form;
   const btn = document.getElementById('btn-salvar');
   if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
 
   let fotoUrl = null;
-  if (_fotoFile) {
-    console.log('Arquivo para upload:', _fotoFile.name, _fotoFile.size);
-    fotoUrl = await uploadFoto(_fotoFile, state.posto.id);
-  } else {
-    console.warn('Nenhum arquivo de foto disponível');
-  }
+  if (_fotoFile) fotoUrl = await uploadFoto(_fotoFile, state.posto.id);
 
   const reg = {
-    nome: f.nome, bandeira: f.bandeira,
-    gc: f.gc, ga: f.ga, et: f.et, eta: f.eta,
-    ds: f.ds, ds500: f.ds500, dsa: f.dsa,
+    nome: isProprio ? state.posto.nome : f.nome,
+    bandeira: isProprio ? state.posto.bandeira : f.bandeira,
+    gc:f.gc, ga:f.ga, et:f.et, eta:f.eta, ds:f.ds, ds500:f.ds500, dsa:f.dsa,
     obs: f.obs,
     imgPreview: fotoUrl || f.imgPreview,
-    iaUsada: f.iaUsada,
-    hora: hora(),
-    lat: f.lat, lng: f.lng,
-    fotoUrl,
+    iaUsada: f.iaUsada, hora: hora(),
+    lat: f.lat, lng: f.lng, fotoUrl,
     camposEditados: f.camposEditados,
   };
-  state.registros.push(reg);
-  salvarHistorico(state.posto.id, f.nome, f.bandeira);
-  await salvarSupabase(reg);
+
+  if (isProprio) {
+    state.proprio = reg;
+  } else {
+    state.registros.push(reg);
+    salvarHistorico(state.posto.id, f.nome, f.bandeira);
+  }
+  await salvarSupabase(reg, isProprio);
   _fotoFile = null;
   irLista();
 }
