@@ -195,7 +195,7 @@ const BCLS={
   RDP:"b-rdp", TOF:"b-oth", "Bandeira Branca":"b-bca"
 };
 
-let S={dados:[],loading:true,aba:"geral",estado:"Todos",busca:"",postoFiltro:"",det:null,dias:1};
+let S={dados:[],alertas:[],loading:true,aba:"geral",estado:"Todos",busca:"",postoFiltro:"",det:null,dias:1};
 
 function bcls(b){return BCLS[b]||"b-oth";}
 
@@ -244,6 +244,15 @@ async function carregarDados(){
     console.error('Erro carregar:',e);
     S.dados=POSTOS.map(p=>({...p,registrou:false,proprioRegistrado:false,concorrentes:0,regs:[],proprio:null,analise:{}}));
   }
+
+  // Carrega alertas em aberto
+  try {
+    const dataInicio=new Date(Date.now()-((S.dias-1)*24*60*60*1000)).toISOString().split('T')[0];
+    const aUrl=`${SUPABASE_URL}/rest/v1/alertas?criado_em=gte.${dataInicio}T00:00:00&status=eq.aberto&select=*&order=criado_em.desc`;
+    const ar=await fetch(aUrl,{headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`}});
+    S.alertas = ar.ok ? await ar.json() : [];
+  } catch(e) { console.error('Erro alertas:',e); S.alertas=[]; }
+
   S.loading=false; renderAll();
 }
 
@@ -387,6 +396,43 @@ function renderDash(){
           </div>
           <div>${COMBS.filter(c=>r[c.k]>0).map(c=>`<span class="tag">${c.l}: R$ ${parseFloat(r[c.k]).toFixed(2)}</span>`).join('')}</div>
         </div>`).join('');
+  } else if(S.aba==="alertas"){
+    // Aplica filtros (estado/posto/busca) também aos alertas
+    const idsPostosFiltrados = new Set(df.map(p=>p.id));
+    const alertasFiltrados = S.alertas.filter(a => idsPostosFiltrados.has(a.posto_id));
+
+    if (alertasFiltrados.length === 0) {
+      rowsHtml = `<div class="empty">🎉 Nenhum alerta em aberto.<br><span style="font-size:11px;color:#3a5a7a;">O auditor roda 1x por dia (madrugada).</span></div>`;
+    } else {
+      // Agrupa por severidade
+      const sevOrder = { alta: 0, media: 1, baixa: 2 };
+      const sevCor = { alta:'#e24b4a', media:'#f0a030', baixa:'#7ab8f0' };
+      const sevLabel = { alta:'ALTA', media:'MÉDIA', baixa:'BAIXA' };
+      alertasFiltrados.sort((a,b) => (sevOrder[a.severidade]||9) - (sevOrder[b.severidade]||9));
+
+      rowsHtml = alertasFiltrados.map(a => {
+        const posto = POSTOS.find(p => p.id === a.posto_id);
+        const cor = sevCor[a.severidade] || '#7ab8f0';
+        return `
+          <div class="comp-card" style="cursor:pointer;border-left:3px solid ${cor};" onclick="abrirDet('${a.posto_id}')">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px;">
+              <div style="flex:1;min-width:0;">
+                <div style="font-weight:600;font-size:13px;color:#fff;">${posto?posto.nome:a.posto_id}</div>
+                <div style="font-size:11px;color:#4a6a8a;margin-top:2px;">${posto?posto.cidade+' · '+posto.estado:''} · ${a.tipo}</div>
+              </div>
+              <span class="diff-pos" style="background:rgba(${a.severidade==='alta'?'226,75,74':a.severidade==='media'?'240,160,48':'122,184,240'},0.18);color:${cor};border:1px solid ${cor};">${sevLabel[a.severidade]||a.severidade}</span>
+            </div>
+            <div style="font-size:13px;color:#e0e8f0;line-height:1.5;">${a.mensagem}</div>
+            <div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center;gap:8px;">
+              <span style="font-size:11px;color:#4a6a8a;">${new Date(a.criado_em).toLocaleString('pt-BR')}</span>
+              <div style="display:flex;gap:6px;">
+                <button onclick="event.stopPropagation();resolverAlerta(${a.id},'revisado')" class="btn-top" style="border-color:#4dd87a;color:#4dd87a;">✓ Revisado</button>
+                <button onclick="event.stopPropagation();resolverAlerta(${a.id},'ignorado')" class="btn-top">Ignorar</button>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+    }
   }
 
   const semProprioCount = d.filter(p=>p.registrou && !p.proprioRegistrado).length;
@@ -398,6 +444,7 @@ function renderDash(){
     <div class="sec-label">Postos</div>
     <div class="tabs">
       <button class="tab ${S.aba==='geral'?'on':''}" onclick="setAba('geral')">Todos (${tot})</button>
+      <button class="tab ${S.aba==='alertas'?'on':''}" onclick="setAba('alertas')" style="${S.alertas.length>0?'color:#ff7878;font-weight:700;':''}">⚠️ Alertas (${S.alertas.length})</button>
       <button class="tab ${S.aba==='pendentes'?'on':''}" onclick="setAba('pendentes')">Pendentes (${pend})</button>
       <button class="tab ${S.aba==='sem-proprio'?'on':''}" onclick="setAba('sem-proprio')">Sem painel próprio (${semProprioCount})</button>
       <button class="tab ${S.aba==='registros'?'on':''}" onclick="setAba('registros')">Registros (${totalRegs})</button>
@@ -546,6 +593,28 @@ function setEst(v){S.estado=v;renderDash();}
 function setPostoFiltro(v){S.postoFiltro=v;renderDash();}
 function abrirDet(id){S.det=S.dados.find(p=>p.id===id);renderAll();}
 function fecharDet(){S.det=null;renderAll();}
+
+async function resolverAlerta(id, status){
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/alertas?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal',
+      },
+      body: JSON.stringify({ status, revisado_em: new Date().toISOString() }),
+    });
+    if (!r.ok) throw new Error(await r.text());
+    // remove localmente para feedback instantâneo
+    S.alertas = S.alertas.filter(a => a.id !== id);
+    renderDash();
+  } catch(e) {
+    console.error('Erro resolver alerta:', e);
+    alert('Não foi possível atualizar o alerta. Tente novamente.');
+  }
+}
 
 setInterval(carregarDados,3*60*1000);
 carregarDados();
