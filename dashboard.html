@@ -17,7 +17,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 .content{padding:14px 16px}
 
-/* KPI */
 .kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
 @media(min-width:600px){.kpi-grid{grid-template-columns:repeat(4,1fr)}}
 .kpi{border-radius:12px;padding:14px 16px}
@@ -29,7 +28,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .kpi-val{font-size:28px;font-weight:700;color:#fff;line-height:1}
 .kpi-sub{font-size:11px;color:rgba(255,255,255,0.6);margin-top:4px}
 
-/* Estado */
 .estado-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
 @media(min-width:600px){.estado-grid{grid-template-columns:repeat(4,1fr)}}
 .estado-card{background:#131e2e;border:1px solid #1e2d42;border-radius:10px;padding:12px 14px}
@@ -41,12 +39,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .sec-label{font-size:10px;font-weight:600;color:#4a6a8a;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;display:flex;align-items:center;gap:8px}
 .sec-label::after{content:"";flex:1;height:1px;background:#1e2d42}
 
-/* Tabs */
 .tabs{display:flex;background:#131e2e;border:1px solid #1e2d42;border-radius:10px;padding:3px;gap:3px;margin-bottom:12px;overflow-x:auto}
 .tab{flex:1;min-width:80px;padding:7px 8px;font-size:11px;border:none;border-radius:7px;background:transparent;color:#4a6a8a;cursor:pointer;font-weight:500;white-space:nowrap;transition:all 0.15s}
 .tab.on{background:#1a3a6b;color:#fff}
 
-/* Filtros */
 .filtros{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
 .filtros-row{display:flex;gap:8px;flex-wrap:wrap}
 .input-s{width:100%;padding:9px 14px;font-size:14px;border-radius:8px;border:1px solid #1e2d42;background:#131e2e;color:#e0e8f0;outline:none}
@@ -56,12 +52,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .btn-est{padding:7px 14px;font-size:12px;border-radius:8px;border:1px solid #1e2d42;background:#131e2e;color:#6a8aaa;cursor:pointer;white-space:nowrap}
 .btn-est.on{background:#2e7dd1;color:#fff;border-color:#2e7dd1}
 
-/* Posto rows */
 .posto-row{background:#131e2e;border:1px solid #1e2d42;border-radius:10px;padding:12px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer;transition:all 0.12s}
 .posto-row:hover{border-color:#2e7dd1}
 .row-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
 .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 .dot-g{background:#4dd87a;box-shadow:0 0 6px rgba(77,216,122,0.5)}
+.dot-y{background:#f0a030;box-shadow:0 0 6px rgba(240,160,48,0.5)}
 .dot-r{background:#e24b4a;box-shadow:0 0 6px rgba(226,75,74,0.5)}
 .row-nome{font-size:13px;font-weight:500;color:#e0e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .row-sub{font-size:11px;color:#4a6a8a;margin-top:2px}
@@ -77,12 +73,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .b-red{background:rgba(226,75,74,0.15);color:#e24b4a;border-color:rgba(226,75,74,0.3)}
 .b-amb{background:rgba(186,117,23,0.15);color:#f0a030;border-color:rgba(186,117,23,0.3)}
 .b-grn{background:rgba(77,216,122,0.12);color:#4dd87a;border-color:rgba(77,216,122,0.3)}
+.b-blue{background:rgba(46,125,209,0.15);color:#7ab8f0;border-color:rgba(46,125,209,0.4)}
 .chevron{font-size:16px;color:#3a5a7a}
 
 .pend-row{background:#1a1500;border:1px solid #3a2a00;border-left:3px solid #f0a030;border-radius:10px;padding:12px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
 .empty{text-align:center;padding:3rem;color:#3a5a7a;font-size:14px}
 
-/* Detalhe */
 .det-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
 .btn-back{background:transparent;border:none;font-size:22px;cursor:pointer;color:#4a6a8a;padding:0;line-height:1}
 .comp-card{background:#131e2e;border:1px solid #1e2d42;border-radius:12px;padding:14px 16px;margin-bottom:10px}
@@ -91,6 +87,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .comp-table td{padding:9px 8px;border-bottom:1px solid #1a2535;color:#e0e8f0}
 .comp-table tr:last-child td{border-bottom:none}
 .tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:4px;background:rgba(255,255,255,0.06);color:#8aaac0;border:1px solid rgba(255,255,255,0.1);margin:2px}
+
+/* Análise de diferenças */
+.analise-card{background:linear-gradient(135deg,#1a2b45,#131e2e);border:1px solid #2a4060;border-radius:12px;padding:16px;margin-bottom:12px}
+.analise-title{font-size:13px;font-weight:700;color:#fff;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.analise-row{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid #1e2d42;font-size:12px}
+.analise-row:last-child{border-bottom:none}
+.analise-row .lbl{color:#8aaac0;font-weight:500}
+.analise-row .val{font-weight:600;color:#e0e8f0;text-align:right}
+.analise-row .val-nosso{color:#7ab8f0}
+.analise-row .val-menor{color:#4dd87a}
+.analise-row .val-maior{color:#e24b4a}
+.diff-pos{font-size:10px;padding:2px 6px;border-radius:4px;font-weight:600;white-space:nowrap}
+.diff-red{background:rgba(226,75,74,0.18);color:#ff7878;border:1px solid rgba(226,75,74,0.4)}
+.diff-amb{background:rgba(240,160,48,0.18);color:#ffb060;border:1px solid rgba(240,160,48,0.4)}
+.diff-grn{background:rgba(77,216,122,0.18);color:#7adb96;border:1px solid rgba(77,216,122,0.4)}
+.diff-gray{background:rgba(255,255,255,0.06);color:#7a8aa0;border:1px solid rgba(255,255,255,0.1)}
 
 .spinner{width:28px;height:28px;border:2px solid #1e2d42;border-top-color:#2e7dd1;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -178,15 +190,9 @@ const COMBS=[
   {k:"ds",l:"Diesel S10"},{k:"ds500",l:"Diesel S500"},{k:"dsa",l:"Diesel S10 Aditivado"},
 ];
 const BCLS={
-  Ipiranga:"b-ipa",
-  Shell:"b-she",
-  BR:"b-br",
-  "Trapézio":"b-tra",
-  Petrobras:"b-br",
-  "Raízen":"b-br",
-  RDP:"b-rdp",
-  TOF:"b-oth",
-  "Bandeira Branca":"b-bca"
+  Ipiranga:"b-ipa", Shell:"b-she", BR:"b-br",
+  "Trapézio":"b-tra", Petrobras:"b-br", "Raízen":"b-br",
+  RDP:"b-rdp", TOF:"b-oth", "Bandeira Branca":"b-bca"
 };
 
 let S={dados:[],loading:true,aba:"geral",estado:"Todos",busca:"",postoFiltro:"",det:null,dias:1};
@@ -196,24 +202,47 @@ function bcls(b){return BCLS[b]||"b-oth";}
 async function carregarDados(){
   S.loading=true; renderAll();
   try{
-    const hoje=new Date().toISOString().split('T')[0];
     const dataInicio=new Date(Date.now()-((S.dias-1)*24*60*60*1000)).toISOString().split('T')[0];
-    const url=`${SUPABASE_URL}/rest/v1/registros?criado_em=gte.${dataInicio}T00:00:00&select=posto_id,concorrente_nome,concorrente_bandeira,gc,ga,et,eta,ds,ds500,dsa,lat,lng,ia_usada,foto_url,criado_em`;
+    const url=`${SUPABASE_URL}/rest/v1/registros?criado_em=gte.${dataInicio}T00:00:00&select=posto_id,concorrente_nome,concorrente_bandeira,gc,ga,et,eta,ds,ds500,dsa,lat,lng,ia_usada,foto_url,criado_em,is_proprio_posto`;
     const resp=await fetch(url,{headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`}});
     const regs=await resp.json();
     const mapa={};
     for(const r of regs){if(!mapa[r.posto_id])mapa[r.posto_id]=[];mapa[r.posto_id].push(r);}
     S.dados=POSTOS.map(p=>{
       const rs=mapa[p.id]||[];
-      const medias={};
+      // Separa concorrentes do próprio
+      const concorrentes = rs.filter(r => !r.is_proprio_posto);
+      const propriosOrdenados = rs.filter(r => r.is_proprio_posto)
+        .sort((a,b)=>new Date(b.criado_em)-new Date(a.criado_em));
+      const proprio = propriosOrdenados[0] || null;
+
+      // Análise por combustível: nosso vs menor vs maior dos concorrentes
+      const analise={};
       for(const {k} of COMBS){
-        const vals=rs.filter(r=>r[k]>0).map(r=>parseFloat(r[k]));
-        medias[k]=vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length):null;
+        const vals=concorrentes.filter(r=>r[k]>0).map(r=>parseFloat(r[k]));
+        const nosso = proprio && proprio[k] ? parseFloat(proprio[k]) : null;
+        if(!vals.length && !nosso){ analise[k]=null; continue; }
+        analise[k]={
+          nosso,
+          menor: vals.length ? Math.min(...vals) : null,
+          maior: vals.length ? Math.max(...vals) : null,
+          media: vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null,
+          nConcorrentes: vals.length,
+        };
       }
-      return{...p,registrou:rs.length>0,concorrentes:rs.length,regs:rs,medias};
+      return {
+        ...p,
+        registrou: concorrentes.length>0,
+        proprioRegistrado: !!proprio,
+        concorrentes: concorrentes.length,
+        regs: concorrentes,
+        proprio,
+        analise,
+      };
     });
   }catch(e){
-    S.dados=POSTOS.map(p=>({...p,registrou:false,concorrentes:0,regs:[],medias:{}}));
+    console.error('Erro carregar:',e);
+    S.dados=POSTOS.map(p=>({...p,registrou:false,proprioRegistrado:false,concorrentes:0,regs:[],proprio:null,analise:{}}));
   }
   S.loading=false; renderAll();
 }
@@ -255,9 +284,16 @@ function renderAll(){
   }
 }
 
+function statusDot(p){
+  if(p.proprioRegistrado && p.registrou) return 'dot-g';
+  if(p.registrou) return 'dot-y';
+  return 'dot-r';
+}
+
 function renderDash(){
   const d=S.dados,tot=d.length;
   const reg=d.filter(p=>p.registrou).length;
+  const comProprio=d.filter(p=>p.proprioRegistrado).length;
   const pend=tot-reg;
   const totalRegs=d.reduce((s,p)=>s+p.regs.length,0);
   const pct=Math.round(reg/tot*100);
@@ -267,8 +303,8 @@ function renderDash(){
     ${[
       {cls:"kpi-0",l:"Total postos",v:tot,s:"PR·RS·SC·SP"},
       {cls:"kpi-1",l:"Registraram",v:reg,s:`${pct}% da rede`},
-      {cls:"kpi-2",l:"Aguardando",v:pend,s:"sem registro"},
-      {cls:"kpi-3",l:"Registros hoje",v:totalRegs,s:"lançamentos"},
+      {cls:"kpi-2",l:"Com painel próprio",v:comProprio,s:"meta + foto do posto"},
+      {cls:"kpi-3",l:"Pendentes",v:pend,s:"sem registro"},
     ].map(k=>`<div class="kpi ${k.cls}"><div class="kpi-label">${k.l}</div><div class="kpi-val">${k.v}</div><div class="kpi-sub">${k.s}</div></div>`).join('')}
   </div>`;
 
@@ -289,14 +325,13 @@ function renderDash(){
     }).join('')}
   </div>`;
 
-  // Rows
   let rowsHtml='';
   if(S.aba==="geral"){
     rowsHtml=df.length===0?`<div class="empty">Nenhum posto encontrado.</div>`:
       df.map(p=>`
         <div class="posto-row" onclick="abrirDet('${p.id}')">
           <div class="row-left">
-            <span class="dot ${p.registrou?'dot-g':'dot-r'}"></span>
+            <span class="dot ${statusDot(p)}"></span>
             <div style="min-width:0">
               <div class="row-nome">${p.nome}</div>
               <div class="row-sub">${p.cidade} · ${p.estado}</div>
@@ -304,6 +339,7 @@ function renderDash(){
           </div>
           <div class="row-right">
             <span class="badge ${bcls(p.bandeira)}">${p.bandeira}</span>
+            ${p.proprioRegistrado?`<span class="badge b-blue">Próprio</span>`:''}
             ${p.registrou?`<span style="font-size:11px;color:#4a6a8a;">${p.concorrentes}</span>`:''}
             ${!p.registrou?`<span class="badge b-amb">Pendente</span>`:''}
             <span class="chevron">›</span>
@@ -319,6 +355,23 @@ function renderDash(){
             <div style="font-size:11px;color:#f0a030;margin-top:2px;">${p.cidade} · ${p.estado}</div>
           </div>
           <span class="badge b-amb">Pendente</span>
+        </div>`).join('');
+  } else if(S.aba==="sem-proprio"){
+    const lista=df.filter(p=>p.registrou && !p.proprioRegistrado);
+    rowsHtml=lista.length===0?`<div class="empty">Todos com painel próprio!</div>`:
+      lista.map(p=>`
+        <div class="posto-row" onclick="abrirDet('${p.id}')">
+          <div class="row-left">
+            <span class="dot dot-y"></span>
+            <div style="min-width:0">
+              <div class="row-nome">${p.nome}</div>
+              <div class="row-sub">${p.cidade} · ${p.estado} · ${p.concorrentes} concorrentes, falta painel próprio</div>
+            </div>
+          </div>
+          <div class="row-right">
+            <span class="badge ${bcls(p.bandeira)}">${p.bandeira}</span>
+            <span class="chevron">›</span>
+          </div>
         </div>`).join('');
   } else if(S.aba==="registros"){
     const todos=df.flatMap(p=>p.regs.map(r=>({...r,pNome:p.nome,pEstado:p.estado})));
@@ -336,6 +389,8 @@ function renderDash(){
         </div>`).join('');
   }
 
+  const semProprioCount = d.filter(p=>p.registrou && !p.proprioRegistrado).length;
+
   document.getElementById('content').innerHTML=`
     ${S.loading?`<div class="loading"><div class="spinner"></div>Carregando...</div>`:`
     ${kpisHtml}
@@ -344,6 +399,7 @@ function renderDash(){
     <div class="tabs">
       <button class="tab ${S.aba==='geral'?'on':''}" onclick="setAba('geral')">Todos (${tot})</button>
       <button class="tab ${S.aba==='pendentes'?'on':''}" onclick="setAba('pendentes')">Pendentes (${pend})</button>
+      <button class="tab ${S.aba==='sem-proprio'?'on':''}" onclick="setAba('sem-proprio')">Sem painel próprio (${semProprioCount})</button>
       <button class="tab ${S.aba==='registros'?'on':''}" onclick="setAba('registros')">Registros (${totalRegs})</button>
     </div>
     <div class="filtros">
@@ -358,57 +414,68 @@ function renderDash(){
     </div>
     ${rowsHtml}`}`;
 
-  // Bind busca sem re-render completo
   const bi=document.getElementById('busca-input');
   if(bi){
-    bi.addEventListener('input',e=>{S.busca=e.target.value;renderRows();});
+    bi.addEventListener('input',e=>{S.busca=e.target.value;renderDash();});
     bi.addEventListener('focus',()=>{bi.setSelectionRange(bi.value.length,bi.value.length);});
   }
 }
 
-function renderRows(){
-  // Atualiza só as rows sem recriar tudo
-  const df=filtrados();
-  const d=S.dados;
-  const tot=d.length,pend=d.filter(p=>!p.registrou).length;
-  const totalRegs=d.reduce((s,p)=>s+p.regs.length,0);
-  let rowsHtml='';
-  if(S.aba==="geral"){
-    rowsHtml=df.length===0?`<div class="empty">Nenhum posto encontrado.</div>`:
-      df.map(p=>`
-        <div class="posto-row" onclick="abrirDet('${p.id}')">
-          <div class="row-left">
-            <span class="dot ${p.registrou?'dot-g':'dot-r'}"></span>
-            <div style="min-width:0">
-              <div class="row-nome">${p.nome}</div>
-              <div class="row-sub">${p.cidade} · ${p.estado}</div>
-            </div>
-          </div>
-          <div class="row-right">
-            <span class="badge ${bcls(p.bandeira)}">${p.bandeira}</span>
-            ${p.registrou?`<span style="font-size:11px;color:#4a6a8a;">${p.concorrentes}</span>`:''}
-            ${!p.registrou?`<span class="badge b-amb">Pendente</span>`:''}
-            <span class="chevron">›</span>
-          </div>
-        </div>`).join('');
-  } else if(S.aba==="pendentes"){
-    const lista=df.filter(p=>!p.registrou);
-    rowsHtml=lista.length===0?`<div class="empty">Todos registraram!</div>`:lista.map(p=>`
-      <div class="pend-row">
-        <div><div style="font-weight:500;font-size:13px;">${p.nome}</div>
-        <div style="font-size:11px;color:#f0a030;">${p.cidade} · ${p.estado}</div></div>
-        <span class="badge b-amb">Pendente</span>
-      </div>`).join('');
+function diffBadge(nosso, menor, maior) {
+  if (nosso === null || menor === null || maior === null) return `<span class="diff-pos diff-gray">—</span>`;
+  if (nosso > maior) return `<span class="diff-pos diff-red">+R$ ${(nosso-maior).toFixed(2)} acima do maior</span>`;
+  if (nosso < menor) return `<span class="diff-pos diff-grn">−R$ ${(menor-nosso).toFixed(2)} abaixo do menor</span>`;
+  // Está na faixa: mostra posição relativa
+  const posDoMaior = (maior - nosso).toFixed(2);
+  const posDoMenor = (nosso - menor).toFixed(2);
+  if (Math.abs(maior - nosso) < Math.abs(nosso - menor)) {
+    return `<span class="diff-pos diff-amb">R$ ${posDoMaior} abaixo do maior</span>`;
   }
-  // Injeta só as rows depois dos filtros
-  const rows=document.querySelector('.filtros');
-  if(rows&&rows.nextSibling){
-    let next=rows.nextSibling;
-    while(next){const n=next.nextSibling;next.parentNode.removeChild(next);next=n;}
+  return `<span class="diff-pos diff-amb">R$ ${posDoMenor} acima do menor</span>`;
+}
+
+function renderAnaliseDif(p) {
+  if (!p.proprio) {
+    return `
+      <div class="analise-card" style="background:linear-gradient(135deg,#3a2a00,#1a1500);border-color:#3a2a00;">
+        <div class="analise-title">⚠️ Painel próprio não registrado</div>
+        <div style="font-size:12px;color:#f0a030;">Sem o painel do próprio posto, não dá pra comparar com o mercado. Avise o gerente.</div>
+      </div>`;
   }
-  const div=document.createElement('div');
-  div.innerHTML=rowsHtml;
-  document.getElementById('content').appendChild(div);
+
+  const linhas = COMBS.map(({k,l}) => {
+    const a = p.analise[k];
+    if (!a || (a.nosso === null && a.menor === null)) return '';
+    const nosso = a.nosso !== null ? `R$ ${a.nosso.toFixed(2)}` : '—';
+    const menor = a.menor !== null ? `R$ ${a.menor.toFixed(2)}` : '—';
+    const maior = a.maior !== null ? `R$ ${a.maior.toFixed(2)}` : '—';
+    return `
+      <div class="analise-row">
+        <div class="lbl">${l}</div>
+        <div class="val val-nosso">${nosso}</div>
+        <div class="val val-menor">${menor}</div>
+        <div class="val val-maior">${maior}</div>
+        <div>${diffBadge(a.nosso, a.menor, a.maior)}</div>
+      </div>`;
+  }).filter(Boolean).join('');
+
+  if (!linhas) {
+    return `<div class="analise-card"><div class="analise-title">📊 Análise de diferenças</div>
+      <div style="font-size:12px;color:#8aaac0;">Sem dados de concorrentes para comparar ainda.</div></div>`;
+  }
+
+  return `
+    <div class="analise-card">
+      <div class="analise-title">📊 Análise de diferenças — nosso preço vs concorrentes</div>
+      <div class="analise-row" style="font-weight:600;color:#4a6a8a;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;">
+        <div>Combustível</div>
+        <div style="text-align:right;color:#7ab8f0;">Nosso</div>
+        <div style="text-align:right;color:#4dd87a;">Menor conc.</div>
+        <div style="text-align:right;color:#e24b4a;">Maior conc.</div>
+        <div style="text-align:right;">Posição</div>
+      </div>
+      ${linhas}
+    </div>`;
 }
 
 function renderDet(){
@@ -423,11 +490,34 @@ function renderDet(){
       <span class="badge ${bcls(p.bandeira)}">${p.bandeira}</span>
     </div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
-      <div class="kpi kpi-0" style="padding:12px 14px"><div class="kpi-label">Status</div><div style="font-size:14px;font-weight:700;color:#fff">${p.registrou?'Registrou':'Pendente'}</div></div>
+      <div class="kpi kpi-0" style="padding:12px 14px"><div class="kpi-label">Status</div><div style="font-size:14px;font-weight:700;color:#fff">${p.proprioRegistrado?'Completo':p.registrou?'Parcial':'Pendente'}</div></div>
       <div class="kpi kpi-1" style="padding:12px 14px"><div class="kpi-label">Concorrentes</div><div style="font-size:22px;font-weight:700;color:#fff">${p.concorrentes}</div></div>
-      <div class="kpi kpi-2" style="padding:12px 14px"><div class="kpi-label">Registros</div><div style="font-size:22px;font-weight:700;color:#fff">${p.regs.length}</div></div>
+      <div class="kpi kpi-2" style="padding:12px 14px"><div class="kpi-label">Painel próprio</div><div style="font-size:14px;font-weight:700;color:#fff">${p.proprioRegistrado?'Sim':'Não'}</div></div>
     </div>
-    ${p.regs.length===0?`<div class="empty">Nenhum registro hoje.</div>`:
+
+    ${renderAnaliseDif(p)}
+
+    ${p.proprio ? `
+      <div class="sec-label">Painel do próprio posto</div>
+      <div class="comp-card" style="border-color:#2a4060;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div>
+            <div style="font-weight:600;font-size:14px;color:#7ab8f0;">📍 ${p.nome}</div>
+            <span class="badge b-blue">Próprio posto</span>
+            ${p.proprio.ia_usada?`<span class="badge b-grn" style="margin-left:4px">IA</span>`:''}
+          </div>
+          <div style="font-size:11px;color:#4a6a8a">${new Date(p.proprio.criado_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
+        </div>
+        ${p.proprio.foto_url?`<img src="${p.proprio.foto_url}" onclick="window.open('${p.proprio.foto_url}','_blank')" style="width:100%;max-height:200px;object-fit:contain;border-radius:8px;background:#0f1520;cursor:pointer;border:1px solid #1e2d42;margin-bottom:10px">`:''}
+        <table class="comp-table">
+          <thead><tr><th>Combustível</th><th style="text-align:right">Preço</th></tr></thead>
+          <tbody>${COMBS.filter(c=>p.proprio[c.k]>0).map(c=>`<tr><td>${c.l}</td><td style="text-align:right;font-weight:600;color:#7ab8f0">R$ ${parseFloat(p.proprio[c.k]).toFixed(2)}</td></tr>`).join('')}</tbody>
+        </table>
+      </div>
+    ` : ''}
+
+    <div class="sec-label">Concorrentes (${p.regs.length})</div>
+    ${p.regs.length===0?`<div class="empty">Nenhum concorrente registrado.</div>`:
       p.regs.map(r=>`
         <div class="comp-card">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
@@ -445,8 +535,7 @@ function renderDet(){
           </table>
           <div style="margin-top:10px;padding-top:10px;border-top:1px solid #1e2d42;display:flex;gap:10px;flex-wrap:wrap;font-size:11px;">
             <span style="color:#8aaac0">${new Date(r.criado_em).toLocaleString('pt-BR')}</span>
-            ${r.lat&&r.lng?`<a href="https://www.google.com/maps?q=${r.lat},${r.lng}" target="_blank" style="color:#2e7dd1;font-weight:600;text-decoration:none">Ver no mapa ↗</a><span class="badge b-grn">GPS verificado</span>`:
-            `<span class="badge b-amb">Sem GPS</span>`}
+            ${r.lat&&r.lng?`<a href="https://www.google.com/maps?q=${r.lat},${r.lng}" target="_blank" style="color:#2e7dd1;font-weight:600;text-decoration:none">Ver no mapa ↗</a><span class="badge b-grn">GPS verificado</span>`:`<span class="badge b-amb">Sem GPS</span>`}
           </div>
         </div>`).join('')}`;
 }
