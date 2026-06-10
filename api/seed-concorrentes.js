@@ -11,7 +11,7 @@
 
 const NOMINATIM = 'https://nominatim.openstreetmap.org/search';
 const OVERPASS  = 'https://overpass-api.de/api/interpreter';
-const UA = 'TrapezioPostos/1.0 (contato: ti@grupo-trapezio.com.br)'; // ATUALIZE com email real
+const UA = 'TrapezioPostos/1.0 (contato: giovanne.mague@grupotrapezio.com.br)'; // ATUALIZE com email real
 
 // ─── Capitais brasileiras → raio menor ───────────────────────
 const CAPITAIS = new Set([
