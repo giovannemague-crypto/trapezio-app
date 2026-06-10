@@ -659,13 +659,18 @@ function renderMercadoTab(postosFiltrados) {
   if (precos.length === 0) {
     return `<div class="empty">
       <div style="font-size:14px;margin-bottom:6px;">📡 Sem dados do Nota Paraná ainda</div>
-      <div style="font-size:11px;color:#3a5a7a;">A coleta automática roda 4x ao dia (07h, 12h, 16h, 20h). Funciona apenas para postos do PR.</div>
+      <div style="font-size:11px;color:#3a5a7a;">A coleta automática roda 4x ao dia. Funciona apenas para postos do PR.</div>
     </div>`;
   }
 
+  // Quantos linhas mostrar inicialmente por combustível
+  const TOP_N_PADRAO = 5;
+
   // Agrupa por posto, depois por combustível
   const COMB_LABEL = { gc:'Gasolina', ga:'Gas. Aditivada', et:'Etanol', ds:'Diesel S10' };
+  const COMB_COR = { gc:'#f5c400', ga:'#f59a3c', et:'#4dd87a', ds:'#7ab8f0' };
   const COMB_ORDEM = ['gc','ga','et','ds'];
+
   const porPosto = {};
   for (const pe of precos) {
     (porPosto[pe.posto_id] ||= {})[pe.combustivel] ||= [];
@@ -676,44 +681,78 @@ function renderMercadoTab(postosFiltrados) {
     .filter(p => porPosto[p.id])
     .map(p => {
       const combs = porPosto[p.id];
-      const linhas = COMB_ORDEM.map(ck => {
+      const totalEstab = new Set(Object.values(combs).flat().map(pe => pe.estabelecimento_codigo)).size;
+
+      const blocosComb = COMB_ORDEM.map(ck => {
         const lista = combs[ck];
         if (!lista || lista.length === 0) return '';
         const ordenada = [...lista].sort((a,b) => parseFloat(a.valor) - parseFloat(b.valor));
-        const menor = ordenada[0];
-        const maior = ordenada[ordenada.length-1];
-        const minutos = Math.round((Date.now() - new Date(menor.datahora_nota).getTime()) / 60000);
-        const tempoTxt = minutos < 60 ? `${minutos}min atrás`
-                       : minutos < 1440 ? `${Math.round(minutos/60)}h atrás`
-                       : `${Math.round(minutos/1440)}d atrás`;
-        return `<div style="display:grid;grid-template-columns:90px 1fr 1fr;gap:12px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:12px;">
-          <div style="color:#8aaac0;">${COMB_LABEL[ck]}</div>
-          <div>
-            <div style="color:#4dd87a;font-weight:600;">R$ ${parseFloat(menor.valor).toFixed(2)} <span style="font-size:9px;opacity:0.6;">menor</span></div>
-            <div style="font-size:10px;color:#7a8aa0;" title="${menor.estabelecimento_nome}">${(menor.estabelecimento_nome||'').slice(0,28)}</div>
-            <div style="font-size:9px;color:#4a6a8a;">${tempoTxt} · ${menor.estabelecimento_bairro||''}</div>
+        const expandidoId = `exp-${p.id}-${ck}`;
+
+        const linhas = ordenada.map((pe, idx) => {
+          const minutos = Math.round((Date.now() - new Date(pe.datahora_nota).getTime()) / 60000);
+          const tempoTxt = minutos < 60 ? `${minutos}min`
+                         : minutos < 1440 ? `${Math.round(minutos/60)}h`
+                         : `${Math.round(minutos/1440)}d`;
+          const cor = idx === 0 ? '#4dd87a' : idx === ordenada.length-1 ? '#e24b4a' : '#e0e8f0';
+          const tag = idx === 0 ? '<span style="font-size:8px;color:#4dd87a;background:rgba(77,216,122,0.15);padding:1px 4px;border-radius:3px;margin-left:4px;">MENOR</span>'
+                    : idx === ordenada.length-1 && ordenada.length > 1 ? '<span style="font-size:8px;color:#e24b4a;background:rgba(226,75,74,0.15);padding:1px 4px;border-radius:3px;margin-left:4px;">MAIOR</span>'
+                    : '';
+          const visivel = idx < TOP_N_PADRAO;
+          return `<div class="merc-row ${visivel?'':'merc-row-hidden'}" data-grp="${expandidoId}" style="display:${visivel?'grid':'none'};grid-template-columns:60px 1fr auto;gap:8px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:11px;align-items:center;">
+            <div style="color:${cor};font-weight:600;">R$ ${parseFloat(pe.valor).toFixed(2)}</div>
+            <div style="min-width:0;">
+              <div style="color:#e0e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${pe.estabelecimento_nome||'—'}${tag}</div>
+              <div style="color:#4a6a8a;font-size:10px;">${pe.estabelecimento_bairro||''} · ${pe.distancia_km?.toFixed?.(1)||'?'}km</div>
+            </div>
+            <div style="color:#4a6a8a;font-size:10px;text-align:right;white-space:nowrap;">${tempoTxt}</div>
+          </div>`;
+        }).join('');
+
+        const temMais = ordenada.length > TOP_N_PADRAO;
+        const botaoExpandir = temMais
+          ? `<button onclick="event.stopPropagation();toggleMercadoExpandir('${expandidoId}', this)" class="btn-top" style="margin-top:4px;font-size:10px;padding:3px 8px;">Ver todos (${ordenada.length})</button>`
+          : '';
+
+        return `<div style="margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;padding-bottom:4px;border-bottom:1px solid ${COMB_COR[ck]}44;">
+            <div style="font-size:11px;font-weight:600;color:${COMB_COR[ck]};text-transform:uppercase;letter-spacing:0.5px;">${COMB_LABEL[ck]}</div>
+            <div style="font-size:10px;color:#4a6a8a;">${ordenada.length} estabelec.</div>
           </div>
-          <div>
-            <div style="color:#e24b4a;font-weight:600;">R$ ${parseFloat(maior.valor).toFixed(2)} <span style="font-size:9px;opacity:0.6;">maior</span></div>
-            <div style="font-size:10px;color:#7a8aa0;" title="${maior.estabelecimento_nome}">${(maior.estabelecimento_nome||'').slice(0,28)}</div>
-            <div style="font-size:9px;color:#4a6a8a;">${lista.length} estabelecimentos</div>
-          </div>
+          ${linhas}
+          ${botaoExpandir}
         </div>`;
       }).filter(Boolean).join('');
 
       return `<div class="comp-card" style="cursor:pointer;" onclick="abrirDet('${p.id}')">
-        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
           <div>
-            <div style="font-weight:600;font-size:13px;">${p.nome}</div>
-            <div style="font-size:11px;color:#4a6a8a;">${p.cidade} · ${p.estado}</div>
+            <div style="font-weight:600;font-size:14px;">${p.nome}</div>
+            <div style="font-size:11px;color:#4a6a8a;">${p.cidade} · ${p.estado} · ${totalEstab} concorrentes mapeados</div>
           </div>
-          <span style="font-size:10px;color:#4a6a8a;">Nota Paraná</span>
+          <span style="font-size:10px;color:#4a6a8a;align-self:flex-start;">📡 Nota Paraná</span>
         </div>
-        ${linhas || '<div style="font-size:11px;color:#7a8aa0;font-style:italic;">Sem coleta recente</div>'}
+        ${blocosComb || '<div style="font-size:11px;color:#7a8aa0;font-style:italic;">Sem coleta recente</div>'}
       </div>`;
     }).join('');
 
   return cards || `<div class="empty">Sem postos do PR no filtro atual.</div>`;
+}
+
+function toggleMercadoExpandir(grpId, btn) {
+  const linhas = document.querySelectorAll(`.merc-row[data-grp="${grpId}"]`);
+  let total = 0, escondidas = 0;
+  linhas.forEach(el => {
+    total++;
+    if (el.classList.contains('merc-row-hidden')) escondidas++;
+  });
+  const mostrar = escondidas > 0;
+  linhas.forEach(el => {
+    if (el.classList.contains('merc-row-hidden')) {
+      el.style.display = mostrar ? 'grid' : 'none';
+    }
+  });
+  if (btn) btn.textContent = mostrar ? `Recolher` : `Ver todos (${total})`;
 }
 
 function setDias(v){S.dias=v;carregarDados();}
