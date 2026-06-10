@@ -7,6 +7,10 @@
     {
       "path": "/api/seed-concorrentes",
       "schedule": "0 3 1 * *"
+    },
+    {
+      "path": "/api/coletor-notaparana-orchestrator",
+      "schedule": "0 10,15,19,23 * * *"
     }
   ]
 }
