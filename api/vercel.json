@@ -3,6 +3,10 @@
     {
       "path": "/api/auditor",
       "schedule": "0 1 * * *"
+    },
+    {
+      "path": "/api/seed-concorrentes",
+      "schedule": "0 3 1 * *"
     }
   ]
 }
