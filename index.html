@@ -71,6 +71,8 @@
     .resumo-table th { text-align: left; padding: 8px 10px; font-weight: 500; color: #73726c; border-bottom: 0.5px solid rgba(0,0,0,0.1); }
     .resumo-table td { padding: 10px 10px; border-bottom: 0.5px solid rgba(0,0,0,0.06); }
     .empty { border: 0.5px dashed rgba(0,0,0,0.15); border-radius: 12px; padding: 2rem; text-align: center; color: #73726c; margin-bottom: 12px; font-size: 13px; line-height: 1.7; }
+    .val-clicavel { cursor: help; border-bottom: 1px dashed rgba(0,0,0,0.2); display: inline-block; }
+    .val-clicavel:hover { filter: brightness(1.1); }
     @media (prefers-color-scheme: dark) {
       body { background: #1a1a18; color: #e8e8e4; }
       .card, .reg-card { background: #2c2c2a; border-color: rgba(255,255,255,0.1); }
@@ -255,12 +257,18 @@ async function buscarPostoProximo(lat, lng) { return null; }
 function compararProprioVsMercado(combKey) {
   if (!state.proprio || !state.proprio[combKey]) return null;
   const nosso = parseFloat(state.proprio[combKey]);
-  const vals = state.registros
+  const comValor = state.registros
     .filter(r => r[combKey])
-    .map(r => parseFloat(r[combKey]))
-    .filter(v => !isNaN(v) && v > 0);
-  if (!vals.length) return { nosso, menor:null, maior:null };
-  return { nosso, menor: Math.min(...vals), maior: Math.max(...vals) };
+    .map(r => ({ v: parseFloat(r[combKey]), nome: r.nome, bandeira: r.bandeira }))
+    .filter(o => !isNaN(o.v) && o.v > 0);
+  if (!comValor.length) return { nosso, menor:null, maior:null, menorNome:null, maiorNome:null };
+  const menorObj = comValor.reduce((a,b) => a.v < b.v ? a : b);
+  const maiorObj = comValor.reduce((a,b) => a.v > b.v ? a : b);
+  return {
+    nosso,
+    menor: menorObj.v, menorNome: menorObj.nome, menorBandeira: menorObj.bandeira,
+    maior: maiorObj.v, maiorNome: maiorObj.nome, maiorBandeira: maiorObj.bandeira,
+  };
 }
 
 // ── Image / OCR ─────────────────────────────────────────────
@@ -570,11 +578,20 @@ function renderResumoComparativo() {
     if (c.nosso > c.maior) pos = `<span class="badge badge-red">+R$ ${(c.nosso - c.maior).toFixed(2)} acima do maior</span>`;
     else if (c.nosso < c.menor) pos = `<span class="badge badge-green">−R$ ${(c.menor - c.nosso).toFixed(2)} abaixo do menor</span>`;
     else pos = `<span class="badge badge-amber">dentro da faixa</span>`;
+
+    const escAttr = s => String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;');
+    const tipMenor = c.menorNome ? `${c.menorNome}${c.menorBandeira?' ('+c.menorBandeira+')':''}` : '';
+    const tipMaior = c.maiorNome ? `${c.maiorNome}${c.maiorBandeira?' ('+c.maiorBandeira+')':''}` : '';
+
     return `
       <tr>
         <td>${label.replace('Gasolina ','Gás.')}</td>
         <td style="text-align:right;font-weight:500;color:#185fa5;">R$ ${c.nosso.toFixed(2)}</td>
-        <td style="text-align:right;font-size:11px;color:#73726c;">${c.menor.toFixed(2)} / ${c.maior.toFixed(2)}</td>
+        <td style="text-align:right;font-size:11px;color:#73726c;">
+          <span class="val-clicavel" title="Menor: ${escAttr(tipMenor)}" onclick="event.stopPropagation();revelarConcorrenteApp(this,'Menor: ${escAttr(tipMenor)}')" style="color:#3b6d11;">${c.menor.toFixed(2)}<span style="font-size:9px;opacity:0.5;">ⓘ</span></span>
+          / 
+          <span class="val-clicavel" title="Maior: ${escAttr(tipMaior)}" onclick="event.stopPropagation();revelarConcorrenteApp(this,'Maior: ${escAttr(tipMaior)}')" style="color:#a32d2d;">${c.maior.toFixed(2)}<span style="font-size:9px;opacity:0.5;">ⓘ</span></span>
+        </td>
         <td style="text-align:right;">${pos}</td>
       </tr>`;
   }).filter(Boolean).join('');
@@ -582,12 +599,23 @@ function renderResumoComparativo() {
   if (!linhas) return '';
   return `
     <div class="card">
-      <div class="label" style="margin-bottom:8px;">Seu posto vs concorrentes</div>
+      <div class="label" style="margin-bottom:8px;">Seu posto vs concorrentes <span style="font-size:10px;color:#9c9a92;font-weight:400;text-transform:none;letter-spacing:0;">(toque nos valores para ver o concorrente)</span></div>
       <table class="resumo-table" style="font-size:12px;">
         <thead><tr><th>Combustível</th><th style="text-align:right;">Nosso</th><th style="text-align:right;">Menor / Maior</th><th style="text-align:right;">Posição</th></tr></thead>
         <tbody>${linhas}</tbody>
       </table>
     </div>`;
+}
+
+function revelarConcorrenteApp(el, txt) {
+  document.querySelectorAll('.val-popover-app').forEach(p => p.remove());
+  const pop = document.createElement('div');
+  pop.className = 'val-popover-app';
+  pop.textContent = txt;
+  pop.style.cssText = 'position:absolute;top:100%;right:0;margin-top:4px;background:#1a1a18;color:#fff;border-radius:6px;padding:6px 10px;font-size:11px;white-space:nowrap;z-index:50;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
+  el.style.position = 'relative';
+  el.appendChild(pop);
+  setTimeout(() => pop.remove(), 3500);
 }
 
 // ── Formulário (concorrente OU próprio) ─────────────────────
