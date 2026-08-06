@@ -17,6 +17,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 .content{padding:14px 16px}
 
+/* KPI */
 .kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
 @media(min-width:600px){.kpi-grid{grid-template-columns:repeat(4,1fr)}}
 .kpi{border-radius:12px;padding:14px 16px}
@@ -28,6 +29,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .kpi-val{font-size:28px;font-weight:700;color:#fff;line-height:1}
 .kpi-sub{font-size:11px;color:rgba(255,255,255,0.6);margin-top:4px}
 
+/* Estado */
 .estado-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
 @media(min-width:600px){.estado-grid{grid-template-columns:repeat(4,1fr)}}
 .estado-card{background:#131e2e;border:1px solid #1e2d42;border-radius:10px;padding:12px 14px}
@@ -39,10 +41,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .sec-label{font-size:10px;font-weight:600;color:#4a6a8a;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;display:flex;align-items:center;gap:8px}
 .sec-label::after{content:"";flex:1;height:1px;background:#1e2d42}
 
+/* Tabs */
 .tabs{display:flex;background:#131e2e;border:1px solid #1e2d42;border-radius:10px;padding:3px;gap:3px;margin-bottom:12px;overflow-x:auto}
 .tab{flex:1;min-width:80px;padding:7px 8px;font-size:11px;border:none;border-radius:7px;background:transparent;color:#4a6a8a;cursor:pointer;font-weight:500;white-space:nowrap;transition:all 0.15s}
 .tab.on{background:#1a3a6b;color:#fff}
 
+/* Filtros */
 .filtros{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
 .filtros-row{display:flex;gap:8px;flex-wrap:wrap}
 .input-s{width:100%;padding:9px 14px;font-size:14px;border-radius:8px;border:1px solid #1e2d42;background:#131e2e;color:#e0e8f0;outline:none}
@@ -52,12 +56,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .btn-est{padding:7px 14px;font-size:12px;border-radius:8px;border:1px solid #1e2d42;background:#131e2e;color:#6a8aaa;cursor:pointer;white-space:nowrap}
 .btn-est.on{background:#2e7dd1;color:#fff;border-color:#2e7dd1}
 
+/* Posto rows */
 .posto-row{background:#131e2e;border:1px solid #1e2d42;border-radius:10px;padding:12px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer;transition:all 0.12s}
 .posto-row:hover{border-color:#2e7dd1}
 .row-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
 .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 .dot-g{background:#4dd87a;box-shadow:0 0 6px rgba(77,216,122,0.5)}
-.dot-y{background:#f0a030;box-shadow:0 0 6px rgba(240,160,48,0.5)}
 .dot-r{background:#e24b4a;box-shadow:0 0 6px rgba(226,75,74,0.5)}
 .row-nome{font-size:13px;font-weight:500;color:#e0e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .row-sub{font-size:11px;color:#4a6a8a;margin-top:2px}
@@ -73,12 +77,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .b-red{background:rgba(226,75,74,0.15);color:#e24b4a;border-color:rgba(226,75,74,0.3)}
 .b-amb{background:rgba(186,117,23,0.15);color:#f0a030;border-color:rgba(186,117,23,0.3)}
 .b-grn{background:rgba(77,216,122,0.12);color:#4dd87a;border-color:rgba(77,216,122,0.3)}
-.b-blue{background:rgba(46,125,209,0.15);color:#7ab8f0;border-color:rgba(46,125,209,0.4)}
 .chevron{font-size:16px;color:#3a5a7a}
 
 .pend-row{background:#1a1500;border:1px solid #3a2a00;border-left:3px solid #f0a030;border-radius:10px;padding:12px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
 .empty{text-align:center;padding:3rem;color:#3a5a7a;font-size:14px}
 
+/* Detalhe */
 .det-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
 .btn-back{background:transparent;border:none;font-size:22px;cursor:pointer;color:#4a6a8a;padding:0;line-height:1}
 .comp-card{background:#131e2e;border:1px solid #1e2d42;border-radius:12px;padding:14px 16px;margin-bottom:10px}
@@ -87,28 +91,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .comp-table td{padding:9px 8px;border-bottom:1px solid #1a2535;color:#e0e8f0}
 .comp-table tr:last-child td{border-bottom:none}
 .tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:4px;background:rgba(255,255,255,0.06);color:#8aaac0;border:1px solid rgba(255,255,255,0.1);margin:2px}
-
-/* Análise de diferenças */
-.analise-card{background:linear-gradient(135deg,#1a2b45,#131e2e);border:1px solid #2a4060;border-radius:12px;padding:16px;margin-bottom:12px}
-.analise-title{font-size:13px;font-weight:700;color:#fff;margin-bottom:12px;display:flex;align-items:center;gap:8px}
-.analise-row{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid #1e2d42;font-size:12px}
-.analise-row:last-child{border-bottom:none}
-.analise-row .lbl{color:#8aaac0;font-weight:500}
-.analise-row .val{font-weight:600;color:#e0e8f0;text-align:right}
-.analise-row .val-nosso{color:#7ab8f0}
-.analise-row .val-menor{color:#4dd87a}
-.analise-row .val-maior{color:#e24b4a}
-.diff-pos{font-size:10px;padding:2px 6px;border-radius:4px;font-weight:600;white-space:nowrap}
-.diff-red{background:rgba(226,75,74,0.18);color:#ff7878;border:1px solid rgba(226,75,74,0.4)}
-.diff-amb{background:rgba(240,160,48,0.18);color:#ffb060;border:1px solid rgba(240,160,48,0.4)}
-.diff-grn{background:rgba(77,216,122,0.18);color:#7adb96;border:1px solid rgba(77,216,122,0.4)}
-.diff-gray{background:rgba(255,255,255,0.06);color:#7a8aa0;border:1px solid rgba(255,255,255,0.1)}
-
-.val-clicavel{cursor:help;position:relative;border-bottom:1px dashed rgba(255,255,255,0.2);display:inline-flex;align-items:baseline;gap:3px;}
-.val-clicavel:hover{filter:brightness(1.2)}
-.val-info{font-size:9px;opacity:0.5;margin-left:2px}
-.val-popover{position:absolute;top:100%;right:0;margin-top:4px;background:#0a1018;border:1px solid #2a4060;border-radius:6px;padding:6px 10px;font-size:11px;color:#e0e8f0;white-space:nowrap;z-index:50;box-shadow:0 4px 12px rgba(0,0,0,0.4);font-weight:500;pointer-events:none;animation:fadeIn 0.15s}
-@keyframes fadeIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
 
 .spinner{width:28px;height:28px;border:2px solid #1e2d42;border-top-color:#2e7dd1;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -187,7 +169,7 @@ const POSTOS=[
   {id:"062",nome:"Posto TS",cidade:"Curitiba",estado:"PR",bandeira:"Shell"},
   {id:"063",nome:"Posto Via Torres",cidade:"Curitiba",estado:"PR",bandeira:"BR"},
   {id:"064",nome:"Posto Vila Resende",cidade:"Piracicaba",estado:"SP",bandeira:"Shell"},
-  {id:"065",nome:"Posto WC",cidade:"Criciúma",estado:"SC",bandeira:"Ipiranga"},
+  {id:"066",nome:"Auto Posto Alphaville",cidade:"Pinhais",estado:"PR",bandeira:"Petrobras"},
 ];
 
 const COMBS=[
@@ -196,90 +178,43 @@ const COMBS=[
   {k:"ds",l:"Diesel S10"},{k:"ds500",l:"Diesel S500"},{k:"dsa",l:"Diesel S10 Aditivado"},
 ];
 const BCLS={
-  Ipiranga:"b-ipa", Shell:"b-she", BR:"b-br",
-  "Trapézio":"b-tra", Petrobras:"b-br", "Raízen":"b-br",
-  RDP:"b-rdp", TOF:"b-oth", "Bandeira Branca":"b-bca"
+  Ipiranga:"b-ipa",
+  Shell:"b-she",
+  BR:"b-br",
+  "Trapézio":"b-tra",
+  Petrobras:"b-br",
+  "Raízen":"b-br",
+  RDP:"b-rdp",
+  TOF:"b-oth",
+  "Bandeira Branca":"b-bca"
 };
 
-let S={dados:[],alertas:[],precosExternos:[],loading:true,aba:"geral",estado:"Todos",busca:"",postoFiltro:"",det:null,dias:1};
+let S={dados:[],loading:true,aba:"geral",estado:"Todos",busca:"",postoFiltro:"",det:null,dias:1};
 
 function bcls(b){return BCLS[b]||"b-oth";}
 
 async function carregarDados(){
   S.loading=true; renderAll();
   try{
+    const hoje=new Date().toISOString().split('T')[0];
     const dataInicio=new Date(Date.now()-((S.dias-1)*24*60*60*1000)).toISOString().split('T')[0];
-    const url=`${SUPABASE_URL}/rest/v1/registros?criado_em=gte.${dataInicio}T00:00:00&select=posto_id,concorrente_nome,concorrente_bandeira,gc,ga,et,eta,ds,ds500,dsa,lat,lng,ia_usada,foto_url,criado_em,is_proprio_posto`;
+    const url=`${SUPABASE_URL}/rest/v1/registros?criado_em=gte.${dataInicio}T00:00:00&select=posto_id,concorrente_nome,concorrente_bandeira,gc,ga,et,eta,ds,ds500,dsa,lat,lng,ia_usada,foto_url,criado_em`;
     const resp=await fetch(url,{headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`}});
     const regs=await resp.json();
     const mapa={};
     for(const r of regs){if(!mapa[r.posto_id])mapa[r.posto_id]=[];mapa[r.posto_id].push(r);}
     S.dados=POSTOS.map(p=>{
       const rs=mapa[p.id]||[];
-      // Separa concorrentes do próprio
-      const concorrentes = rs.filter(r => !r.is_proprio_posto);
-      const propriosOrdenados = rs.filter(r => r.is_proprio_posto)
-        .sort((a,b)=>new Date(b.criado_em)-new Date(a.criado_em));
-      const proprio = propriosOrdenados[0] || null;
-
-      // Análise por combustível: nosso vs menor vs maior dos concorrentes
-      const analise={};
+      const medias={};
       for(const {k} of COMBS){
-        // Mantém o registro junto do valor pra saber QUAL concorrente é cada extremo
-        const comValor = concorrentes
-          .filter(r => r[k] > 0)
-          .map(r => ({ v: parseFloat(r[k]), nome: r.concorrente_nome || '—', bandeira: r.concorrente_bandeira || '' }));
-        const nosso = proprio && proprio[k] ? parseFloat(proprio[k]) : null;
-        if(!comValor.length && !nosso){ analise[k]=null; continue; }
-
-        let menorObj=null, maiorObj=null;
-        if (comValor.length) {
-          menorObj = comValor.reduce((a,b) => a.v < b.v ? a : b);
-          maiorObj = comValor.reduce((a,b) => a.v > b.v ? a : b);
-        }
-
-        analise[k]={
-          nosso,
-          menor: menorObj ? menorObj.v : null,
-          menorNome: menorObj ? menorObj.nome : null,
-          menorBandeira: menorObj ? menorObj.bandeira : null,
-          maior: maiorObj ? maiorObj.v : null,
-          maiorNome: maiorObj ? maiorObj.nome : null,
-          maiorBandeira: maiorObj ? maiorObj.bandeira : null,
-          media: comValor.length ? comValor.reduce((a,b)=>a+b.v,0)/comValor.length : null,
-          nConcorrentes: comValor.length,
-        };
+        const vals=rs.filter(r=>r[k]>0).map(r=>parseFloat(r[k]));
+        medias[k]=vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length):null;
       }
-      return {
-        ...p,
-        registrou: concorrentes.length>0,
-        proprioRegistrado: !!proprio,
-        concorrentes: concorrentes.length,
-        regs: concorrentes,
-        proprio,
-        analise,
-      };
+      return{...p,registrou:rs.length>0,concorrentes:rs.length,regs:rs,medias};
     });
   }catch(e){
-    console.error('Erro carregar:',e);
-    S.dados=POSTOS.map(p=>({...p,registrou:false,proprioRegistrado:false,concorrentes:0,regs:[],proprio:null,analise:{}}));
+    S.dados=POSTOS.map(p=>({...p,registrou:false,concorrentes:0,regs:[],medias:{}}));
   }
-
-  // Carrega alertas em aberto
-  try {
-    const dataInicio=new Date(Date.now()-((S.dias-1)*24*60*60*1000)).toISOString().split('T')[0];
-    const aUrl=`${SUPABASE_URL}/rest/v1/alertas?criado_em=gte.${dataInicio}T00:00:00&status=eq.aberto&select=*&order=criado_em.desc`;
-    const ar=await fetch(aUrl,{headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`}});
-    S.alertas = ar.ok ? await ar.json() : [];
-  } catch(e) { console.error('Erro alertas:',e); S.alertas=[]; }
-
-  // Carrega preços externos (Nota Paraná) — só os mais recentes por estabelecimento+combustível
-  try {
-    const mUrl=`${SUPABASE_URL}/rest/v1/v_precos_externos_atual?select=*&order=datahora_nota.desc&limit=2000`;
-    const mr=await fetch(mUrl,{headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`}});
-    S.precosExternos = mr.ok ? await mr.json() : [];
-  } catch(e) { console.error('Erro precos externos:',e); S.precosExternos=[]; }
-
   S.loading=false; renderAll();
 }
 
@@ -320,16 +255,9 @@ function renderAll(){
   }
 }
 
-function statusDot(p){
-  if(p.proprioRegistrado && p.registrou) return 'dot-g';
-  if(p.registrou) return 'dot-y';
-  return 'dot-r';
-}
-
 function renderDash(){
   const d=S.dados,tot=d.length;
   const reg=d.filter(p=>p.registrou).length;
-  const comProprio=d.filter(p=>p.proprioRegistrado).length;
   const pend=tot-reg;
   const totalRegs=d.reduce((s,p)=>s+p.regs.length,0);
   const pct=Math.round(reg/tot*100);
@@ -339,8 +267,8 @@ function renderDash(){
     ${[
       {cls:"kpi-0",l:"Total postos",v:tot,s:"PR·RS·SC·SP"},
       {cls:"kpi-1",l:"Registraram",v:reg,s:`${pct}% da rede`},
-      {cls:"kpi-2",l:"Com painel próprio",v:comProprio,s:"meta + foto do posto"},
-      {cls:"kpi-3",l:"Pendentes",v:pend,s:"sem registro"},
+      {cls:"kpi-2",l:"Aguardando",v:pend,s:"sem registro"},
+      {cls:"kpi-3",l:"Registros hoje",v:totalRegs,s:"lançamentos"},
     ].map(k=>`<div class="kpi ${k.cls}"><div class="kpi-label">${k.l}</div><div class="kpi-val">${k.v}</div><div class="kpi-sub">${k.s}</div></div>`).join('')}
   </div>`;
 
@@ -361,13 +289,14 @@ function renderDash(){
     }).join('')}
   </div>`;
 
+  // Rows
   let rowsHtml='';
   if(S.aba==="geral"){
     rowsHtml=df.length===0?`<div class="empty">Nenhum posto encontrado.</div>`:
       df.map(p=>`
         <div class="posto-row" onclick="abrirDet('${p.id}')">
           <div class="row-left">
-            <span class="dot ${statusDot(p)}"></span>
+            <span class="dot ${p.registrou?'dot-g':'dot-r'}"></span>
             <div style="min-width:0">
               <div class="row-nome">${p.nome}</div>
               <div class="row-sub">${p.cidade} · ${p.estado}</div>
@@ -375,7 +304,6 @@ function renderDash(){
           </div>
           <div class="row-right">
             <span class="badge ${bcls(p.bandeira)}">${p.bandeira}</span>
-            ${p.proprioRegistrado?`<span class="badge b-blue">Próprio</span>`:''}
             ${p.registrou?`<span style="font-size:11px;color:#4a6a8a;">${p.concorrentes}</span>`:''}
             ${!p.registrou?`<span class="badge b-amb">Pendente</span>`:''}
             <span class="chevron">›</span>
@@ -392,23 +320,6 @@ function renderDash(){
           </div>
           <span class="badge b-amb">Pendente</span>
         </div>`).join('');
-  } else if(S.aba==="sem-proprio"){
-    const lista=df.filter(p=>p.registrou && !p.proprioRegistrado);
-    rowsHtml=lista.length===0?`<div class="empty">Todos com painel próprio!</div>`:
-      lista.map(p=>`
-        <div class="posto-row" onclick="abrirDet('${p.id}')">
-          <div class="row-left">
-            <span class="dot dot-y"></span>
-            <div style="min-width:0">
-              <div class="row-nome">${p.nome}</div>
-              <div class="row-sub">${p.cidade} · ${p.estado} · ${p.concorrentes} concorrentes, falta painel próprio</div>
-            </div>
-          </div>
-          <div class="row-right">
-            <span class="badge ${bcls(p.bandeira)}">${p.bandeira}</span>
-            <span class="chevron">›</span>
-          </div>
-        </div>`).join('');
   } else if(S.aba==="registros"){
     const todos=df.flatMap(p=>p.regs.map(r=>({...r,pNome:p.nome,pEstado:p.estado})));
     rowsHtml=todos.length===0?`<div class="empty">Nenhum registro hoje.</div>`:
@@ -423,49 +334,7 @@ function renderDash(){
           </div>
           <div>${COMBS.filter(c=>r[c.k]>0).map(c=>`<span class="tag">${c.l}: R$ ${parseFloat(r[c.k]).toFixed(2)}</span>`).join('')}</div>
         </div>`).join('');
-  } else if(S.aba==="alertas"){
-    // Aplica filtros (estado/posto/busca) também aos alertas
-    const idsPostosFiltrados = new Set(df.map(p=>p.id));
-    const alertasFiltrados = S.alertas.filter(a => idsPostosFiltrados.has(a.posto_id));
-
-    if (alertasFiltrados.length === 0) {
-      rowsHtml = `<div class="empty">🎉 Nenhum alerta em aberto.<br><span style="font-size:11px;color:#3a5a7a;">O auditor roda 1x por dia (madrugada).</span></div>`;
-    } else {
-      // Agrupa por severidade
-      const sevOrder = { alta: 0, media: 1, baixa: 2 };
-      const sevCor = { alta:'#e24b4a', media:'#f0a030', baixa:'#7ab8f0' };
-      const sevLabel = { alta:'ALTA', media:'MÉDIA', baixa:'BAIXA' };
-      alertasFiltrados.sort((a,b) => (sevOrder[a.severidade]||9) - (sevOrder[b.severidade]||9));
-
-      rowsHtml = alertasFiltrados.map(a => {
-        const posto = POSTOS.find(p => p.id === a.posto_id);
-        const cor = sevCor[a.severidade] || '#7ab8f0';
-        return `
-          <div class="comp-card" style="cursor:pointer;border-left:3px solid ${cor};" onclick="abrirDet('${a.posto_id}')">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px;">
-              <div style="flex:1;min-width:0;">
-                <div style="font-weight:600;font-size:13px;color:#fff;">${posto?posto.nome:a.posto_id}</div>
-                <div style="font-size:11px;color:#4a6a8a;margin-top:2px;">${posto?posto.cidade+' · '+posto.estado:''} · ${a.tipo}</div>
-              </div>
-              <span class="diff-pos" style="background:rgba(${a.severidade==='alta'?'226,75,74':a.severidade==='media'?'240,160,48':'122,184,240'},0.18);color:${cor};border:1px solid ${cor};">${sevLabel[a.severidade]||a.severidade}</span>
-            </div>
-            <div style="font-size:13px;color:#e0e8f0;line-height:1.5;">${a.mensagem}</div>
-            <div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center;gap:8px;">
-              <span style="font-size:11px;color:#4a6a8a;">${new Date(a.criado_em).toLocaleString('pt-BR')}</span>
-              <div style="display:flex;gap:6px;">
-                <button onclick="event.stopPropagation();resolverAlerta(${a.id},'revisado')" class="btn-top" style="border-color:#4dd87a;color:#4dd87a;">✓ Revisado</button>
-                <button onclick="event.stopPropagation();resolverAlerta(${a.id},'ignorado')" class="btn-top">Ignorar</button>
-              </div>
-            </div>
-          </div>`;
-      }).join('');
-    }
-  } else if(S.aba==="mercado"){
-    // Aba Mercado: mostra preços coletados via Nota Paraná (SEFAZ-PR)
-    rowsHtml = renderMercadoTab(df);
   }
-
-  const semProprioCount = d.filter(p=>p.registrou && !p.proprioRegistrado).length;
 
   document.getElementById('content').innerHTML=`
     ${S.loading?`<div class="loading"><div class="spinner"></div>Carregando...</div>`:`
@@ -474,10 +343,7 @@ function renderDash(){
     <div class="sec-label">Postos</div>
     <div class="tabs">
       <button class="tab ${S.aba==='geral'?'on':''}" onclick="setAba('geral')">Todos (${tot})</button>
-      <button class="tab ${S.aba==='alertas'?'on':''}" onclick="setAba('alertas')" style="${S.alertas.length>0?'color:#ff7878;font-weight:700;':''}">⚠️ Alertas (${S.alertas.length})</button>
-      <button class="tab ${S.aba==='mercado'?'on':''}" onclick="setAba('mercado')">📈 Mercado (PR)</button>
       <button class="tab ${S.aba==='pendentes'?'on':''}" onclick="setAba('pendentes')">Pendentes (${pend})</button>
-      <button class="tab ${S.aba==='sem-proprio'?'on':''}" onclick="setAba('sem-proprio')">Sem painel próprio (${semProprioCount})</button>
       <button class="tab ${S.aba==='registros'?'on':''}" onclick="setAba('registros')">Registros (${totalRegs})</button>
     </div>
     <div class="filtros">
@@ -492,85 +358,57 @@ function renderDash(){
     </div>
     ${rowsHtml}`}`;
 
+  // Bind busca sem re-render completo
   const bi=document.getElementById('busca-input');
   if(bi){
-    bi.addEventListener('input',e=>{S.busca=e.target.value;renderDash();});
+    bi.addEventListener('input',e=>{S.busca=e.target.value;renderRows();});
     bi.addEventListener('focus',()=>{bi.setSelectionRange(bi.value.length,bi.value.length);});
   }
 }
 
-function diffBadge(nosso, menor, maior) {
-  if (nosso === null || menor === null || maior === null) return `<span class="diff-pos diff-gray">—</span>`;
-  if (nosso > maior) return `<span class="diff-pos diff-red">+R$ ${(nosso-maior).toFixed(2)} acima do maior</span>`;
-  if (nosso < menor) return `<span class="diff-pos diff-grn">−R$ ${(menor-nosso).toFixed(2)} abaixo do menor</span>`;
-  // Está na faixa: mostra posição relativa
-  const posDoMaior = (maior - nosso).toFixed(2);
-  const posDoMenor = (nosso - menor).toFixed(2);
-  if (Math.abs(maior - nosso) < Math.abs(nosso - menor)) {
-    return `<span class="diff-pos diff-amb">R$ ${posDoMaior} abaixo do maior</span>`;
+function renderRows(){
+  // Atualiza só as rows sem recriar tudo
+  const df=filtrados();
+  const d=S.dados;
+  const tot=d.length,pend=d.filter(p=>!p.registrou).length;
+  const totalRegs=d.reduce((s,p)=>s+p.regs.length,0);
+  let rowsHtml='';
+  if(S.aba==="geral"){
+    rowsHtml=df.length===0?`<div class="empty">Nenhum posto encontrado.</div>`:
+      df.map(p=>`
+        <div class="posto-row" onclick="abrirDet('${p.id}')">
+          <div class="row-left">
+            <span class="dot ${p.registrou?'dot-g':'dot-r'}"></span>
+            <div style="min-width:0">
+              <div class="row-nome">${p.nome}</div>
+              <div class="row-sub">${p.cidade} · ${p.estado}</div>
+            </div>
+          </div>
+          <div class="row-right">
+            <span class="badge ${bcls(p.bandeira)}">${p.bandeira}</span>
+            ${p.registrou?`<span style="font-size:11px;color:#4a6a8a;">${p.concorrentes}</span>`:''}
+            ${!p.registrou?`<span class="badge b-amb">Pendente</span>`:''}
+            <span class="chevron">›</span>
+          </div>
+        </div>`).join('');
+  } else if(S.aba==="pendentes"){
+    const lista=df.filter(p=>!p.registrou);
+    rowsHtml=lista.length===0?`<div class="empty">Todos registraram!</div>`:lista.map(p=>`
+      <div class="pend-row">
+        <div><div style="font-weight:500;font-size:13px;">${p.nome}</div>
+        <div style="font-size:11px;color:#f0a030;">${p.cidade} · ${p.estado}</div></div>
+        <span class="badge b-amb">Pendente</span>
+      </div>`).join('');
   }
-  return `<span class="diff-pos diff-amb">R$ ${posDoMenor} acima do menor</span>`;
-}
-
-function renderAnaliseDif(p) {
-  if (!p.proprio) {
-    return `
-      <div class="analise-card" style="background:linear-gradient(135deg,#3a2a00,#1a1500);border-color:#3a2a00;">
-        <div class="analise-title">⚠️ Painel próprio não registrado</div>
-        <div style="font-size:12px;color:#f0a030;">Sem o painel do próprio posto, não dá pra comparar com o mercado. Avise o gerente.</div>
-      </div>`;
+  // Injeta só as rows depois dos filtros
+  const rows=document.querySelector('.filtros');
+  if(rows&&rows.nextSibling){
+    let next=rows.nextSibling;
+    while(next){const n=next.nextSibling;next.parentNode.removeChild(next);next=n;}
   }
-
-  const linhas = COMBS.map(({k,l}) => {
-    const a = p.analise[k];
-    if (!a || (a.nosso === null && a.menor === null)) return '';
-    const nosso = a.nosso !== null ? `R$ ${a.nosso.toFixed(2)}` : '—';
-
-    // Menor com tooltip+click revelando o concorrente
-    let menorCell;
-    if (a.menor !== null) {
-      const tip = a.menorNome ? `${a.menorNome}${a.menorBandeira?' ('+a.menorBandeira+')':''}` : '';
-      menorCell = `<div class="val val-menor val-clicavel" title="Concorrente: ${escapeAttr(tip)}" onclick="event.stopPropagation();revelarConcorrente(this,'${escapeAttr(tip)}')">R$ ${a.menor.toFixed(2)}<span class="val-info">ⓘ</span></div>`;
-    } else {
-      menorCell = `<div class="val val-menor">—</div>`;
-    }
-
-    // Maior com tooltip+click revelando o concorrente
-    let maiorCell;
-    if (a.maior !== null) {
-      const tip = a.maiorNome ? `${a.maiorNome}${a.maiorBandeira?' ('+a.maiorBandeira+')':''}` : '';
-      maiorCell = `<div class="val val-maior val-clicavel" title="Concorrente: ${escapeAttr(tip)}" onclick="event.stopPropagation();revelarConcorrente(this,'${escapeAttr(tip)}')">R$ ${a.maior.toFixed(2)}<span class="val-info">ⓘ</span></div>`;
-    } else {
-      maiorCell = `<div class="val val-maior">—</div>`;
-    }
-
-    return `
-      <div class="analise-row">
-        <div class="lbl">${l}</div>
-        <div class="val val-nosso">${nosso}</div>
-        ${menorCell}
-        ${maiorCell}
-        <div>${diffBadge(a.nosso, a.menor, a.maior)}</div>
-      </div>`;
-  }).filter(Boolean).join('');
-
-  if (!linhas) {
-    return `<div class="analise-card"><div class="analise-title">📊 Análise de diferenças</div>
-      <div style="font-size:12px;color:#8aaac0;">Sem dados de concorrentes para comparar ainda.</div></div>`;
-  }
-
-  return `
-    <div class="analise-card">
-      <div class="analise-title">📊 Análise de diferenças — nosso preço vs concorrentes</div>
-      <div class="analise-row" style="font-weight:600;color:#4a6a8a;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;">
-        <div>Combustível</div>
-        <div style="text-align:right;color:#7ab8f0;">Nosso</div>
-        <div style="text-align:right;color:#4dd87a;">Menor conc.</div>
-        <div style="text-align:right;color:#e24b4a;">Maior conc.</div>
-        <div style="text-align:right;">Posição</div>
-      </div>
-      ${linhas}
-    </div>`;
+  const div=document.createElement('div');
+  div.innerHTML=rowsHtml;
+  document.getElementById('content').appendChild(div);
 }
 
 function renderDet(){
@@ -585,34 +423,11 @@ function renderDet(){
       <span class="badge ${bcls(p.bandeira)}">${p.bandeira}</span>
     </div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
-      <div class="kpi kpi-0" style="padding:12px 14px"><div class="kpi-label">Status</div><div style="font-size:14px;font-weight:700;color:#fff">${p.proprioRegistrado?'Completo':p.registrou?'Parcial':'Pendente'}</div></div>
+      <div class="kpi kpi-0" style="padding:12px 14px"><div class="kpi-label">Status</div><div style="font-size:14px;font-weight:700;color:#fff">${p.registrou?'Registrou':'Pendente'}</div></div>
       <div class="kpi kpi-1" style="padding:12px 14px"><div class="kpi-label">Concorrentes</div><div style="font-size:22px;font-weight:700;color:#fff">${p.concorrentes}</div></div>
-      <div class="kpi kpi-2" style="padding:12px 14px"><div class="kpi-label">Painel próprio</div><div style="font-size:14px;font-weight:700;color:#fff">${p.proprioRegistrado?'Sim':'Não'}</div></div>
+      <div class="kpi kpi-2" style="padding:12px 14px"><div class="kpi-label">Registros</div><div style="font-size:22px;font-weight:700;color:#fff">${p.regs.length}</div></div>
     </div>
-
-    ${renderAnaliseDif(p)}
-
-    ${p.proprio ? `
-      <div class="sec-label">Painel do próprio posto</div>
-      <div class="comp-card" style="border-color:#2a4060;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-          <div>
-            <div style="font-weight:600;font-size:14px;color:#7ab8f0;">📍 ${p.nome}</div>
-            <span class="badge b-blue">Próprio posto</span>
-            ${p.proprio.ia_usada?`<span class="badge b-grn" style="margin-left:4px">IA</span>`:''}
-          </div>
-          <div style="font-size:11px;color:#4a6a8a">${new Date(p.proprio.criado_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
-        </div>
-        ${p.proprio.foto_url?`<img src="${p.proprio.foto_url}" onclick="window.open('${p.proprio.foto_url}','_blank')" style="width:100%;max-height:200px;object-fit:contain;border-radius:8px;background:#0f1520;cursor:pointer;border:1px solid #1e2d42;margin-bottom:10px">`:''}
-        <table class="comp-table">
-          <thead><tr><th>Combustível</th><th style="text-align:right">Preço</th></tr></thead>
-          <tbody>${COMBS.filter(c=>p.proprio[c.k]>0).map(c=>`<tr><td>${c.l}</td><td style="text-align:right;font-weight:600;color:#7ab8f0">R$ ${parseFloat(p.proprio[c.k]).toFixed(2)}</td></tr>`).join('')}</tbody>
-        </table>
-      </div>
-    ` : ''}
-
-    <div class="sec-label">Concorrentes (${p.regs.length})</div>
-    ${p.regs.length===0?`<div class="empty">Nenhum concorrente registrado.</div>`:
+    ${p.regs.length===0?`<div class="empty">Nenhum registro hoje.</div>`:
       p.regs.map(r=>`
         <div class="comp-card">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
@@ -630,129 +445,10 @@ function renderDet(){
           </table>
           <div style="margin-top:10px;padding-top:10px;border-top:1px solid #1e2d42;display:flex;gap:10px;flex-wrap:wrap;font-size:11px;">
             <span style="color:#8aaac0">${new Date(r.criado_em).toLocaleString('pt-BR')}</span>
-            ${r.lat&&r.lng?`<a href="https://www.google.com/maps?q=${r.lat},${r.lng}" target="_blank" style="color:#2e7dd1;font-weight:600;text-decoration:none">Ver no mapa ↗</a><span class="badge b-grn">GPS verificado</span>`:`<span class="badge b-amb">Sem GPS</span>`}
+            ${r.lat&&r.lng?`<a href="https://www.google.com/maps?q=${r.lat},${r.lng}" target="_blank" style="color:#2e7dd1;font-weight:600;text-decoration:none">Ver no mapa ↗</a><span class="badge b-grn">GPS verificado</span>`:
+            `<span class="badge b-amb">Sem GPS</span>`}
           </div>
         </div>`).join('')}`;
-}
-
-function escapeAttr(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;');
-}
-
-function revelarConcorrente(el, nome) {
-  if (!nome) return;
-  // Se já existe popover, remove
-  document.querySelectorAll('.val-popover').forEach(p => p.remove());
-  const pop = document.createElement('div');
-  pop.className = 'val-popover';
-  pop.textContent = nome;
-  el.appendChild(pop);
-  setTimeout(() => pop.remove(), 3500);
-}
-
-function renderMercadoTab(postosFiltrados) {
-  // Filtra preços externos só pra postos do PR que passaram pelo filtro de estado
-  const postosPR = postosFiltrados.filter(p => p.estado === 'PR');
-  const idsPR = new Set(postosPR.map(p => p.id));
-  const precos = S.precosExternos.filter(pe => idsPR.has(pe.posto_id));
-
-  if (precos.length === 0) {
-    return `<div class="empty">
-      <div style="font-size:14px;margin-bottom:6px;">📡 Sem dados do Nota Paraná ainda</div>
-      <div style="font-size:11px;color:#3a5a7a;">A coleta automática roda 4x ao dia. Funciona apenas para postos do PR.</div>
-    </div>`;
-  }
-
-  // Quantos linhas mostrar inicialmente por combustível
-  const TOP_N_PADRAO = 5;
-
-  // Agrupa por posto, depois por combustível
-  const COMB_LABEL = { gc:'Gasolina', ga:'Gas. Aditivada', et:'Etanol', ds:'Diesel S10' };
-  const COMB_COR = { gc:'#f5c400', ga:'#f59a3c', et:'#4dd87a', ds:'#7ab8f0' };
-  const COMB_ORDEM = ['gc','ga','et','ds'];
-
-  const porPosto = {};
-  for (const pe of precos) {
-    (porPosto[pe.posto_id] ||= {})[pe.combustivel] ||= [];
-    porPosto[pe.posto_id][pe.combustivel].push(pe);
-  }
-
-  const cards = postosPR
-    .filter(p => porPosto[p.id])
-    .map(p => {
-      const combs = porPosto[p.id];
-      const totalEstab = new Set(Object.values(combs).flat().map(pe => pe.estabelecimento_codigo)).size;
-
-      const blocosComb = COMB_ORDEM.map(ck => {
-        const lista = combs[ck];
-        if (!lista || lista.length === 0) return '';
-        const ordenada = [...lista].sort((a,b) => parseFloat(a.valor) - parseFloat(b.valor));
-        const expandidoId = `exp-${p.id}-${ck}`;
-
-        const linhas = ordenada.map((pe, idx) => {
-          const minutos = Math.round((Date.now() - new Date(pe.datahora_nota).getTime()) / 60000);
-          const tempoTxt = minutos < 60 ? `${minutos}min`
-                         : minutos < 1440 ? `${Math.round(minutos/60)}h`
-                         : `${Math.round(minutos/1440)}d`;
-          const cor = idx === 0 ? '#4dd87a' : idx === ordenada.length-1 ? '#e24b4a' : '#e0e8f0';
-          const tag = idx === 0 ? '<span style="font-size:8px;color:#4dd87a;background:rgba(77,216,122,0.15);padding:1px 4px;border-radius:3px;margin-left:4px;">MENOR</span>'
-                    : idx === ordenada.length-1 && ordenada.length > 1 ? '<span style="font-size:8px;color:#e24b4a;background:rgba(226,75,74,0.15);padding:1px 4px;border-radius:3px;margin-left:4px;">MAIOR</span>'
-                    : '';
-          const visivel = idx < TOP_N_PADRAO;
-          return `<div class="merc-row ${visivel?'':'merc-row-hidden'}" data-grp="${expandidoId}" style="display:${visivel?'grid':'none'};grid-template-columns:60px 1fr auto;gap:8px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:11px;align-items:center;">
-            <div style="color:${cor};font-weight:600;">R$ ${parseFloat(pe.valor).toFixed(2)}</div>
-            <div style="min-width:0;">
-              <div style="color:#e0e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${pe.estabelecimento_nome||'—'}${tag}</div>
-              <div style="color:#4a6a8a;font-size:10px;">${pe.estabelecimento_bairro||''} · ${pe.distancia_km?.toFixed?.(1)||'?'}km</div>
-            </div>
-            <div style="color:#4a6a8a;font-size:10px;text-align:right;white-space:nowrap;">${tempoTxt}</div>
-          </div>`;
-        }).join('');
-
-        const temMais = ordenada.length > TOP_N_PADRAO;
-        const botaoExpandir = temMais
-          ? `<button onclick="event.stopPropagation();toggleMercadoExpandir('${expandidoId}', this)" class="btn-top" style="margin-top:4px;font-size:10px;padding:3px 8px;">Ver todos (${ordenada.length})</button>`
-          : '';
-
-        return `<div style="margin-bottom:10px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;padding-bottom:4px;border-bottom:1px solid ${COMB_COR[ck]}44;">
-            <div style="font-size:11px;font-weight:600;color:${COMB_COR[ck]};text-transform:uppercase;letter-spacing:0.5px;">${COMB_LABEL[ck]}</div>
-            <div style="font-size:10px;color:#4a6a8a;">${ordenada.length} estabelec.</div>
-          </div>
-          ${linhas}
-          ${botaoExpandir}
-        </div>`;
-      }).filter(Boolean).join('');
-
-      return `<div class="comp-card" style="cursor:pointer;" onclick="abrirDet('${p.id}')">
-        <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
-          <div>
-            <div style="font-weight:600;font-size:14px;">${p.nome}</div>
-            <div style="font-size:11px;color:#4a6a8a;">${p.cidade} · ${p.estado} · ${totalEstab} concorrentes mapeados</div>
-          </div>
-          <span style="font-size:10px;color:#4a6a8a;align-self:flex-start;">📡 Nota Paraná</span>
-        </div>
-        ${blocosComb || '<div style="font-size:11px;color:#7a8aa0;font-style:italic;">Sem coleta recente</div>'}
-      </div>`;
-    }).join('');
-
-  return cards || `<div class="empty">Sem postos do PR no filtro atual.</div>`;
-}
-
-function toggleMercadoExpandir(grpId, btn) {
-  const linhas = document.querySelectorAll(`.merc-row[data-grp="${grpId}"]`);
-  let total = 0, escondidas = 0;
-  linhas.forEach(el => {
-    total++;
-    if (el.classList.contains('merc-row-hidden')) escondidas++;
-  });
-  const mostrar = escondidas > 0;
-  linhas.forEach(el => {
-    if (el.classList.contains('merc-row-hidden')) {
-      el.style.display = mostrar ? 'grid' : 'none';
-    }
-  });
-  if (btn) btn.textContent = mostrar ? `Recolher` : `Ver todos (${total})`;
 }
 
 function setDias(v){S.dias=v;carregarDados();}
@@ -761,28 +457,6 @@ function setEst(v){S.estado=v;renderDash();}
 function setPostoFiltro(v){S.postoFiltro=v;renderDash();}
 function abrirDet(id){S.det=S.dados.find(p=>p.id===id);renderAll();}
 function fecharDet(){S.det=null;renderAll();}
-
-async function resolverAlerta(id, status){
-  try {
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/alertas?id=eq.${id}`, {
-      method: 'PATCH',
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal',
-      },
-      body: JSON.stringify({ status, revisado_em: new Date().toISOString() }),
-    });
-    if (!r.ok) throw new Error(await r.text());
-    // remove localmente para feedback instantâneo
-    S.alertas = S.alertas.filter(a => a.id !== id);
-    renderDash();
-  } catch(e) {
-    console.error('Erro resolver alerta:', e);
-    alert('Não foi possível atualizar o alerta. Tente novamente.');
-  }
-}
 
 setInterval(carregarDados,3*60*1000);
 carregarDados();
