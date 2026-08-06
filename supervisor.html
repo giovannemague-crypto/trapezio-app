@@ -3,463 +3,210 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Trapézio — Dashboard Supervisor</title>
+<title>Trapézio — Supervisor</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f1520;color:#e0e8f0;min-height:100vh}
-
+body{font-family:-apple-system,sans-serif;background:#0f1520;color:#e0e8f0;min-height:100vh}
 .topbar{background:#111927;border-bottom:1px solid #1e2d42;padding:0 16px;display:flex;justify-content:space-between;align-items:center;height:56px;position:sticky;top:0;z-index:100}
 .logo-name{font-size:16px;font-weight:800;color:#fff;letter-spacing:0.06em;text-transform:uppercase;font-style:italic}
 .logo-sub{font-size:9px;color:#4a6a8a;letter-spacing:0.15em;text-transform:uppercase}
-.topbar-right{display:flex;align-items:center;gap:8px}
-.pill-live{font-size:11px;padding:3px 8px;border-radius:20px;background:rgba(46,209,100,0.15);color:#4dd87a;border:1px solid rgba(46,209,100,0.3)}
-.btn-top{font-size:12px;padding:5px 12px;border-radius:6px;border:1px solid #2a4060;background:transparent;color:#8aaac0;cursor:pointer}
-
-.content{padding:14px 16px}
-
-/* KPI */
-.kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
-@media(min-width:600px){.kpi-grid{grid-template-columns:repeat(4,1fr)}}
-.kpi{border-radius:12px;padding:14px 16px}
-.kpi-0{background:linear-gradient(135deg,#1a3a6b,#2e7dd1)}
-.kpi-1{background:linear-gradient(135deg,#0f6e56,#1D9E75)}
-.kpi-2{background:linear-gradient(135deg,#633806,#EF9F27)}
-.kpi-3{background:linear-gradient(135deg,#791F1F,#E24B4A)}
-.kpi-label{font-size:10px;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px}
-.kpi-val{font-size:28px;font-weight:700;color:#fff;line-height:1}
-.kpi-sub{font-size:11px;color:rgba(255,255,255,0.6);margin-top:4px}
-
-/* Estado */
-.estado-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
-@media(min-width:600px){.estado-grid{grid-template-columns:repeat(4,1fr)}}
-.estado-card{background:#131e2e;border:1px solid #1e2d42;border-radius:10px;padding:12px 14px}
-.estado-nome{font-size:18px;font-weight:700;color:#fff}
-.prog-wrap{height:5px;background:#1e2d42;border-radius:3px;overflow:hidden;margin:8px 0 4px}
-.prog-bar{height:100%;border-radius:3px;transition:width 0.8s}
-.estado-frac{font-size:11px;color:#4a6a8a}
-
-.sec-label{font-size:10px;font-weight:600;color:#4a6a8a;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;display:flex;align-items:center;gap:8px}
-.sec-label::after{content:"";flex:1;height:1px;background:#1e2d42}
-
-/* Tabs */
-.tabs{display:flex;background:#131e2e;border:1px solid #1e2d42;border-radius:10px;padding:3px;gap:3px;margin-bottom:12px;overflow-x:auto}
-.tab{flex:1;min-width:80px;padding:7px 8px;font-size:11px;border:none;border-radius:7px;background:transparent;color:#4a6a8a;cursor:pointer;font-weight:500;white-space:nowrap;transition:all 0.15s}
-.tab.on{background:#1a3a6b;color:#fff}
-
-/* Filtros */
-.filtros{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
-.filtros-row{display:flex;gap:8px;flex-wrap:wrap}
-.input-s{width:100%;padding:9px 14px;font-size:14px;border-radius:8px;border:1px solid #1e2d42;background:#131e2e;color:#e0e8f0;outline:none}
+.btn-dash{font-size:12px;padding:6px 14px;border-radius:6px;border:1px solid #2e7dd1;background:transparent;color:#2e7dd1;cursor:pointer;text-decoration:none}
+.content{padding:16px}
+.input-s{width:100%;padding:10px 14px;font-size:14px;border-radius:10px;border:1px solid #1e2d42;background:#131e2e;color:#e0e8f0;outline:none;margin-bottom:10px}
 .input-s:focus{border-color:#2e7dd1}
 .input-s::placeholder{color:#3a5a7a}
-.select-s{flex:1;min-width:120px;padding:8px 12px;font-size:13px;border-radius:8px;border:1px solid #1e2d42;background:#131e2e;color:#e0e8f0;outline:none}
-.btn-est{padding:7px 14px;font-size:12px;border-radius:8px;border:1px solid #1e2d42;background:#131e2e;color:#6a8aaa;cursor:pointer;white-space:nowrap}
+.estados{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.btn-est{padding:7px 14px;font-size:12px;border-radius:8px;border:1px solid #1e2d42;background:#131e2e;color:#6a8aaa;cursor:pointer}
 .btn-est.on{background:#2e7dd1;color:#fff;border-color:#2e7dd1}
-
-/* Posto rows */
-.posto-row{background:#131e2e;border:1px solid #1e2d42;border-radius:10px;padding:12px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer;transition:all 0.12s}
-.posto-row:hover{border-color:#2e7dd1}
-.row-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
-.dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-.dot-g{background:#4dd87a;box-shadow:0 0 6px rgba(77,216,122,0.5)}
-.dot-r{background:#e24b4a;box-shadow:0 0 6px rgba(226,75,74,0.5)}
-.row-nome{font-size:13px;font-weight:500;color:#e0e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.row-sub{font-size:11px;color:#4a6a8a;margin-top:2px}
-.row-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
-.badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:5px;white-space:nowrap;border:1px solid;font-weight:600}
+.contagem{font-size:12px;color:#4a6a8a;margin-bottom:10px}
+.posto-card{background:#131e2e;border:1px solid #1e2d42;border-radius:10px;padding:12px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer;transition:border-color 0.12s}
+.posto-card:hover{border-color:#2e7dd1;background:#172030}
+.card-nome{font-size:13px;font-weight:500;color:#e0e8f0}
+.card-sub{font-size:11px;color:#4a6a8a;margin-top:3px}
+.card-end{font-size:10px;color:#3a5a7a;margin-top:2px}
+.badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:5px;border:1px solid;font-weight:600}
 .b-ipa{background:rgba(245,196,0,0.15);color:#8a6000;border-color:rgba(245,196,0,0.6)}
 .b-she{background:rgba(226,75,74,0.12);color:#8a0000;border-color:rgba(226,75,74,0.5)}
 .b-br{background:rgba(39,174,96,0.12);color:#145a2a;border-color:rgba(39,174,96,0.5)}
 .b-tra{background:rgba(100,100,220,0.12);color:#9090ff;border-color:rgba(100,100,220,0.3)}
 .b-rdp{background:rgba(29,158,117,0.12);color:#2ec496;border-color:rgba(29,158,117,0.3)}
-.b-bca{background:rgba(255,255,255,0.08);color:#ccc;border-color:rgba(255,255,255,0.25)}
+.b-bca{background:rgba(255,255,255,0.08);color:#888;border-color:rgba(0,0,0,0.15)}
 .b-oth{background:rgba(255,255,255,0.06);color:#8aaac0;border-color:rgba(255,255,255,0.1)}
-.b-red{background:rgba(226,75,74,0.15);color:#e24b4a;border-color:rgba(226,75,74,0.3)}
-.b-amb{background:rgba(186,117,23,0.15);color:#f0a030;border-color:rgba(186,117,23,0.3)}
-.b-grn{background:rgba(77,216,122,0.12);color:#4dd87a;border-color:rgba(77,216,122,0.3)}
-.chevron{font-size:16px;color:#3a5a7a}
-
-.pend-row{background:#1a1500;border:1px solid #3a2a00;border-left:3px solid #f0a030;border-radius:10px;padding:12px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
-.empty{text-align:center;padding:3rem;color:#3a5a7a;font-size:14px}
-
-/* Detalhe */
-.det-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
-.btn-back{background:transparent;border:none;font-size:22px;cursor:pointer;color:#4a6a8a;padding:0;line-height:1}
-.comp-card{background:#131e2e;border:1px solid #1e2d42;border-radius:12px;padding:14px 16px;margin-bottom:10px}
-.comp-table{width:100%;border-collapse:collapse;font-size:13px}
-.comp-table th{text-align:left;padding:7px 8px;font-size:10px;font-weight:600;color:#4a6a8a;text-transform:uppercase;letter-spacing:0.08em;border-bottom:1px solid #1e2d42}
-.comp-table td{padding:9px 8px;border-bottom:1px solid #1a2535;color:#e0e8f0}
-.comp-table tr:last-child td{border-bottom:none}
-.tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:4px;background:rgba(255,255,255,0.06);color:#8aaac0;border:1px solid rgba(255,255,255,0.1);margin:2px}
-
-.spinner{width:28px;height:28px;border:2px solid #1e2d42;border-top-color:#2e7dd1;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px}
-@keyframes spin{to{transform:rotate(360deg)}}
-.loading{text-align:center;padding:4rem;color:#4a6a8a}
+.est-tag{font-size:10px;padding:2px 7px;border-radius:5px;background:#1e2d42;color:#8aaac0;border:1px solid #2a3a52}
+.chevron{font-size:16px;color:#3a5a7a;flex-shrink:0}
+.empty{text-align:center;padding:3rem;color:#3a5a7a}
 </style>
 </head>
 <body>
-<div id="topbar-wrap"></div>
-<div class="content" id="content"></div>
-<div id="det-wrap" style="display:none;padding:14px 16px"></div>
+
+<div class="topbar">
+  <div>
+    <div class="logo-sub">Supervisor</div>
+    <div class="logo-name">Grupo Trapézio</div>
+  </div>
+  <a href="/dashboard.html" class="btn-dash">Dashboard →</a>
+</div>
+
+<div class="content">
+  <input class="input-s" id="busca" type="text" placeholder="Buscar por nome, cidade ou endereço...">
+  <div class="estados" id="estados"></div>
+  <div class="contagem" id="contagem"></div>
+  <div id="lista"></div>
+</div>
 
 <script>
-const SUPABASE_URL='https://rpuiptwlmomwbjcmnwbd.supabase.co';
-const SUPABASE_KEY='sb_publishable_SL_hHlR1S1nFDAlMUN7Fzg_qvuWcmmW';
-
-const POSTOS=[
-  {id:"001",nome:"Posto Alfa",cidade:"Colombo",estado:"PR",bandeira:"Ipiranga"},
-  {id:"002",nome:"Posto Almirante Filial 02",cidade:"São Bento Do Sul",estado:"SC",bandeira:"Ipiranga"},
-  {id:"003",nome:"Posto Almirante Filial 03",cidade:"São Leopoldo",estado:"RS",bandeira:"Ipiranga"},
-  {id:"004",nome:"Posto Almirante Filial 04",cidade:"Porto Alegre",estado:"RS",bandeira:"Ipiranga"},
-  {id:"005",nome:"Posto Almirante Filial 05",cidade:"Novo Hamburgo",estado:"RS",bandeira:"Ipiranga"},
-  {id:"006",nome:"Posto Almirante Filial 06",cidade:"Canoas",estado:"RS",bandeira:"Ipiranga"},
-  {id:"007",nome:"Posto Almirante Filial 07",cidade:"Canoas",estado:"RS",bandeira:"Ipiranga"},
-  {id:"008",nome:"Posto Almirante Filial 08",cidade:"Gravataí",estado:"RS",bandeira:"Ipiranga"},
-  {id:"009",nome:"Posto Almirante Filial 09",cidade:"Sapucaia Do Sul",estado:"RS",bandeira:"Ipiranga"},
-  {id:"011",nome:"Posto Almirante Filial 11",cidade:"São José Dos Pinhais",estado:"PR",bandeira:"Ipiranga"},
-  {id:"012",nome:"Posto Almirante Filial 12",cidade:"Portão",estado:"RS",bandeira:"Ipiranga"},
-  {id:"013",nome:"Posto Almirante Filial 13 (São Dimas)",cidade:"Colombo",estado:"PR",bandeira:"BR"},
-  {id:"014",nome:"Posto Almirante Filial 14 (Rosas)",cidade:"Gravataí",estado:"RS",bandeira:"Ipiranga"},
-  {id:"015",nome:"Posto Almirante Filial 15 (Gravo)",cidade:"Araricá",estado:"RS",bandeira:"Ipiranga"},
-  {id:"017",nome:"Posto Almirante Filial 17 (Gravi)",cidade:"Araricá",estado:"RS",bandeira:"Ipiranga"},
-  {id:"018",nome:"Posto Almirante Filial 18 (Sapucaia)",cidade:"Sapucaia Do Sul",estado:"RS",bandeira:"Ipiranga"},
-  {id:"019",nome:"Posto Almirante Filial 19 (San Michael)",cidade:"Curitiba",estado:"PR",bandeira:"Ipiranga"},
-  {id:"024a",nome:"Posto Almirante Filial 24 (Oceano)",cidade:"Curitiba",estado:"PR",bandeira:"Ipiranga"},
-  {id:"020",nome:"Posto Almirante Matriz",cidade:"São José Dos Pinhais",estado:"PR",bandeira:"Ipiranga"},
-  {id:"021",nome:"Posto América",cidade:"Colombo",estado:"PR",bandeira:"Ipiranga"},
-  {id:"022",nome:"Posto Beira Rio",cidade:"Porto Feliz",estado:"SP",bandeira:"BR"},
-  {id:"023",nome:"Posto Brasil",cidade:"Fazenda Rio Grande",estado:"PR",bandeira:"Ipiranga"},
-  {id:"025",nome:"Posto Cisne",cidade:"Fazenda Rio Grande",estado:"PR",bandeira:"BR"},
-  {id:"026",nome:"Posto Dom Afonso",cidade:"Balneário Camboriú",estado:"SC",bandeira:"Ipiranga"},
-  {id:"027",nome:"Posto Duque De Caxias",cidade:"São Francisco Do Sul",estado:"SC",bandeira:"Ipiranga"},
-  {id:"028",nome:"Posto Estaiada",cidade:"Piracicaba",estado:"SP",bandeira:"Shell"},
-  {id:"029",nome:"Posto Izaac",cidade:"Curitiba",estado:"PR",bandeira:"Trapézio"},
-  {id:"030",nome:"Posto Linha Verde Filial 02",cidade:"Curitiba",estado:"PR",bandeira:"Ipiranga"},
-  {id:"031",nome:"Posto Linha Verde Filial 03 (Palmares)",cidade:"Maringá",estado:"PR",bandeira:"Ipiranga"},
-  {id:"032",nome:"Posto Linha Verde Filial 04",cidade:"Campo Bom",estado:"RS",bandeira:"Ipiranga"},
-  {id:"033",nome:"Posto Linha Verde Filial 05",cidade:"Viamão",estado:"RS",bandeira:"Ipiranga"},
-  {id:"034",nome:"Posto Linha Verde Filial 06 (Makiolka)",cidade:"Curitiba",estado:"PR",bandeira:"BR"},
-  {id:"035",nome:"Posto Linha Verde Filial 07 (Borda)",cidade:"São José Dos Pinhais",estado:"PR",bandeira:"Ipiranga"},
-  {id:"036",nome:"Posto Linha Verde Filial 10 (Petrus)",cidade:"Curitiba",estado:"PR",bandeira:"Shell"},
-  {id:"037",nome:"Posto Linha Verde Filial 11",cidade:"Gravataí",estado:"RS",bandeira:"Ipiranga"},
-  {id:"038",nome:"Posto Linha Verde Filial 13 (Gonçales)",cidade:"Arapongas",estado:"PR",bandeira:"Ipiranga"},
-  {id:"039",nome:"Posto Linha Verde Filial 14 (Marques)",cidade:"Joinville",estado:"SC",bandeira:"Shell"},
-  {id:"040",nome:"Posto Linha Verde Filial 15 (Lustosa)",cidade:"Curitiba",estado:"PR",bandeira:"Trapézio"},
-  {id:"041",nome:"Posto Linha Verde Filial 16 (Bairro Novo)",cidade:"Curitiba",estado:"PR",bandeira:"Trapézio"},
-  {id:"042",nome:"Posto Linha Verde Filial 18 (4Z)",cidade:"Porto Alegre",estado:"RS",bandeira:"Ipiranga"},
-  {id:"043",nome:"Posto Linha Verde Filial 20 (3Z)",cidade:"Porto Alegre",estado:"RS",bandeira:"Ipiranga"},
-  {id:"044",nome:"Posto Linha Verde Filial 21 (BV)",cidade:"Viamão",estado:"RS",bandeira:"Shell"},
-  {id:"045",nome:"Posto Linha Verde Filial 22 (Trapézio)",cidade:"Curitiba",estado:"PR",bandeira:"BR"},
-  {id:"046",nome:"Posto Linha Verde Filial 23 (Angra Batel)",cidade:"Curitiba",estado:"PR",bandeira:"Ipiranga"},
-  {id:"047",nome:"Posto Linha Verde Filial 24 (Branquinha)",cidade:"Viamão",estado:"RS",bandeira:"Trapézio"},
-  {id:"048",nome:"Posto Linha Verde Filial 25",cidade:"São Leopoldo",estado:"RS",bandeira:"BR"},
-  {id:"049",nome:"Posto Linha Verde Filial 26",cidade:"Portão",estado:"RS",bandeira:"Shell"},
-  {id:"050",nome:"Posto Linha Verde Filial 27",cidade:"São Leopoldo",estado:"RS",bandeira:"Trapézio"},
-  {id:"051",nome:"Posto Linha Verde Filial 28 (RDP)",cidade:"São Bento do Sul",estado:"SC",bandeira:"RDP"},
-  {id:"052",nome:"Posto Linha Verde Matriz",cidade:"Curitiba",estado:"PR",bandeira:"Ipiranga"},
-  {id:"053",nome:"Posto Marechal",cidade:"Curitiba",estado:"PR",bandeira:"Shell"},
-  {id:"054",nome:"Posto Mirante Piracicaba",cidade:"Piracicaba",estado:"SP",bandeira:"Shell"},
-  {id:"055",nome:"Posto Neninha",cidade:"Campinas",estado:"SP",bandeira:"Trapézio"},
-  {id:"056",nome:"Posto NSA",cidade:"Fazenda Rio Grande",estado:"PR",bandeira:"Ipiranga"},
-  {id:"057",nome:"Posto Premiere",cidade:"Curitiba",estado:"PR",bandeira:"Shell"},
-  {id:"058",nome:"Posto Rio Verde",cidade:"Colombo",estado:"PR",bandeira:"Ipiranga"},
-  {id:"059",nome:"Posto Tijucas",cidade:"Curitiba",estado:"PR",bandeira:"BR"},
-  {id:"060",nome:"Posto TOF",cidade:"Valinhos",estado:"SP",bandeira:"TOF"},
-  {id:"061",nome:"Posto Triangulo",cidade:"Curitiba",estado:"PR",bandeira:"BR"},
-  {id:"062",nome:"Posto TS",cidade:"Curitiba",estado:"PR",bandeira:"Shell"},
-  {id:"063",nome:"Posto Via Torres",cidade:"Curitiba",estado:"PR",bandeira:"BR"},
-  {id:"064",nome:"Posto Vila Resende",cidade:"Piracicaba",estado:"SP",bandeira:"Shell"},
-  {id:"066",nome:"Auto Posto Alphaville",cidade:"Pinhais",estado:"PR",bandeira:"Petrobras"},
+var POSTOS = [
+  {id:"001",nome:"Posto Alfa",cidade:"Colombo",estado:"PR",bandeira:"Ipiranga",end:"Est Da Graciosa, 3253"},
+  {id:"002",nome:"Posto Almirante Filial 02",cidade:"São Bento Do Sul",estado:"SC",bandeira:"Ipiranga",end:"R Antonio Kaesemodel, 2339"},
+  {id:"003",nome:"Posto Almirante Filial 03",cidade:"São Leopoldo",estado:"RS",bandeira:"Ipiranga",end:"Av. Getúlio Vargas, 2130"},
+  {id:"004",nome:"Posto Almirante Filial 04",cidade:"Porto Alegre",estado:"RS",bandeira:"Ipiranga",end:"Av. Borges De Medeiros, 2205"},
+  {id:"005",nome:"Posto Almirante Filial 05",cidade:"Novo Hamburgo",estado:"RS",bandeira:"Ipiranga",end:"Av. Primeiro De Marco, 4600"},
+  {id:"006",nome:"Posto Almirante Filial 06",cidade:"Canoas",estado:"RS",bandeira:"Ipiranga",end:"Av. Santos Ferreira, 2700"},
+  {id:"007",nome:"Posto Almirante Filial 07",cidade:"Canoas",estado:"RS",bandeira:"Ipiranga",end:"Av. Do Nazario, 1024"},
+  {id:"008",nome:"Posto Almirante Filial 08",cidade:"Gravataí",estado:"RS",bandeira:"Ipiranga",end:"Av. Dorival Candido, 1460"},
+  {id:"009",nome:"Posto Almirante Filial 09",cidade:"Sapucaia Do Sul",estado:"RS",bandeira:"Ipiranga",end:"Av. Luiz Pasteur, 4799"},
+  {id:"011",nome:"Posto Almirante Filial 11",cidade:"São José Dos Pinhais",estado:"PR",bandeira:"Ipiranga",end:"Av. Rui Barbosa, 4791"},
+  {id:"012",nome:"Posto Almirante Filial 12",cidade:"Portão",estado:"RS",bandeira:"Ipiranga",end:"Rod RS 240, 5280"},
+  {id:"013",nome:"Posto Almirante Filial 13 (São Dimas)",cidade:"Colombo",estado:"PR",bandeira:"BR",end:"Rua Presidente Faria, 116"},
+  {id:"014",nome:"Posto Almirante Filial 14 (Rosas)",cidade:"Gravataí",estado:"RS",bandeira:"Ipiranga",end:"Avenida Ely Correa, 5600"},
+  {id:"015",nome:"Posto Almirante Filial 15 (Gravo)",cidade:"Araricá",estado:"RS",bandeira:"Ipiranga",end:"Rua Porto Palmeira, 2509"},
+  {id:"017",nome:"Posto Almirante Filial 17 (Gravi)",cidade:"Araricá",estado:"RS",bandeira:"Ipiranga",end:"R Jose Appelonio Da Costa, 2160"},
+  {id:"018",nome:"Posto Almirante Filial 18 (Sapucaia)",cidade:"Sapucaia Do Sul",estado:"RS",bandeira:"Ipiranga",end:"Av. Coronel Theodomiro, 885"},
+  {id:"019",nome:"Posto Almirante Filial 19 (San Michael)",cidade:"Curitiba",estado:"PR",bandeira:"Ipiranga",end:"R. João Bettega, 3015"},
+  {id:"024a",nome:"Posto Almirante Filial 24 (Oceano)",cidade:"Curitiba",estado:"PR",bandeira:"Ipiranga",end:"R Carlos Dietzsch, 1115"},
+  {id:"020",nome:"Posto Almirante Matriz",cidade:"São José Dos Pinhais",estado:"PR",bandeira:"Ipiranga",end:"Almirante Alexandrino, 1526"},
+  {id:"021",nome:"Posto América",cidade:"Colombo",estado:"PR",bandeira:"Ipiranga",end:"Av. Marginal Jose de Anchieta, 956"},
+  {id:"022",nome:"Posto Beira Rio",cidade:"Porto Feliz",estado:"SP",bandeira:"BR",end:"Av. Armando de Sales Oliveira, 1101"},
+  {id:"023",nome:"Posto Brasil",cidade:"Fazenda Rio Grande",estado:"PR",bandeira:"Ipiranga",end:"AV. Brasil, 846"},
+  {id:"025",nome:"Posto Cisne",cidade:"Fazenda Rio Grande",estado:"PR",bandeira:"BR",end:"Avenida Portugal, 3205"},
+  {id:"026",nome:"Posto Dom Afonso",cidade:"Balneário Camboriú",estado:"SC",bandeira:"Ipiranga",end:"R. Dom Afonso, 680"},
+  {id:"027",nome:"Posto Duque De Caxias",cidade:"São Francisco Do Sul",estado:"SC",bandeira:"Ipiranga",end:"Rodovia Duque De Caxias, SC301"},
+  {id:"028",nome:"Posto Estaiada",cidade:"Piracicaba",estado:"SP",bandeira:"Shell",end:"Av. Cristovao Colombo, 2935"},
+  {id:"029",nome:"Posto Izaac",cidade:"Curitiba",estado:"PR",bandeira:"Trapézio",end:"Rua Izaac Ferreira Da Cruz, 1497"},
+  {id:"030",nome:"Posto Linha Verde Filial 02",cidade:"Curitiba",estado:"PR",bandeira:"Ipiranga",end:"Av. Marechal Floriano Peixoto, 7825"},
+  {id:"031",nome:"Posto Linha Verde Filial 03 (Palmares)",cidade:"Maringá",estado:"PR",bandeira:"Ipiranga",end:"Av. Dos Palmares, 20"},
+  {id:"032",nome:"Posto Linha Verde Filial 04",cidade:"Campo Bom",estado:"RS",bandeira:"Ipiranga",end:"Av. Dos Estados, 2435"},
+  {id:"033",nome:"Posto Linha Verde Filial 05",cidade:"Viamão",estado:"RS",bandeira:"Ipiranga",end:"Av. Sen. Salgado Filho, 7277"},
+  {id:"034",nome:"Posto Linha Verde Filial 06 (Makiolka)",cidade:"Curitiba",estado:"PR",bandeira:"BR",end:"Rua Theodoro Makiolka, 3115"},
+  {id:"035",nome:"Posto Linha Verde Filial 07 (Borda)",cidade:"São José Dos Pinhais",estado:"PR",bandeira:"Ipiranga",end:"Rua Estela Mari Rezende, 10789"},
+  {id:"036",nome:"Posto Linha Verde Filial 10 (Petrus)",cidade:"Curitiba",estado:"PR",bandeira:"Shell",end:"Rua Das Carmelitas, 2963"},
+  {id:"037",nome:"Posto Linha Verde Filial 11",cidade:"Gravataí",estado:"RS",bandeira:"Ipiranga",end:"Av. Dorival Cândido, 2029"},
+  {id:"038",nome:"Posto Linha Verde Filial 13 (Gonçales)",cidade:"Arapongas",estado:"PR",bandeira:"Ipiranga",end:"Rua Uirapuru, 1901"},
+  {id:"039",nome:"Posto Linha Verde Filial 14 (Marques)",cidade:"Joinville",estado:"SC",bandeira:"Shell",end:"Rua Marques De Olinda, 2385"},
+  {id:"040",nome:"Posto Linha Verde Filial 15 (Lustosa)",cidade:"Curitiba",estado:"PR",bandeira:"Trapézio",end:"Rua Duque De Caxias, 399"},
+  {id:"041",nome:"Posto Linha Verde Filial 16 (Bairro Novo)",cidade:"Curitiba",estado:"PR",bandeira:"Trapézio",end:"R. Tijucas Do Sul, 1963"},
+  {id:"042",nome:"Posto Linha Verde Filial 18 (4Z)",cidade:"Porto Alegre",estado:"RS",bandeira:"Ipiranga",end:"Av. Farrapos, 858"},
+  {id:"043",nome:"Posto Linha Verde Filial 20 (3Z)",cidade:"Porto Alegre",estado:"RS",bandeira:"Ipiranga",end:"Av. Saturnino De Brito, 1018"},
+  {id:"044",nome:"Posto Linha Verde Filial 21 (BV)",cidade:"Viamão",estado:"RS",bandeira:"Shell",end:"Est. João Oliveira Remião, 7810"},
+  {id:"045",nome:"Posto Linha Verde Filial 22 (Trapézio)",cidade:"Curitiba",estado:"PR",bandeira:"BR",end:"Rua Raul Pompeia, 1350"},
+  {id:"046",nome:"Posto Linha Verde Filial 23 (Angra Batel)",cidade:"Curitiba",estado:"PR",bandeira:"Ipiranga",end:"Av. Sete De Setembro, 4814"},
+  {id:"047",nome:"Posto Linha Verde Filial 24 (Branquinha)",cidade:"Viamão",estado:"RS",bandeira:"Trapézio",end:"Est. Bérico José Bernardes, 142"},
+  {id:"048",nome:"Posto Linha Verde Filial 25",cidade:"São Leopoldo",estado:"RS",bandeira:"BR",end:"Av. São Borja, 2035"},
+  {id:"049",nome:"Posto Linha Verde Filial 26",cidade:"Portão",estado:"RS",bandeira:"Shell",end:"RS-240, 8092"},
+  {id:"050",nome:"Posto Linha Verde Filial 27",cidade:"São Leopoldo",estado:"RS",bandeira:"Trapézio",end:"R Visconde De São Leopoldo, 620"},
+  {id:"051",nome:"Posto Linha Verde Filial 28 (RDP)",cidade:"São Bento do Sul",estado:"SC",bandeira:"RDP",end:"Rua das Neves, 2112"},
+  {id:"052",nome:"Posto Linha Verde Matriz",cidade:"Curitiba",estado:"PR",bandeira:"Ipiranga",end:"Km 79 BR-116"},
+  {id:"053",nome:"Posto Marechal",cidade:"Curitiba",estado:"PR",bandeira:"Shell",end:"Av. Manoel Ribas, 8051"},
+  {id:"054",nome:"Posto Mirante Piracicaba",cidade:"Piracicaba",estado:"SP",bandeira:"Shell",end:"Av. Barão De Serra Negra, 101"},
+  {id:"055",nome:"Posto Neninha",cidade:"Campinas",estado:"SP",bandeira:"Trapézio",end:"Av. das Amoreiras, 2062"},
+  {id:"056",nome:"Posto NSA",cidade:"Fazenda Rio Grande",estado:"PR",bandeira:"Ipiranga",end:"Rua Sao Romualdo, 778"},
+  {id:"057",nome:"Posto Premiere",cidade:"Curitiba",estado:"PR",bandeira:"Shell",end:"Rua Prof. Pedro Viriato P Souza, 1846"},
+  {id:"058",nome:"Posto Rio Verde",cidade:"Colombo",estado:"PR",bandeira:"Ipiranga",end:"Avenida Argentina, 324"},
+  {id:"059",nome:"Posto Tijucas",cidade:"Curitiba",estado:"PR",bandeira:"BR",end:"Rua Izaac Ferreira Da Cruz, 2920"},
+  {id:"060",nome:"Posto TOF",cidade:"Valinhos",estado:"SP",bandeira:"TOF",end:"Av. dos Esportes, 1092"},
+  {id:"061",nome:"Posto Triangulo",cidade:"Curitiba",estado:"PR",bandeira:"BR",end:"Rua Sao Salvador, 360"},
+  {id:"062",nome:"Posto TS",cidade:"Curitiba",estado:"PR",bandeira:"Shell",end:"Av. Anita Garibaldi, 1305"},
+  {id:"063",nome:"Posto Via Torres",cidade:"Curitiba",estado:"PR",bandeira:"BR",end:"Comendador Franco, 3133"},
+  {id:"064",nome:"Posto Vila Resende",cidade:"Piracicaba",estado:"SP",bandeira:"Shell",end:"Av. Dona Francisca, 549"},
+  {id:"066",nome:"Auto Posto Alphaville",cidade:"Pinhais",estado:"PR",bandeira:"Petrobras",end:"Estrada da Graciosa, 554, Atuba"},
 ];
 
-const COMBS=[
-  {k:"gc",l:"Gasolina Comum"},{k:"ga",l:"Gasolina Aditivada"},
-  {k:"et",l:"Etanol"},{k:"eta",l:"Etanol Aditivado"},
-  {k:"ds",l:"Diesel S10"},{k:"ds500",l:"Diesel S500"},{k:"dsa",l:"Diesel S10 Aditivado"},
-];
-const BCLS={
-  Ipiranga:"b-ipa",
-  Shell:"b-she",
-  BR:"b-br",
-  "Trapézio":"b-tra",
-  Petrobras:"b-br",
-  "Raízen":"b-br",
-  RDP:"b-rdp",
-  TOF:"b-oth",
+var BCLS = {
+  Ipiranga:"b-ipa", Shell:"b-she", BR:"b-br",
+  Petrobras:"b-br", "Raízen":"b-br",
+  "Trapézio":"b-tra", RDP:"b-rdp", TOF:"b-oth",
   "Bandeira Branca":"b-bca"
 };
+var ESTADOS = ["Todos","PR","RS","SC","SP"];
+var estado = "Todos";
+var busca = "";
 
-let S={dados:[],loading:true,aba:"geral",estado:"Todos",busca:"",postoFiltro:"",det:null,dias:1};
-
-function bcls(b){return BCLS[b]||"b-oth";}
-
-async function carregarDados(){
-  S.loading=true; renderAll();
-  try{
-    const hoje=new Date().toISOString().split('T')[0];
-    const dataInicio=new Date(Date.now()-((S.dias-1)*24*60*60*1000)).toISOString().split('T')[0];
-    const url=`${SUPABASE_URL}/rest/v1/registros?criado_em=gte.${dataInicio}T00:00:00&select=posto_id,concorrente_nome,concorrente_bandeira,gc,ga,et,eta,ds,ds500,dsa,lat,lng,ia_usada,foto_url,criado_em`;
-    const resp=await fetch(url,{headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`}});
-    const regs=await resp.json();
-    const mapa={};
-    for(const r of regs){if(!mapa[r.posto_id])mapa[r.posto_id]=[];mapa[r.posto_id].push(r);}
-    S.dados=POSTOS.map(p=>{
-      const rs=mapa[p.id]||[];
-      const medias={};
-      for(const {k} of COMBS){
-        const vals=rs.filter(r=>r[k]>0).map(r=>parseFloat(r[k]));
-        medias[k]=vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length):null;
-      }
-      return{...p,registrou:rs.length>0,concorrentes:rs.length,regs:rs,medias};
-    });
-  }catch(e){
-    S.dados=POSTOS.map(p=>({...p,registrou:false,concorrentes:0,regs:[],medias:{}}));
-  }
-  S.loading=false; renderAll();
+function slugify(str) {
+  return str.toLowerCase()
+    .replace(/[àáâãäå]/g,'a').replace(/[èéêë]/g,'e')
+    .replace(/[ìíîï]/g,'i').replace(/[òóôõö]/g,'o')
+    .replace(/[ùúûü]/g,'u').replace(/[ç]/g,'c')
+    .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 }
 
-function filtrados(){
-  return S.dados
-    .filter(p=>S.estado==="Todos"||p.estado===S.estado)
-    .filter(p=>S.postoFiltro===""||p.id===S.postoFiltro)
-    .filter(p=>S.busca===""||p.nome.toLowerCase().includes(S.busca.toLowerCase())||p.cidade.toLowerCase().includes(S.busca.toLowerCase()));
+function getFiltrados() {
+  var q = busca.toLowerCase();
+  return POSTOS.filter(function(p) {
+    var estadoOk = estado === "Todos" || p.estado === estado;
+    var buscaOk = q === "" ||
+      p.nome.toLowerCase().indexOf(q) >= 0 ||
+      p.cidade.toLowerCase().indexOf(q) >= 0 ||
+      p.end.toLowerCase().indexOf(q) >= 0 ||
+      p.bandeira.toLowerCase().indexOf(q) >= 0;
+    return estadoOk && buscaOk;
+  });
 }
 
-function renderTopbar(){
-  document.getElementById('topbar-wrap').innerHTML=`
-    <div class="topbar">
-      <div>
-        <div class="logo-sub">Supervisor</div>
-        <div class="logo-name">Grupo Trapézio</div>
-      </div>
-      <div class="topbar-right">
-        <div style="display:flex;gap:4px;background:#131e2e;border:1px solid #1e2d42;border-radius:8px;padding:3px;">
-          ${[1,2,3,4,5].map(d=>`<button onclick="setDias(${d})" style="padding:4px 10px;font-size:11px;border:none;border-radius:6px;cursor:pointer;font-weight:600;background:${S.dias===d?'#2e7dd1':'transparent'};color:${S.dias===d?'#fff':'#4a6a8a'};">${d}d</button>`).join('')}
-        </div>
-        <span class="pill-live">● Ao vivo</span>
-        <button class="btn-top" onclick="carregarDados()">Atualizar</button>
-      </div>
-    </div>`;
+function irParaPosto(slug) {
+  window.location.href = '/?posto=' + slug;
 }
 
-function renderAll(){
-  renderTopbar();
-  if(S.det){
-    document.getElementById('content').style.display='none';
-    document.getElementById('det-wrap').style.display='block';
-    document.getElementById('det-wrap').innerHTML=renderDet();
-  } else {
-    document.getElementById('det-wrap').style.display='none';
-    document.getElementById('content').style.display='block';
-    renderDash();
-  }
-}
+function render() {
+  var df = getFiltrados();
+  document.getElementById('contagem').textContent = df.length + ' posto' + (df.length !== 1 ? 's' : '') + ' encontrado' + (df.length !== 1 ? 's' : '');
 
-function renderDash(){
-  const d=S.dados,tot=d.length;
-  const reg=d.filter(p=>p.registrou).length;
-  const pend=tot-reg;
-  const totalRegs=d.reduce((s,p)=>s+p.regs.length,0);
-  const pct=Math.round(reg/tot*100);
-  const df=filtrados();
-
-  const kpisHtml=`<div class="kpi-grid">
-    ${[
-      {cls:"kpi-0",l:"Total postos",v:tot,s:"PR·RS·SC·SP"},
-      {cls:"kpi-1",l:"Registraram",v:reg,s:`${pct}% da rede`},
-      {cls:"kpi-2",l:"Aguardando",v:pend,s:"sem registro"},
-      {cls:"kpi-3",l:"Registros hoje",v:totalRegs,s:"lançamentos"},
-    ].map(k=>`<div class="kpi ${k.cls}"><div class="kpi-label">${k.l}</div><div class="kpi-val">${k.v}</div><div class="kpi-sub">${k.s}</div></div>`).join('')}
-  </div>`;
-
-  const estadosHtml=`<div class="sec-label">Por estado</div><div class="estado-grid">
-    ${["PR","RS","SC","SP"].map(e=>{
-      const et=d.filter(p=>p.estado===e).length;
-      const eo=d.filter(p=>p.estado===e&&p.registrou).length;
-      const ep=et?Math.round(eo/et*100):0;
-      const cor=ep===100?"#4dd87a":ep>=70?"#2e7dd1":"#e24b4a";
-      return`<div class="estado-card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <span class="estado-nome">${e}</span>
-          <span style="font-size:13px;font-weight:700;color:${cor}">${ep}%</span>
-        </div>
-        <div class="prog-wrap"><div class="prog-bar" style="width:${ep}%;background:${cor}"></div></div>
-        <div class="estado-frac">${eo}/${et} registraram</div>
-      </div>`;
-    }).join('')}
-  </div>`;
-
-  // Rows
-  let rowsHtml='';
-  if(S.aba==="geral"){
-    rowsHtml=df.length===0?`<div class="empty">Nenhum posto encontrado.</div>`:
-      df.map(p=>`
-        <div class="posto-row" onclick="abrirDet('${p.id}')">
-          <div class="row-left">
-            <span class="dot ${p.registrou?'dot-g':'dot-r'}"></span>
-            <div style="min-width:0">
-              <div class="row-nome">${p.nome}</div>
-              <div class="row-sub">${p.cidade} · ${p.estado}</div>
-            </div>
-          </div>
-          <div class="row-right">
-            <span class="badge ${bcls(p.bandeira)}">${p.bandeira}</span>
-            ${p.registrou?`<span style="font-size:11px;color:#4a6a8a;">${p.concorrentes}</span>`:''}
-            ${!p.registrou?`<span class="badge b-amb">Pendente</span>`:''}
-            <span class="chevron">›</span>
-          </div>
-        </div>`).join('');
-  } else if(S.aba==="pendentes"){
-    const lista=df.filter(p=>!p.registrou);
-    rowsHtml=lista.length===0?`<div class="empty">Todos registraram hoje!</div>`:
-      lista.map(p=>`
-        <div class="pend-row">
-          <div>
-            <div style="font-weight:500;font-size:13px;color:#e0e8f0;">${p.nome}</div>
-            <div style="font-size:11px;color:#f0a030;margin-top:2px;">${p.cidade} · ${p.estado}</div>
-          </div>
-          <span class="badge b-amb">Pendente</span>
-        </div>`).join('');
-  } else if(S.aba==="registros"){
-    const todos=df.flatMap(p=>p.regs.map(r=>({...r,pNome:p.nome,pEstado:p.estado})));
-    rowsHtml=todos.length===0?`<div class="empty">Nenhum registro hoje.</div>`:
-      todos.sort((a,b)=>new Date(b.criado_em)-new Date(a.criado_em)).map(r=>`
-        <div class="comp-card" style="cursor:pointer" onclick="abrirDet('${r.posto_id}')">
-          <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-            <div>
-              <div style="font-weight:500;font-size:13px;">${r.pNome}</div>
-              <div style="font-size:11px;color:#4a6a8a;">${r.concorrente_nome||'—'} · <span class="badge ${bcls(r.concorrente_bandeira)}" style="font-size:9px;">${r.concorrente_bandeira||'—'}</span></div>
-            </div>
-            <div style="font-size:11px;color:#4a6a8a">${new Date(r.criado_em).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</div>
-          </div>
-          <div>${COMBS.filter(c=>r[c.k]>0).map(c=>`<span class="tag">${c.l}: R$ ${parseFloat(r[c.k]).toFixed(2)}</span>`).join('')}</div>
-        </div>`).join('');
+  if (df.length === 0) {
+    document.getElementById('lista').innerHTML = '<div class="empty">Nenhum posto encontrado.</div>';
+    return;
   }
 
-  document.getElementById('content').innerHTML=`
-    ${S.loading?`<div class="loading"><div class="spinner"></div>Carregando...</div>`:`
-    ${kpisHtml}
-    ${estadosHtml}
-    <div class="sec-label">Postos</div>
-    <div class="tabs">
-      <button class="tab ${S.aba==='geral'?'on':''}" onclick="setAba('geral')">Todos (${tot})</button>
-      <button class="tab ${S.aba==='pendentes'?'on':''}" onclick="setAba('pendentes')">Pendentes (${pend})</button>
-      <button class="tab ${S.aba==='registros'?'on':''}" onclick="setAba('registros')">Registros (${totalRegs})</button>
-    </div>
-    <div class="filtros">
-      <input class="input-s" id="busca-input" type="text" placeholder="Buscar posto ou cidade..." value="${S.busca}">
-      <div class="filtros-row">
-        <select class="select-s" id="posto-select" onchange="setPostoFiltro(this.value)">
-          <option value="">Todos os postos</option>
-          ${POSTOS.map(p=>`<option value="${p.id}" ${S.postoFiltro===p.id?'selected':''}>${p.nome} · ${p.cidade}</option>`).join('')}
-        </select>
-        ${["Todos","PR","RS","SC","SP"].map(e=>`<button class="btn-est ${S.estado===e?'on':''}" onclick="setEst('${e}')">${e}</button>`).join('')}
-      </div>
-    </div>
-    ${rowsHtml}`}`;
-
-  // Bind busca sem re-render completo
-  const bi=document.getElementById('busca-input');
-  if(bi){
-    bi.addEventListener('input',e=>{S.busca=e.target.value;renderRows();});
-    bi.addEventListener('focus',()=>{bi.setSelectionRange(bi.value.length,bi.value.length);});
+  var html = '';
+  for (var i = 0; i < df.length; i++) {
+    var p = df[i];
+    var slug = slugify(p.nome);
+    var bcls = BCLS[p.bandeira] || 'b-oth';
+    html += '<div class="posto-card" onclick="irParaPosto(\'' + slug + '\')">';
+    html += '<div style="flex:1;min-width:0">';
+    html += '<div class="card-nome">' + p.nome + '</div>';
+    html += '<div class="card-sub">' + p.cidade + ' · ' + p.estado + ' · <span class="badge ' + bcls + '">' + p.bandeira + '</span></div>';
+    html += '<div class="card-end">' + p.end + '</div>';
+    html += '</div>';
+    html += '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0">';
+    html += '<span class="est-tag">' + p.estado + '</span>';
+    html += '<span class="chevron">›</span>';
+    html += '</div>';
+    html += '</div>';
   }
+  document.getElementById('lista').innerHTML = html;
 }
 
-function renderRows(){
-  // Atualiza só as rows sem recriar tudo
-  const df=filtrados();
-  const d=S.dados;
-  const tot=d.length,pend=d.filter(p=>!p.registrou).length;
-  const totalRegs=d.reduce((s,p)=>s+p.regs.length,0);
-  let rowsHtml='';
-  if(S.aba==="geral"){
-    rowsHtml=df.length===0?`<div class="empty">Nenhum posto encontrado.</div>`:
-      df.map(p=>`
-        <div class="posto-row" onclick="abrirDet('${p.id}')">
-          <div class="row-left">
-            <span class="dot ${p.registrou?'dot-g':'dot-r'}"></span>
-            <div style="min-width:0">
-              <div class="row-nome">${p.nome}</div>
-              <div class="row-sub">${p.cidade} · ${p.estado}</div>
-            </div>
-          </div>
-          <div class="row-right">
-            <span class="badge ${bcls(p.bandeira)}">${p.bandeira}</span>
-            ${p.registrou?`<span style="font-size:11px;color:#4a6a8a;">${p.concorrentes}</span>`:''}
-            ${!p.registrou?`<span class="badge b-amb">Pendente</span>`:''}
-            <span class="chevron">›</span>
-          </div>
-        </div>`).join('');
-  } else if(S.aba==="pendentes"){
-    const lista=df.filter(p=>!p.registrou);
-    rowsHtml=lista.length===0?`<div class="empty">Todos registraram!</div>`:lista.map(p=>`
-      <div class="pend-row">
-        <div><div style="font-weight:500;font-size:13px;">${p.nome}</div>
-        <div style="font-size:11px;color:#f0a030;">${p.cidade} · ${p.estado}</div></div>
-        <span class="badge b-amb">Pendente</span>
-      </div>`).join('');
+function renderEstados() {
+  var html = '';
+  for (var i = 0; i < ESTADOS.length; i++) {
+    var e = ESTADOS[i];
+    html += '<button class="btn-est' + (estado === e ? ' on' : '') + '" onclick="setEst(\'' + e + '\')">' + e + '</button>';
   }
-  // Injeta só as rows depois dos filtros
-  const rows=document.querySelector('.filtros');
-  if(rows&&rows.nextSibling){
-    let next=rows.nextSibling;
-    while(next){const n=next.nextSibling;next.parentNode.removeChild(next);next=n;}
-  }
-  const div=document.createElement('div');
-  div.innerHTML=rowsHtml;
-  document.getElementById('content').appendChild(div);
+  document.getElementById('estados').innerHTML = html;
 }
 
-function renderDet(){
-  const p=S.det;
-  return`
-    <div class="det-header">
-      <button class="btn-back" onclick="fecharDet()">←</button>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:11px;color:#4a6a8a;text-transform:uppercase;">${p.cidade} · ${p.estado}</div>
-        <div style="font-size:17px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.nome}</div>
-      </div>
-      <span class="badge ${bcls(p.bandeira)}">${p.bandeira}</span>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
-      <div class="kpi kpi-0" style="padding:12px 14px"><div class="kpi-label">Status</div><div style="font-size:14px;font-weight:700;color:#fff">${p.registrou?'Registrou':'Pendente'}</div></div>
-      <div class="kpi kpi-1" style="padding:12px 14px"><div class="kpi-label">Concorrentes</div><div style="font-size:22px;font-weight:700;color:#fff">${p.concorrentes}</div></div>
-      <div class="kpi kpi-2" style="padding:12px 14px"><div class="kpi-label">Registros</div><div style="font-size:22px;font-weight:700;color:#fff">${p.regs.length}</div></div>
-    </div>
-    ${p.regs.length===0?`<div class="empty">Nenhum registro hoje.</div>`:
-      p.regs.map(r=>`
-        <div class="comp-card">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-            <div>
-              <div style="font-weight:600;font-size:14px;">${r.concorrente_nome||'Sem nome'}</div>
-              <span class="badge ${bcls(r.concorrente_bandeira)}">${r.concorrente_bandeira||'—'}</span>
-              ${r.ia_usada?`<span class="badge b-grn" style="margin-left:4px">IA</span>`:''}
-            </div>
-            <div style="font-size:11px;color:#4a6a8a">${new Date(r.criado_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
-          </div>
-          ${r.foto_url?`<img src="${r.foto_url}" onclick="window.open('${r.foto_url}','_blank')" style="width:100%;max-height:200px;object-fit:contain;border-radius:8px;background:#0f1520;cursor:pointer;border:1px solid #1e2d42;margin-bottom:10px">`:''}
-          <table class="comp-table">
-            <thead><tr><th>Combustível</th><th style="text-align:right">Preço</th></tr></thead>
-            <tbody>${COMBS.filter(c=>r[c.k]>0).map(c=>`<tr><td>${c.l}</td><td style="text-align:right;font-weight:600;color:#4dd87a">R$ ${parseFloat(r[c.k]).toFixed(2)}</td></tr>`).join('')}</tbody>
-          </table>
-          <div style="margin-top:10px;padding-top:10px;border-top:1px solid #1e2d42;display:flex;gap:10px;flex-wrap:wrap;font-size:11px;">
-            <span style="color:#8aaac0">${new Date(r.criado_em).toLocaleString('pt-BR')}</span>
-            ${r.lat&&r.lng?`<a href="https://www.google.com/maps?q=${r.lat},${r.lng}" target="_blank" style="color:#2e7dd1;font-weight:600;text-decoration:none">Ver no mapa ↗</a><span class="badge b-grn">GPS verificado</span>`:
-            `<span class="badge b-amb">Sem GPS</span>`}
-          </div>
-        </div>`).join('')}`;
+function setEst(v) {
+  estado = v;
+  renderEstados();
+  render();
 }
 
-function setDias(v){S.dias=v;carregarDados();}
-function setAba(v){S.aba=v;renderDash()}
-function setEst(v){S.estado=v;renderDash();}
-function setPostoFiltro(v){S.postoFiltro=v;renderDash();}
-function abrirDet(id){S.det=S.dados.find(p=>p.id===id);renderAll();}
-function fecharDet(){S.det=null;renderAll();}
+document.getElementById('busca').addEventListener('input', function(e) {
+  busca = e.target.value;
+  render();
+});
 
-setInterval(carregarDados,3*60*1000);
-carregarDados();
+renderEstados();
+render();
 </script>
 </body>
 </html>
